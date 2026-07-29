@@ -1,0 +1,19 @@
+.container{
+    max-width:900px;
+}
+
+.card{
+    border-radius:15px;
+}
+
+label{
+    font-weight:600;
+}
+
+input{
+    border-radius:8px !important;
+}
+
+button{
+    border-radius:8px !important;
+}
