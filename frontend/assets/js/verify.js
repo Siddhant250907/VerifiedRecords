@@ -1,29 +1,14 @@
 document
-.getElementById("verifyBtn")
-.addEventListener("click", function(){
+    .getElementById("verifyForm")
+    .addEventListener("submit", function (e) {
 
-    const id =
-    document.getElementById("verifyId").value;
+        e.preventDefault();
 
-    if(id==""){
+        const certificateId =
+            document.getElementById("certificateId").value;
 
-        alert("Enter Certificate ID");
+        alert(
+            "Checking certificate: " + certificateId
+        );
 
-        return;
-
-    }
-
-    document
-    .getElementById("result")
-    .innerHTML=
-
-    `
-    <div class="alert alert-info">
-
-        Searching blockchain for
-        <b>${id}</b>
-
-    </div>
-    `;
-
-});
+    });

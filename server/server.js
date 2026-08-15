@@ -1,20 +1,24 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 
 const app = express();
-
-app.use(cors());
-app.use(bodyParser.json());
-
 const PORT = 3000;
 
-// Home
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Serve the frontend folder
+app.use(express.static("../frontend"));
+
+// Home page
 app.get("/", (req, res) => {
-    res.send("University Certificate Verification Backend Running 🚀");
+    res.sendFile("index.html", {
+        root: "../frontend"
+    });
 });
 
-// Test GET API
+// Test API
 app.get("/api/test", (req, res) => {
     res.json({
         success: true,
@@ -22,9 +26,10 @@ app.get("/api/test", (req, res) => {
     });
 });
 
-// Test POST API
+// Certificate API
 app.post("/api/certificate", (req, res) => {
 
+    console.log("Certificate received:");
     console.log(req.body);
 
     res.json({
@@ -36,5 +41,5 @@ app.post("/api/certificate", (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });

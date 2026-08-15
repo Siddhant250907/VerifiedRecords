@@ -2,174 +2,134 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>University Certificate Verification</title>
+    <title>VerifiedRecords</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome -->
+    <!-- Fonts -->
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- Custom CSS -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Our CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
+
 </head>
+
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
 
-            <a class="navbar-brand fw-bold" href="#">
-                🎓 CertiChain
-            </a>
+    <!-- =====================================================
+         TOP NAVIGATION BOX
+    ====================================================== -->
 
-            <button class="navbar-toggler"
-                data-bs-toggle="collapse"
-                data-bs-target="#menu">
+        <nav class="top-navbar">
 
-                <span class="navbar-toggler-icon"></span>
+            <!-- LEFT SIDE -->
+            <div class="nav-left">
 
-            </button>
+                <a href="index.html" class="nav-icon" data-tooltip="Home">
+                    <i class="fa-solid fa-house"></i>
+                </a>
 
-            <div class="collapse navbar-collapse" id="menu">
+                <a href="admin.html" class="nav-icon" data-tooltip="Admin">
+                    <i class="fa-solid fa-user-shield"></i>
+                </a>
 
-                <ul class="navbar-nav ms-auto">
+                <a href="verify.html" class="nav-icon" data-tooltip="Verify">
+                    <i class="fa-solid fa-certificate"></i>
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="index.html">Home</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="admin.html">Admin</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="verify.html">Verify</a>
-                    </li>
-
-                </ul>
+                <a href="about.html" class="nav-icon" data-tooltip="About">
+                    <i class="fa-solid fa-circle-info"></i>
+                </a>
 
             </div>
 
+
+            <!-- RIGHT SIDE -->
+            <div class="nav-right">
+
+                <a href="login.html" class="login-btn">
+                    <i class="fa-solid fa-user"></i>
+                    LOGIN / SIGNUP
+                </a>
+
+            </div>
+
+        </nav>
+
+
+
+    <!-- =====================================================
+         WEBSITE NAME
+         BELOW THE NAVIGATION BOX
+    ====================================================== -->
+
+    <header class="site-header">
+
+        <div class="brand">
+
+            <div class="brand-name">
+                VerifiedRecords
+            </div>
+
+            <div class="brand-tagline">
+                BLOCKCHAIN • TRUST • VERIFICATION
+            </div>
+
         </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero text-center">
+    </header>
 
-        <div class="container">
 
-            <h1 class="display-4 fw-bold">
-                Blockchain Certificate Verification
-            </h1>
 
-            <p class="lead mt-3">
-                Secure • Tamper Proof • Instant Verification
+    <!-- =====================================================
+         MAIN HOME SECTION
+    ====================================================== -->
+
+    <main class="hero">
+
+        <div class="hero-content">
+
+            <p class="hero-small">
+                BLOCKCHAIN CERTIFICATE VERIFICATION
             </p>
 
-            <div class="mt-4">
 
-                <a href="admin.html" class="btn btn-primary btn-lg me-3">
-                    Admin Dashboard
-                </a>
+            <h1>
+                Records you can
+                <span>trust.</span>
+            </h1>
 
-                <a href="verify.html" class="btn btn-outline-primary btn-lg">
-                    Verify Certificate
-                </a>
 
-            </div>
+            <p class="hero-description">
 
-        </div>
+                VerifiedRecords is a blockchain-powered certificate
+                verification platform designed to make academic records
+                secure, transparent and easy to verify.
 
-    </section>
+            </p>
 
-    <!-- Features -->
-    <section class="container my-5">
 
-        <div class="row g-4">
-
-            <div class="col-md-4">
-
-                <div class="card shadow h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="fa-solid fa-shield-halved fa-3x text-primary"></i>
-
-                        <h4 class="mt-3">
-                            Secure
-                        </h4>
-
-                        <p>
-                            Certificates stored securely on blockchain.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <div class="card shadow h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="fa-solid fa-bolt fa-3x text-warning"></i>
-
-                        <h4 class="mt-3">
-                            Instant Verification
-                        </h4>
-
-                        <p>
-                            Verify certificates within seconds.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-4">
-
-                <div class="card shadow h-100">
-
-                    <div class="card-body text-center">
-
-                        <i class="fa-solid fa-lock fa-3x text-success"></i>
-
-                        <h4 class="mt-3">
-                            Tamper Proof
-                        </h4>
-
-                        <p>
-                            Blockchain prevents certificate forgery.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
+            <a href="verify.html" class="hero-button">
+                Verify a Certificate →
+            </a>
 
         </div>
 
-    </section>
+    </main>
 
-    <footer class="bg-dark text-white text-center p-3">
-
-        © 2026 University Certificate Verification System
-
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 

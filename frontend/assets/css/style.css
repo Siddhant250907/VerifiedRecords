@@ -1,19 +1,1566 @@
-.container{
-    max-width:900px;
+/* =========================================================
+   GLOBAL SETTINGS
+========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.card{
-    border-radius:15px;
+
+html {
+    scroll-behavior: smooth;
 }
 
-label{
-    font-weight:600;
+
+body {
+    min-height: 100vh;
+
+    background: #070707;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
 }
 
-input{
-    border-radius:8px !important;
+
+
+/* =========================================================
+   TOP NAVIGATION BOX
+========================================================= */
+
+.navbar {
+
+    width: 100%;
+
+    height: 72px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 0 45px;
+
+
+    /* REDDISH-BLACK BACKGROUND */
+
+    background: linear-gradient(
+        90deg,
+        #130707,
+        #210909,
+        #150707
+    );
+
+
+    /* SUBTLE RED BORDER */
+
+    border-top: 1px solid rgba(190, 45, 45, 0.35);
+
+    border-bottom: 1px solid rgba(190, 45, 45, 0.45);
+
+
+    /* RED GLOW */
+
+    box-shadow:
+        0 5px 25px rgba(130, 20, 20, 0.20),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.03);
+
 }
 
-button{
-    border-radius:8px !important;
+
+
+/* =========================================================
+   LEFT NAVIGATION
+========================================================= */
+
+.nav-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 40px;
+
+}
+
+
+.nav-link {
+
+    position: relative;
+
+    text-decoration: none;
+
+    color: #eeeeee;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+
+    padding: 26px 5px;
+
+
+    transition:
+        color 0.25s ease,
+        text-shadow 0.25s ease;
+
+}
+
+
+
+/* Small line below navigation option */
+
+.nav-link::after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    bottom: 17px;
+
+    width: 0;
+
+    height: 2px;
+
+    background: #38d46a;
+
+
+    transition:
+        width 0.25s ease;
+
+}
+
+
+
+/* =========================================================
+   NAVIGATION HOVER
+   WHITE → GREEN
+========================================================= */
+
+.nav-link:hover {
+
+    color: #38d46a;
+
+    text-shadow:
+        0 0 8px rgba(56, 212, 106, 0.40);
+
+}
+
+
+.nav-link:hover::after {
+
+    width: 100%;
+
+}
+
+
+
+/* =========================================================
+   LOGIN BUTTON
+========================================================= */
+
+.nav-right {
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+.login-btn {
+
+    text-decoration: none;
+
+    color: #eeeeee;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+
+    padding: 11px 22px;
+
+
+    border: 1px solid
+        rgba(210, 65, 65, 0.65);
+
+    border-radius: 7px;
+
+
+    transition:
+        color 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+
+}
+
+
+
+/* Login hover → GREEN */
+
+.login-btn:hover {
+
+    color: #38d46a;
+
+    border-color: #38d46a;
+
+    background:
+        rgba(56, 212, 106, 0.06);
+
+    box-shadow:
+        0 0 12px
+        rgba(56, 212, 106, 0.20);
+
+}
+
+
+
+/* =========================================================
+   WEBSITE NAME
+   THIS IS BELOW THE NAVIGATION BOX
+========================================================= */
+
+.site-header {
+
+    width: 100%;
+
+    padding:
+
+        38px
+        8%
+        15px
+        8%;
+
+
+    background: #070707;
+
+}
+
+
+
+/* VerifiedRecords */
+
+.brand-name {
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-size: 52px;
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+
+    color: #d84b4b;
+
+
+    /* VERY SUBTLE RED SHADOW */
+
+    text-shadow:
+
+        0 0 8px
+        rgba(216, 75, 75, 0.25),
+
+        0 0 20px
+        rgba(216, 75, 75, 0.10);
+
+}
+
+
+
+/* Tagline */
+
+.brand-tagline {
+
+    margin-top: 4px;
+
+    font-size: 13px;
+
+    letter-spacing: 4px;
+
+    color: #aaaaaa;
+
+}
+
+
+
+/* =========================================================
+   MAIN HERO SECTION
+========================================================= */
+
+.hero {
+
+    min-height:
+        calc(100vh - 190px);
+
+
+    display: flex;
+
+    align-items: center;
+
+
+    padding:
+        60px 8%;
+
+
+    background:
+
+        radial-gradient(
+            circle at 85% 25%,
+            rgba(110, 20, 20, 0.17),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(100, 15, 15, 0.08),
+            transparent 35%
+        ),
+
+        #070707;
+
+}
+
+
+
+/* Hero content */
+
+.hero-content {
+
+    max-width: 950px;
+
+}
+
+
+
+/* =========================================================
+   SMALL RED TEXT
+========================================================= */
+
+.hero-small {
+
+    color: #d84b4b;
+
+    font-size: 15px;
+
+    letter-spacing: 5px;
+
+    margin-bottom: 28px;
+
+}
+
+
+
+/* =========================================================
+   MAIN HEADING
+========================================================= */
+
+.hero h1 {
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-size:
+        clamp(55px, 6vw, 92px);
+
+    line-height: 1.05;
+
+    color: #f3eeee;
+
+    margin-bottom: 30px;
+
+}
+
+
+
+/* Red "trust." */
+
+.hero h1 span {
+
+    color: #d84b4b;
+
+
+    text-shadow:
+
+        0 0 15px
+        rgba(216, 75, 75, 0.25);
+
+}
+
+
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.hero-description {
+
+    max-width: 750px;
+
+    color: #aaaaaa;
+
+    font-size: 18px;
+
+    line-height: 1.9;
+
+    margin-bottom: 35px;
+
+}
+
+
+
+/* =========================================================
+   VERIFY BUTTON
+========================================================= */
+
+.hero-button {
+
+    display: inline-block;
+
+    text-decoration: none;
+
+    color: #ffffff;
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #a92d2d,
+            #651717
+        );
+
+
+    padding:
+        15px 28px;
+
+
+    border-radius: 7px;
+
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+
+    border:
+        1px solid
+        rgba(220, 70, 70, 0.5);
+
+
+    transition:
+
+        transform 0.25s ease,
+
+        box-shadow 0.25s ease,
+
+        background 0.25s ease;
+
+}
+
+
+
+/* Button hover → GREEN */
+
+.hero-button:hover {
+
+    transform:
+        translateY(-3px);
+
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #38a95a,
+            #17652f
+        );
+
+
+    box-shadow:
+
+        0 8px 25px
+        rgba(56, 169, 90, 0.25);
+
+}
+
+
+
+/* =========================================================
+   VERY SMALL SPARKLE EFFECT
+========================================================= */
+
+.site-header::after {
+
+    content: "✦";
+
+    position: absolute;
+
+    left: 32%;
+
+    margin-top: -35px;
+
+    color: rgba(216, 75, 75, 0.45);
+
+    font-size: 9px;
+
+
+    animation:
+        sparkle 3s infinite ease-in-out;
+
+}
+
+
+@keyframes sparkle {
+
+    0% {
+        opacity: 0.15;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 0.15;
+        transform: scale(0.8);
+    }
+
+}
+
+
+
+/* =========================================================
+   MOBILE RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+
+    .navbar {
+
+        height: auto;
+
+        min-height: 70px;
+
+        padding:
+            0 20px;
+
+    }
+
+
+    .nav-left {
+
+        gap: 15px;
+
+    }
+
+
+    .nav-link {
+
+        font-size: 11px;
+
+        padding:
+            26px 2px;
+
+    }
+
+
+    .login-btn {
+
+        font-size: 10px;
+
+        padding:
+            9px 11px;
+
+    }
+
+
+    .site-header {
+
+        padding:
+            30px 25px 10px 25px;
+
+    }
+
+
+    .brand-name {
+
+        font-size: 38px;
+
+    }
+
+
+    .brand-tagline {
+
+        font-size: 10px;
+
+        letter-spacing: 2px;
+
+    }
+
+
+    .hero {
+
+        padding:
+            50px 25px;
+
+    }
+
+
+    .hero h1 {
+
+        font-size: 50px;
+
+    }
+
+
+    .hero-description {
+
+        font-size: 15px;
+
+    }
+
+}
+
+/* =========================================================
+   LOGIN PAGE
+========================================================= */
+
+.login-container {
+
+    min-height:
+        calc(100vh - 190px);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 50px 20px;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            rgba(120, 20, 20, 0.14),
+            transparent 45%
+        ),
+
+        #070707;
+
+}
+
+
+.login-card {
+
+    width: 420px;
+
+    padding: 40px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #180909,
+            #0d0707
+        );
+
+    border:
+
+        1px solid
+        rgba(210, 65, 65, 0.35);
+
+    border-radius: 12px;
+
+    box-shadow:
+
+        0 15px 50px
+        rgba(100, 10, 10, 0.25);
+
+}
+
+
+.login-card h1 {
+
+    font-family:
+        "Playfair Display",
+        serif;
+
+    font-size: 38px;
+
+    color: #eeeeee;
+
+    text-align: center;
+
+    margin-bottom: 8px;
+
+}
+
+
+.login-subtitle {
+
+    text-align: center;
+
+    color: #999;
+
+    font-size: 14px;
+
+    margin-bottom: 30px;
+
+}
+
+
+.input-group {
+
+    margin-bottom: 20px;
+
+}
+
+
+.input-group label {
+
+    display: block;
+
+    color: #ddd;
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+
+}
+
+
+.input-group input {
+
+    width: 100%;
+
+    padding: 13px 15px;
+
+    background: #080808;
+
+    color: white;
+
+    border:
+
+        1px solid
+        rgba(210, 65, 65, 0.35);
+
+    border-radius: 6px;
+
+    outline: none;
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+}
+
+
+.input-group input:focus {
+
+    border-color: #38d46a;
+
+    box-shadow:
+        0 0 10px
+        rgba(56, 212, 106, 0.15);
+
+}
+
+
+.login-submit {
+
+    width: 100%;
+
+    padding: 13px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    color: white;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #a92d2d,
+            #651717
+        );
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+
+}
+
+
+.login-submit:hover {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #38a95a,
+            #17652f
+        );
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+.signup-text {
+
+    text-align: center;
+
+    margin-top: 25px;
+
+    color: #999;
+
+    font-size: 13px;
+
+}
+
+
+.signup-text a {
+
+    color: #d84b4b;
+
+    text-decoration: none;
+
+}
+
+
+.signup-text a:hover {
+
+    color: #38d46a;
+
+}
+
+
+.back-home {
+
+    display: block;
+
+    text-align: center;
+
+    margin-top: 20px;
+
+    color: #888;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+}
+
+
+.back-home:hover {
+
+    color: #38d46a;
+
+}
+
+/* =========================================
+   TOP NAVIGATION
+========================================= */
+
+.top-navbar {
+    height: 88px;
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 55px;
+
+    background: rgba(18, 5, 6, 0.92);
+
+    border-bottom: 1px solid rgba(220, 55, 55, 0.35);
+
+    backdrop-filter: blur(12px);
+
+    position: relative;
+    z-index: 1000;
+}
+
+
+/* LEFT NAVIGATION */
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+
+/* ICON BUTTON */
+
+.nav-icon {
+    position: relative;
+
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-size: 20px;
+
+    border-radius: 12px;
+
+    transition:
+        color 0.25s ease,
+        background 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+/* HOVER */
+
+.nav-icon:hover {
+    color: #39ff88;
+
+    background: rgba(39, 255, 126, 0.08);
+
+    transform: translateY(-2px);
+}
+
+
+/* TOOLTIP */
+
+.nav-icon::after {
+
+    content: attr(data-tooltip);
+
+    position: absolute;
+
+    top: 58px;
+    left: 50%;
+
+    transform: translateX(-50%) translateY(-5px);
+
+    background: #111;
+
+    color: white;
+
+    padding: 7px 12px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    border: 1px solid rgba(220, 60, 60, 0.5);
+
+    transition: all 0.2s ease;
+
+}
+
+
+/* SHOW TOOLTIP */
+
+.nav-icon:hover::after {
+
+    opacity: 1;
+
+    transform: translateX(-50%) translateY(0);
+
+}
+
+
+/* CLICK EFFECT */
+
+.nav-icon:active {
+
+    color: #3d8bff;
+
+    transform: scale(0.92);
+
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+
+.login-btn {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 13px 22px;
+
+    color: white;
+
+    text-decoration: none;
+
+    font-weight: 600;
+
+    border: 1px solid rgba(220, 55, 55, 0.7);
+
+    border-radius: 10px;
+
+    background: rgba(100, 10, 15, 0.25);
+
+    transition: all 0.25s ease;
+}
+
+
+.login-btn:hover {
+
+    color: #39ff88;
+
+    border-color: #39ff88;
+
+    background: rgba(39, 255, 126, 0.08);
+
+    transform: translateY(-2px);
+}
+
+
+.login-btn:active {
+
+    color: #3d8bff;
+
+    transform: scale(0.97);
+}
+
+/* =========================================
+   ADMIN PAGE
+========================================= */
+
+.admin-page {
+
+    min-height: calc(100vh - 88px);
+
+    padding: 80px 12%;
+
+    background:
+
+        radial-gradient(
+            circle at 80% 20%,
+            rgba(140, 20, 25, 0.20),
+            transparent 45%
+        ),
+
+        #070707;
+
+    color: white;
+
+}
+
+
+.admin-container {
+
+    max-width: 850px;
+
+    margin: auto;
+
+}
+
+
+.admin-heading {
+
+    margin-bottom: 35px;
+
+}
+
+
+.admin-heading p {
+
+    color: #e34d4d;
+
+    letter-spacing: 4px;
+
+    font-size: 13px;
+
+}
+
+
+.admin-heading h1 {
+
+    font-size: 55px;
+
+    font-family: Georgia, serif;
+
+    margin: 10px 0;
+
+}
+
+
+.admin-heading span {
+
+    color: #aaa;
+
+    font-size: 18px;
+
+}
+
+
+/* FORM CARD */
+
+.certificate-card {
+
+    padding: 40px;
+
+    border-radius: 18px;
+
+    background: rgba(100, 10, 15, 0.18);
+
+    border: 1px solid rgba(220, 60, 60, 0.3);
+
+    backdrop-filter: blur(15px);
+
+    box-shadow:
+
+        0 20px 60px rgba(0,0,0,0.4);
+
+}
+
+
+/* INPUT */
+
+.input-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+    margin-bottom: 22px;
+
+}
+
+
+.input-group label {
+
+    margin-bottom: 8px;
+
+    color: #ddd;
+
+    font-weight: 600;
+
+}
+
+
+.input-group input {
+
+    padding: 14px 16px;
+
+    border-radius: 8px;
+
+    border: 1px solid rgba(255,255,255,0.15);
+
+    background: rgba(0,0,0,0.45);
+
+    color: white;
+
+    font-size: 16px;
+
+    outline: none;
+
+    transition: 0.25s;
+
+}
+
+
+.input-group input:focus {
+
+    border-color: #e34d4d;
+
+    box-shadow:
+
+        0 0 15px rgba(220,60,60,0.15);
+
+}
+
+
+.input-group input::placeholder {
+
+    color: #777;
+
+}
+
+
+/* BUTTON */
+
+.issue-btn {
+
+    width: 100%;
+
+    padding: 15px;
+
+    margin-top: 10px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #b52f32,
+            #68191c
+        );
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+
+}
+
+
+.issue-btn:hover {
+
+    background:
+
+        linear-gradient(
+            135deg,
+            #39ff88,
+            #168f4b
+        );
+
+    color: #071009;
+
+    transform: translateY(-2px);
+
+}
+
+
+.issue-btn:active {
+
+    background: #3d8bff;
+
+    transform: scale(0.98);
+
+}
+
+/* =========================================================
+   VERIFY PAGE FIX
+   DO NOT REMOVE EXISTING CSS
+   ========================================================= */
+
+/* Make sure verify page uses the same dark theme */
+.verify-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 80% 30%,
+            rgba(120, 20, 20, 0.12),
+            transparent 40%
+        ),
+        #050505;
+    color: white;
+}
+
+
+/* Verify heading */
+.verify-page h1,
+.verify-page h2 {
+    color: #ffffff;
+}
+
+
+/* Verify description */
+.verify-page p {
+    color: #cfcfcf;
+}
+
+
+/* Certificate ID input */
+.verify-page input {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border: 1px solid rgba(190, 45, 45, 0.6);
+    border-radius: 8px;
+    padding: 12px 15px;
+    outline: none;
+    transition: 0.3s ease;
+}
+
+
+/* Input hover */
+.verify-page input:hover {
+    border-color: #e04444;
+}
+
+
+/* Input focus */
+.verify-page input:focus {
+    border-color: #e04444;
+    box-shadow: 0 0 12px rgba(224, 68, 68, 0.25);
+}
+
+
+/* Verify button */
+.verify-page button {
+    background: linear-gradient(
+        135deg,
+        #8f1d1d,
+        #c93636
+    );
+
+    color: white;
+    border: none;
+    border-radius: 8px;
+
+    padding: 12px 25px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+}
+
+
+/* Button hover */
+.verify-page button:hover {
+    background: linear-gradient(
+        135deg,
+        #b52a2a,
+        #e04444
+    );
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 25px rgba(180, 30, 30, 0.3);
+}
+
+
+/* =========================================================
+   VERIFIEDRECORDS FONT
+   ========================================================= */
+
+.logo,
+.brand,
+.website-name {
+    font-family: "Cinzel", serif !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+
+/* If your logo is an h1 */
+h1.logo,
+h1.brand,
+h1.website-name {
+    color: #d84444;
+    text-shadow:
+        0 0 8px rgba(216, 68, 68, 0.25);
+}
+
+/* VerifiedRecords font */
+.website-name,
+.logo,
+.brand {
+    font-family: "Cinzel", Georgia, serif !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* ================= VERIFY PAGE FIX ================= */
+
+.verify-page {
+    max-width: 900px;
+    margin: 80px auto;
+    padding: 50px;
+    background: rgba(35, 5, 5, 0.55);
+    border: 1px solid rgba(180, 40, 40, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(100, 0, 0, 0.18);
+}
+
+.verify-page .page-title {
+    font-size: 48px;
+    color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.verify-page .page-title span {
+    color: #d84444;
+}
+
+.verify-page p {
+    color: #bbbbbb;
+    font-size: 18px;
+}
+
+.verify-page .form-group {
+    margin-bottom: 25px;
+}
+
+.verify-page label {
+    display: block;
+    color: #ffffff;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.verify-page input {
+    width: 100%;
+    max-width: 500px;
+    padding: 14px 16px;
+
+    background: rgba(255,255,255,0.06);
+    color: white;
+
+    border: 1px solid rgba(216,68,68,0.5);
+    border-radius: 8px;
+
+    font-size: 16px;
+    outline: none;
+
+    transition: 0.3s ease;
+}
+
+.verify-page input:focus {
+    border-color: #e04444;
+    box-shadow: 0 0 15px rgba(224,68,68,0.25);
+}
+
+.verify-page .primary-button {
+    padding: 14px 28px;
+
+    background: linear-gradient(
+        135deg,
+        #8f1d1d,
+        #d84444
+    );
+
+    color: white;
+    border: none;
+    border-radius: 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+.verify-page .primary-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 25px rgba(216,68,68,0.3);
+}
+
+.website-name {
+    font-family: "Cinzel", Georgia, serif !important;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* =========================================
+   GLOBAL VERIFIEDRECORDS FONT
+========================================= */
+
+.brand-name {
+    font-family: "Cinzel", Georgia, serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+}
+
+/* =========================================
+   LOGIN / SIGNUP — FINAL OVERRIDE
+========================================= */
+
+a.login-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    position: absolute !important;
+    right: 55px !important;
+    top: 19px !important;
+
+    width: 180px !important;
+    height: 45px !important;
+
+    background: transparent !important;
+    border: 1px solid #b52b2b !important;
+    border-radius: 10px !important;
+
+    color: #ffffff !important;
+    text-decoration: none !important;
+
+    font-family: Arial, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+
+    transition: all 0.25s ease !important;
+}
+
+/* Hover */
+a.login-button:hover {
+    background: #1f8f55 !important;
+    border-color: #1f8f55 !important;
+    color: #ffffff !important;
+
+    box-shadow: 0 0 18px rgba(31, 143, 85, 0.35) !important;
+
+    transform: translateY(-1px) !important;
+}
+
+/* Click */
+a.login-button:active {
+    background: #2864d7 !important;
+    border-color: #2864d7 !important;
+    color: #ffffff !important;
+    transform: scale(0.92) !important;
 }

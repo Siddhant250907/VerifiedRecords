@@ -3,59 +3,173 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Verify Certificate</title>
+        <title>Verify Certificate - VerifiedRecords</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand" href="index.html">🎓 CertiChain</a>
+<!-- ================= NAVBAR ================= -->
+
+<nav class="navbar">
+
+    <div class="nav-left">
+
+        <!-- HOME -->
+        <div class="nav-item" data-name="Home">
+
+            <a href="index.html"
+               class="nav-icon">
+
+                🏠
+
+            </a>
+
+        </div>
+
+
+        <!-- ADMIN -->
+        <div class="nav-item" data-name="Admin">
+
+            <a href="admin.html"
+               class="nav-icon">
+
+                👨‍💼
+
+            </a>
+
+        </div>
+
+
+        <!-- VERIFY -->
+        <div class="nav-item" data-name="Verify">
+
+            <a href="verify.html"
+               class="nav-icon">
+
+                🛡️
+
+            </a>
+
+        </div>
+
+
+        <!-- ABOUT -->
+        <div class="nav-item" data-name="About">
+
+            <a href="about.html"
+               class="nav-icon">
+
+                ℹ️
+
+            </a>
+
+        </div>
+
     </div>
+
+
+    <!-- LOGIN -->
+
+    <a href="login.html"
+       class="login-button">
+
+        LOGIN / SIGNUP
+
+    </a>
+
 </nav>
 
-<div class="container mt-5">
 
-    <div class="card shadow p-4">
 
-        <h2 class="text-center mb-4">
-            Verify Certificate
-        </h2>
+<!-- ================= BRAND ================= -->
 
-        <div class="mb-3">
+<div class="brand-section">
 
-            <label>Certificate ID</label>
+    <div class="brand-name">
 
-            <input
-                type="text"
-                id="verifyId"
-                class="form-control">
+        VerifiedRecords
 
-        </div>
+    </div>
 
-        <button
-            class="btn btn-success w-100"
-            id="verifyBtn">
+    <div class="brand-tagline">
 
-            Verify Certificate
-
-        </button>
-
-        <div
-            id="result"
-            class="mt-4">
-
-        </div>
+        BLOCKCHAIN • TRUST • VERIFICATION
 
     </div>
 
 </div>
+
+
+
+<!-- ================= VERIFY BOX ================= -->
+
+<div class="container verify-page">
+
+    <h1 class="page-title">
+
+        Verify <span>Certificate</span>
+
+    </h1>
+
+
+    <p style="
+        color:#bbbbbb;
+        font-size:18px;
+        margin-bottom:30px;
+    ">
+
+        Enter the certificate ID to verify
+        its authenticity.
+
+    </p>
+
+
+    <form id="verifyForm">
+
+
+        <div class="form-group">
+
+            <label for="certificateId">
+
+                Certificate ID
+
+            </label>
+
+
+            <input
+                type="text"
+                id="certificateId"
+                placeholder="Example: CERT001"
+                required
+            >
+
+        </div>
+
+
+
+        <button
+            type="submit"
+            class="primary-button">
+
+            Verify Certificate →
+
+        </button>
+
+
+    </form>
+
+</div>
+
+
 
 <script src="assets/js/verify.js"></script>
 

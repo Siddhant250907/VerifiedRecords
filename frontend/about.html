@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>About | VerifiedRecords</title>
+
+
+    <!-- Font Awesome -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- Main CSS -->
+
+    <link rel="stylesheet"
+          href="assets/css/style.css">
+
+
+    <style>
+
+        /* ======================================
+           ABOUT PAGE
+        ====================================== */
+
+        .about-page {
+
+            min-height: calc(100vh - 88px);
+
+            padding: 80px 12%;
+
+            background:
+
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(150, 20, 20, 0.18),
+                    transparent 40%
+                ),
+
+                radial-gradient(
+                    circle at 80% 70%,
+                    rgba(120, 10, 20, 0.15),
+                    transparent 45%
+                ),
+
+                #070707;
+
+            color: white;
+
+        }
+
+
+        .about-container {
+
+            max-width: 1100px;
+
+            margin: auto;
+
+        }
+
+
+        .about-label {
+
+            color: #e34d4d;
+
+            letter-spacing: 5px;
+
+            font-size: 13px;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .about-title {
+
+            font-size: clamp(45px, 6vw, 80px);
+
+            font-family: Georgia, serif;
+
+            margin-bottom: 25px;
+
+            color: #ffffff;
+
+        }
+
+
+        .about-title span {
+
+            color: #d94242;
+
+            text-shadow:
+                0 0 20px rgba(220, 50, 50, 0.25);
+
+        }
+
+
+        .about-intro {
+
+            font-size: 20px;
+
+            line-height: 1.8;
+
+            color: #d0d0d0;
+
+            max-width: 900px;
+
+            margin-bottom: 60px;
+
+        }
+
+
+        /* CARDS */
+
+        .about-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 25px;
+
+        }
+
+
+        .about-card {
+
+            padding: 32px;
+
+            border-radius: 16px;
+
+            background:
+                rgba(120, 15, 20, 0.18);
+
+            border:
+                1px solid rgba(220, 60, 60, 0.25);
+
+            backdrop-filter: blur(12px);
+
+            transition: 0.3s ease;
+
+        }
+
+
+        .about-card:hover {
+
+            transform: translateY(-5px);
+
+            border-color:
+                rgba(220, 60, 60, 0.6);
+
+            background:
+                rgba(130, 20, 25, 0.25);
+
+        }
+
+
+        .about-card i {
+
+            font-size: 25px;
+
+            color: #e34d4d;
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .about-card h2 {
+
+            font-size: 22px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .about-card p {
+
+            color: #c5c5c5;
+
+            line-height: 1.7;
+
+        }
+
+
+        /* ACKNOWLEDGEMENT */
+
+        .acknowledgement {
+
+            margin-top: 30px;
+
+            padding: 35px;
+
+            border-left:
+                3px solid #d94242;
+
+            background:
+                rgba(100, 10, 15, 0.15);
+
+        }
+
+
+        .acknowledgement h2 {
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .acknowledgement p {
+
+            color: #cfcfcf;
+
+            line-height: 1.8;
+
+        }
+
+
+        /* FOOTER INFO */
+
+        .about-meta {
+
+            margin-top: 60px;
+
+            padding-top: 25px;
+
+            border-top:
+                1px solid rgba(255,255,255,0.1);
+
+            display: flex;
+
+            justify-content: space-between;
+
+            color: #999;
+
+        }
+
+
+        .about-meta strong {
+
+            color: white;
+
+        }
+
+
+        /* MOBILE */
+
+        @media(max-width: 700px) {
+
+            .top-navbar {
+
+                padding: 0 20px;
+
+            }
+
+            .nav-left {
+
+                gap: 5px;
+
+            }
+
+            .login-btn {
+
+                padding: 10px;
+
+                font-size: 0;
+
+            }
+
+            .login-btn i {
+
+                font-size: 18px;
+
+            }
+
+            .about-page {
+
+                padding: 60px 25px;
+
+            }
+
+            .about-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .about-meta {
+
+                flex-direction: column;
+
+                gap: 10px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- ======================================
+     NAVIGATION
+====================================== -->
+
+<nav class="top-navbar">
+
+    <div class="nav-left">
+
+        <a href="index.html"
+           class="nav-icon"
+           data-tooltip="Home">
+
+            <i class="fa-solid fa-house"></i>
+
+        </a>
+
+
+        <a href="admin.html"
+           class="nav-icon"
+           data-tooltip="Admin">
+
+            <i class="fa-solid fa-user-shield"></i>
+
+        </a>
+
+
+        <a href="verify.html"
+           class="nav-icon"
+           data-tooltip="Verify">
+
+            <i class="fa-solid fa-certificate"></i>
+
+        </a>
+
+
+        <a href="about.html"
+           class="nav-icon"
+           data-tooltip="About">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+        </a>
+
+    </div>
+
+
+    <div class="nav-right">
+
+        <a href="login.html"
+           class="login-btn">
+
+            <i class="fa-solid fa-user"></i>
+
+            LOGIN / SIGNUP
+
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- ======================================
+     ABOUT CONTENT
+====================================== -->
+
+<main class="about-page">
+
+    <div class="about-container">
+
+
+        <div class="about-label">
+
+            ABOUT VERIFIEDRECORDS
+
+        </div>
+
+
+        <h1 class="about-title">
+
+            Trust your records.
+            <span>Verify with confidence.</span>
+
+        </h1>
+
+
+        <p class="about-intro">
+
+            VerifiedRecords is a blockchain-powered
+            certificate verification platform designed
+            to make academic records secure,
+            transparent and easy to verify.
+
+            Instead of relying entirely on traditional
+            paper-based verification, the platform uses
+            blockchain technology to create a
+            tamper-resistant record of certificates.
+
+        </p>
+
+
+
+        <section class="about-grid">
+
+
+            <!-- HOW IT WORKS -->
+
+            <div class="about-card">
+
+                <i class="fa-solid fa-link"></i>
+
+                <h2>How It Works</h2>
+
+                <p>
+
+                    An authorised institution can issue
+                    a certificate through the platform.
+
+                    Important certificate information is
+                    recorded and linked with a blockchain
+                    transaction.
+
+                    A verifier can then enter the
+                    certificate details and check whether
+                    the record is genuine.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- BLOCKCHAIN -->
+
+            <div class="about-card">
+
+                <i class="fa-solid fa-cubes"></i>
+
+                <h2>Why Blockchain?</h2>
+
+                <p>
+
+                    Blockchain provides a distributed
+                    and tamper-resistant record.
+
+                    Once certificate information is
+                    recorded on the blockchain, changing
+                    the stored record becomes extremely
+                    difficult without detection.
+
+                    This helps improve trust and
+                    transparency in certificate
+                    verification.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- CHALLENGES -->
+
+            <div class="about-card">
+
+                <i class="fa-solid fa-shield-halved"></i>
+
+                <h2>Challenges Overcome</h2>
+
+                <p>
+
+                    Traditional certificate verification
+                    can involve manual checking,
+                    paperwork and delays.
+
+                    VerifiedRecords aims to reduce these
+                    difficulties by providing a digital
+                    verification workflow.
+
+                    The project also addresses challenges
+                    involving blockchain connectivity,
+                    certificate data handling and
+                    user-friendly verification.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- SECURITY -->
+
+            <div class="about-card">
+
+                <i class="fa-solid fa-lock"></i>
+
+                <h2>Security & Transparency</h2>
+
+                <p>
+
+                    The system is designed around the
+                    principles of authenticity,
+                    transparency and data integrity.
+
+                    Blockchain records provide an
+                    additional layer of confidence when
+                    checking whether a certificate has
+                    been issued and recorded correctly.
+
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ACKNOWLEDGEMENT -->
+
+        <section class="acknowledgement">
+
+            <h2>
+                Acknowledgement
+            </h2>
+
+            <p>
+
+                This project was developed as an
+                academic blockchain application to
+                explore how decentralised technologies
+                can be applied to real-world problems.
+
+                The goal of VerifiedRecords is not only
+                to demonstrate blockchain functionality,
+                but also to explore how technology can
+                make academic credential verification
+                more efficient, transparent and
+                trustworthy.
+
+                This project represents an ongoing
+                learning journey in blockchain,
+                web development and decentralised
+                applications.
+
+            </p>
+
+        </section>
+
+
+
+        <!-- META INFORMATION -->
+
+        <div class="about-meta">
+
+            <div>
+
+                Published:
+                <strong>14 August 2026</strong>
+
+            </div>
+
+
+            <div>
+
+                Developer:
+                <strong>Siddhant Asati</strong>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</main>
+
+
+</body>
+
+</html>
