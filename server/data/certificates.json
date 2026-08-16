@@ -22,5 +22,13 @@
         "certificateId": "CERT_AIML001",
         "issueDate": "2026-07-25",
         "issuedAt": "2026-08-16T19:45:31.299Z"
+    },
+    {
+        "studentName": "Sahaj ",
+        "rollNumber": "25BCE1620",
+        "course": "CSE",
+        "certificateId": "CERT_CSE001",
+        "issueDate": "2026-05-16",
+        "issuedAt": "2026-08-16T20:00:26.067Z"
     }
 ]
