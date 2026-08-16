@@ -1,0 +1,26 @@
+[
+    {
+        "studentName": "siddhant",
+        "rollNumber": "25bce1633",
+        "course": "cse",
+        "certificateId": "cert003",
+        "issueDate": "2026-08-17",
+        "issuedAt": "2026-08-16T19:25:48.791Z"
+    },
+    {
+        "studentName": "Siddhant Asati",
+        "rollNumber": "25BCE1633",
+        "course": "CSE",
+        "certificateId": "CERT227",
+        "issueDate": "2026-08-17",
+        "issuedAt": "2026-08-16T19:36:21.232Z"
+    },
+    {
+        "studentName": "Akash Mittal",
+        "rollNumber": "24BAI1687",
+        "course": "AIML",
+        "certificateId": "CERT_AIML001",
+        "issueDate": "2026-07-25",
+        "issuedAt": "2026-08-16T19:45:31.299Z"
+    }
+]
