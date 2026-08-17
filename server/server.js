@@ -32,7 +32,7 @@ app.use(
 // PORT
 // ==================================================
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 
 // ==================================================
@@ -358,10 +358,10 @@ app.get(
 // START SERVER
 // ==================================================
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
 
     console.log(
-        `VerifiedRecords running on http://localhost:${PORT}`
+        `VerifiedRecords running on port ${PORT}`
     );
 
 });
