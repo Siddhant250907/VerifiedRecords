@@ -83,11 +83,7 @@ if (!MONGODB_URI) {
 // ==================================================
 
 app.get("/", (req, res) => {
-
-    res.send(
-        "VerifiedRecords Backend Running 🚀"
-    );
-
+    res.sendFile(path.join(__dirname, "..", "docs", "index.html"));
 });
 
 
