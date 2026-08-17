@@ -1,66 +1,99 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
-const fs = require("fs");
+const mongoose = require("mongoose");
 const path = require("path");
+require("dotenv").config();
+
+const Certificate = require("./models/certificates");
 
 const app = express();
 
+
+// ==================================================
+// MIDDLEWARE
+// ==================================================
+
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.use(express.static(path.join(__dirname, "..", "docs")));
 
-const PORT = 3000;
+// ==================================================
+// SERVE FRONTEND
+// ==================================================
 
-// ===============================
-// DATABASE FILE
-// ===============================
-
-const dataFile = path.join(
-    __dirname,
-    "data",
-    "certificates.json"
+app.use(
+    express.static(
+        path.join(__dirname, "..", "docs")
+    )
 );
 
 
-// ===============================
-// READ CERTIFICATES
-// ===============================
+// ==================================================
+// PORT
+// ==================================================
 
-function getCertificates() {
+const PORT = 3000;
 
-    const data = fs.readFileSync(
-        dataFile,
-        "utf8"
-    );
 
-    return JSON.parse(data);
+// ==================================================
+// MONGODB CONNECTION
+// ==================================================
+
+// ==================================================
+// MONGODB CONNECTION
+// ==================================================
+
+// ==================================================
+// MONGODB CONNECTION
+// ==================================================
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (!MONGODB_URI) {
+
+    console.error("❌ MONGODB_URI is missing from .env");
+
+} else {
+
+    mongoose.connect(MONGODB_URI, {
+        serverSelectionTimeoutMS: 10000
+    })
+    .then(() => {
+
+        console.log("=================================");
+        console.log("✅ MongoDB Connected Successfully");
+        console.log("Database:", mongoose.connection.name);
+        console.log("=================================");
+
+    })
+    .catch((error) => {
+
+        console.error("=================================");
+        console.error("❌ MongoDB Connection Failed");
+        console.error(error.message);
+        console.error("=================================");
+
+    });
+
 }
 
 
-// ===============================
-// SAVE CERTIFICATES
-// ===============================
-
-function saveCertificates(certificates) {
-
-    fs.writeFileSync(
-        dataFile,
-        JSON.stringify(certificates, null, 4)
-    );
-}
-
-
-// ===============================
+// ==================================================
 // HOME
-// ===============================
+// ==================================================
+
+app.get("/", (req, res) => {
+
+    res.send(
+        "VerifiedRecords Backend Running 🚀"
+    );
+
+});
 
 
-
-// ===============================
+// ==================================================
 // TEST API
-// ===============================
+// ==================================================
 
 app.get("/api/test", (req, res) => {
 
@@ -76,12 +109,12 @@ app.get("/api/test", (req, res) => {
 });
 
 
-// ===============================
+// ==================================================
 // ISSUE CERTIFICATE
 // ADMIN
-// ===============================
+// ==================================================
 
-app.post("/api/certificate", (req, res) => {
+app.post("/api/certificate", async (req, res) => {
 
     try {
 
@@ -96,7 +129,9 @@ app.post("/api/certificate", (req, res) => {
         } = req.body;
 
 
-        // Check required fields
+        // ------------------------------------------
+        // CHECK REQUIRED FIELDS
+        // ------------------------------------------
 
         if (
             !studentName ||
@@ -118,20 +153,14 @@ app.post("/api/certificate", (req, res) => {
         }
 
 
-        // Get existing certificates
-
-        const certificates =
-            getCertificates();
-
-
-        // Check duplicate Certificate ID
+        // ------------------------------------------
+        // CHECK DUPLICATE CERTIFICATE ID
+        // ------------------------------------------
 
         const existingCertificate =
-            certificates.find(
-                certificate =>
-                    certificate.certificateId ===
-                    certificateId
-            );
+            await Certificate.findOne({
+                certificateId: certificateId
+            });
 
 
         if (existingCertificate) {
@@ -148,41 +177,50 @@ app.post("/api/certificate", (req, res) => {
         }
 
 
-        // Create certificate
+        // ------------------------------------------
+        // CREATE CERTIFICATE
+        // ------------------------------------------
 
-        const newCertificate = {
+        const newCertificate =
+            new Certificate({
 
-            studentName,
-            rollNumber,
-            course,
-            certificateId,
-            issueDate,
+                studentName:
+                    studentName,
 
-            issuedAt:
-                new Date().toISOString()
+                rollNumber:
+                    rollNumber,
 
-        };
+                course:
+                    course,
+
+                certificateId:
+                    certificateId,
+
+                issueDate:
+                    issueDate,
+
+                issuedAt:
+                    new Date()
+
+            });
 
 
-        // Add certificate
+        // ------------------------------------------
+        // SAVE TO MONGODB
+        // ------------------------------------------
 
-        certificates.push(
-            newCertificate
-        );
-
-
-        // Save certificate
-
-        saveCertificates(
-            certificates
-        );
+        await newCertificate.save();
 
 
         console.log(
             "Certificate issued:",
-            newCertificate
+            certificateId
         );
 
+
+        // ------------------------------------------
+        // SEND RESPONSE
+        // ------------------------------------------
 
         res.status(201).json({
 
@@ -200,7 +238,11 @@ app.post("/api/certificate", (req, res) => {
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Issue Certificate Error:",
+            error
+        );
+
 
         res.status(500).json({
 
@@ -216,14 +258,14 @@ app.post("/api/certificate", (req, res) => {
 });
 
 
-// ===============================
+// ==================================================
 // VERIFY CERTIFICATE
 // USER
-// ===============================
+// ==================================================
 
 app.get(
     "/api/certificate/:certificateId",
-    (req, res) => {
+    async (req, res) => {
 
         try {
 
@@ -231,22 +273,25 @@ app.get(
                 req.params.certificateId;
 
 
-            const certificates =
-                getCertificates();
-
-
-            // Search certificate
+            // --------------------------------------
+            // SEARCH MONGODB
+            // --------------------------------------
 
             const certificate =
-                certificates.find(
-                    certificate =>
-                        certificate.certificateId
-                        .toLowerCase() ===
-                        certificateId.toLowerCase()
-                );
+                await Certificate.findOne({
+
+                    certificateId:
+                        new RegExp(
+                            `^${certificateId}$`,
+                            "i"
+                        )
+
+                });
 
 
-            // Certificate not found
+            // --------------------------------------
+            // CERTIFICATE NOT FOUND
+            // --------------------------------------
 
             if (!certificate) {
 
@@ -264,7 +309,9 @@ app.get(
             }
 
 
-            // Certificate found
+            // --------------------------------------
+            // CERTIFICATE FOUND
+            // --------------------------------------
 
             res.json({
 
@@ -284,11 +331,17 @@ app.get(
 
         catch (error) {
 
-            console.error(error);
+            console.error(
+                "Verify Certificate Error:",
+                error
+            );
+
 
             res.status(500).json({
 
                 success: false,
+
+                verified: false,
 
                 message:
                     "Server error."
@@ -301,14 +354,14 @@ app.get(
 );
 
 
-// ===============================
+// ==================================================
 // START SERVER
-// ===============================
+// ==================================================
 
 app.listen(PORT, () => {
 
     console.log(
-        `VerifiedRecords Backend running on http://localhost:${PORT}`
+        `VerifiedRecords running on http://localhost:${PORT}`
     );
 
 });
