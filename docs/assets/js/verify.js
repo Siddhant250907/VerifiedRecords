@@ -26,7 +26,7 @@ document
         try {
 
             const response = await fetch(
-                `api/certificate/${encodeURIComponent(certificateId)}`
+                `https://verifiedrecords.onrender.com/api/certificate/${encodeURIComponent(certificateId)}`
             );
 
 

@@ -28,7 +28,7 @@ document
         try {
 
             const response = await fetch(
-                "/api/certificate",
+                "https://verifiedrecords.onrender.com/api/certificate",
                 {
 
                     method: "POST",
