@@ -5,7 +5,7 @@
 const firebaseConfig = {
 
     apiKey:
-        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V0T0Gw",
+        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
 
     authDomain:
         "verifiedrecords.firebaseapp.com",
