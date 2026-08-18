@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -18,6 +17,20 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 
+    <!-- Fonts -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
+
     <!-- Main CSS -->
 
     <link rel="stylesheet"
@@ -26,27 +39,30 @@
 
     <style>
 
-        /* ======================================
+
+        /* ==================================================
            ABOUT PAGE
-        ====================================== */
+        ================================================== */
 
         .about-page {
 
-            min-height: calc(100vh - 88px);
+            min-height:
+                calc(100vh - 88px);
 
-            padding: 80px 12%;
+            padding:
+                80px 12%;
 
             background:
 
                 radial-gradient(
                     circle at 20% 20%,
-                    rgba(150, 20, 20, 0.18),
+                    rgba(150,20,20,0.18),
                     transparent 40%
                 ),
 
                 radial-gradient(
                     circle at 80% 70%,
-                    rgba(120, 10, 20, 0.15),
+                    rgba(120,10,20,0.15),
                     transparent 45%
                 ),
 
@@ -81,13 +97,15 @@
 
         .about-title {
 
-            font-size: clamp(45px, 6vw, 80px);
+            font-size:
+                clamp(45px,6vw,80px);
 
-            font-family: Georgia, serif;
+            font-family:
+                Georgia, serif;
 
             margin-bottom: 25px;
 
-            color: #ffffff;
+            color: white;
 
         }
 
@@ -97,7 +115,8 @@
             color: #d94242;
 
             text-shadow:
-                0 0 20px rgba(220, 50, 50, 0.25);
+                0 0 20px
+                rgba(220,50,50,0.25);
 
         }
 
@@ -117,14 +136,16 @@
         }
 
 
-        /* CARDS */
+        /* ==================================================
+           CARDS
+        ================================================== */
 
         .about-grid {
 
             display: grid;
 
             grid-template-columns:
-                repeat(2, 1fr);
+                repeat(2,1fr);
 
             gap: 25px;
 
@@ -138,27 +159,31 @@
             border-radius: 16px;
 
             background:
-                rgba(120, 15, 20, 0.18);
+                rgba(120,15,20,0.18);
 
             border:
-                1px solid rgba(220, 60, 60, 0.25);
+                1px solid
+                rgba(220,60,60,0.25);
 
-            backdrop-filter: blur(12px);
+            backdrop-filter:
+                blur(12px);
 
-            transition: 0.3s ease;
+            transition:
+                0.3s ease;
 
         }
 
 
         .about-card:hover {
 
-            transform: translateY(-5px);
+            transform:
+                translateY(-5px);
 
             border-color:
-                rgba(220, 60, 60, 0.6);
+                rgba(220,60,60,0.6);
 
             background:
-                rgba(130, 20, 25, 0.25);
+                rgba(130,20,25,0.25);
 
         }
 
@@ -192,7 +217,9 @@
         }
 
 
-        /* ACKNOWLEDGEMENT */
+        /* ==================================================
+           ACKNOWLEDGEMENT
+        ================================================== */
 
         .acknowledgement {
 
@@ -204,7 +231,7 @@
                 3px solid #d94242;
 
             background:
-                rgba(100, 10, 15, 0.15);
+                rgba(100,10,15,0.15);
 
         }
 
@@ -225,7 +252,9 @@
         }
 
 
-        /* FOOTER INFO */
+        /* ==================================================
+           META
+        ================================================== */
 
         .about-meta {
 
@@ -234,11 +263,13 @@
             padding-top: 25px;
 
             border-top:
-                1px solid rgba(255,255,255,0.1);
+                1px solid
+                rgba(255,255,255,0.1);
 
             display: flex;
 
-            justify-content: space-between;
+            justify-content:
+                space-between;
 
             color: #999;
 
@@ -252,41 +283,206 @@
         }
 
 
-        /* MOBILE */
+        /* ==================================================
+           AUTH
+        ================================================== */
 
-        @media(max-width: 700px) {
+        .auth-area {
 
-            .top-navbar {
+            position: relative;
 
-                padding: 0 20px;
+            display: flex;
 
-            }
+            align-items: center;
 
-            .nav-left {
+        }
 
-                gap: 5px;
 
-            }
+        .login-button {
 
-            .login-btn {
+            text-decoration: none;
 
-                padding: 10px;
+            color: white;
 
-                font-size: 0;
+            border:
+                1px solid #e33b3b;
 
-            }
+            padding:
+                14px 25px;
 
-            .login-btn i {
+            border-radius: 10px;
 
-                font-size: 18px;
+            font-weight: 600;
 
-            }
+            font-size: 16px;
+
+            transition:
+                0.3s ease;
+
+        }
+
+
+        .login-button:hover {
+
+            background: #e33b3b;
+
+            color: white;
+
+        }
+
+
+        .account-container {
+
+            position: relative;
+
+        }
+
+
+        .account-button {
+
+            width: 50px;
+
+            height: 50px;
+
+            border-radius: 50%;
+
+            border:
+                1px solid #20d45a;
+
+            background: transparent;
+
+            color: #20d45a;
+
+            font-size: 22px;
+
+            cursor: pointer;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        .account-button:hover {
+
+            background: #20d45a;
+
+            color: black;
+
+        }
+
+
+        .account-menu {
+
+            display: none;
+
+            position: absolute;
+
+            right: 0;
+
+            top: 60px;
+
+            width: 230px;
+
+            background: #120607;
+
+            border:
+                1px solid #49151b;
+
+            border-radius: 12px;
+
+            padding: 15px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(0,0,0,0.5);
+
+            z-index: 9999;
+
+        }
+
+
+        .account-menu.show {
+
+            display: block;
+
+        }
+
+
+        .account-email {
+
+            color: #20d45a;
+
+            font-size: 14px;
+
+            padding-bottom: 12px;
+
+            margin-bottom: 10px;
+
+            border-bottom:
+                1px solid #3a1518;
+
+            word-break: break-word;
+
+        }
+
+
+        .account-menu a,
+        .account-menu button {
+
+            display: block;
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: transparent;
+
+            color: white;
+
+            text-align: left;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+        }
+
+
+        .account-menu a:hover,
+        .account-menu button:hover {
+
+            background: #2a1012;
+
+            color: #20d45a;
+
+        }
+
+
+        /* ==================================================
+           MOBILE
+        ================================================== */
+
+        @media(max-width:700px) {
 
             .about-page {
 
-                padding: 60px 25px;
+                padding:
+                    60px 25px;
 
             }
+
 
             .about-grid {
 
@@ -294,15 +490,18 @@
 
             }
 
+
             .about-meta {
 
-                flex-direction: column;
+                flex-direction:
+                    column;
 
                 gap: 10px;
 
             }
 
         }
+
 
     </style>
 
@@ -312,13 +511,15 @@
 <body>
 
 
-<!-- ======================================
+<!-- ==================================================
      NAVIGATION
-====================================== -->
+================================================== -->
 
 <nav class="top-navbar">
 
+
     <div class="nav-left">
+
 
         <a href="index.html"
            class="nav-icon"
@@ -355,31 +556,96 @@
 
         </a>
 
+
     </div>
 
+
+
+    <!-- AUTH -->
 
     <div class="nav-right">
 
-        <a href="login.html"
-           class="login-btn">
+        <div class="auth-area">
 
-            <i class="fa-solid fa-user"></i>
 
-            LOGIN / SIGNUP
+            <!-- NOT LOGGED IN -->
 
-        </a>
+            <a href="login.html"
+               id="loginButton"
+               class="login-button">
+
+                LOGIN / SIGNUP
+
+            </a>
+
+
+
+            <!-- LOGGED IN -->
+
+            <div id="accountButton"
+                 class="account-container"
+                 style="display:none;">
+
+
+                <button
+                    class="account-button"
+                    onclick="toggleAccountMenu()">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </button>
+
+
+
+                <div id="accountMenu"
+                     class="account-menu">
+
+
+                    <div id="accountEmail"
+                         class="account-email">
+
+                    </div>
+
+
+                    <a href="admin.html">
+
+                        <i class="fa-solid fa-gauge"></i>
+
+                        Dashboard
+
+                    </a>
+
+
+                    <button onclick="logoutUser()">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+
+                        Logout
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
 
     </div>
+
 
 </nav>
 
 
 
-<!-- ======================================
+<!-- ==================================================
      ABOUT CONTENT
-====================================== -->
+================================================== -->
 
 <main class="about-page">
+
 
     <div class="about-container">
 
@@ -391,12 +657,16 @@
         </div>
 
 
+
         <h1 class="about-title">
 
             Trust your records.
-            <span>Verify with confidence.</span>
+            <span>
+                Verify with confidence.
+            </span>
 
         </h1>
+
 
 
         <p class="about-intro">
@@ -405,6 +675,8 @@
             certificate verification platform designed
             to make academic records secure,
             transparent and easy to verify.
+
+            <br><br>
 
             Instead of relying entirely on traditional
             paper-based verification, the platform uses
@@ -415,16 +687,18 @@
 
 
 
+        <!-- CARDS -->
+
         <section class="about-grid">
 
-
-            <!-- HOW IT WORKS -->
 
             <div class="about-card">
 
                 <i class="fa-solid fa-link"></i>
 
-                <h2>How It Works</h2>
+                <h2>
+                    How It Works
+                </h2>
 
                 <p>
 
@@ -445,13 +719,13 @@
 
 
 
-            <!-- BLOCKCHAIN -->
-
             <div class="about-card">
 
                 <i class="fa-solid fa-cubes"></i>
 
-                <h2>Why Blockchain?</h2>
+                <h2>
+                    Why Blockchain?
+                </h2>
 
                 <p>
 
@@ -473,13 +747,13 @@
 
 
 
-            <!-- CHALLENGES -->
-
             <div class="about-card">
 
                 <i class="fa-solid fa-shield-halved"></i>
 
-                <h2>Challenges Overcome</h2>
+                <h2>
+                    Challenges Overcome
+                </h2>
 
                 <p>
 
@@ -502,13 +776,13 @@
 
 
 
-            <!-- SECURITY -->
-
             <div class="about-card">
 
                 <i class="fa-solid fa-lock"></i>
 
-                <h2>Security & Transparency</h2>
+                <h2>
+                    Security & Transparency
+                </h2>
 
                 <p>
 
@@ -534,9 +808,11 @@
 
         <section class="acknowledgement">
 
+
             <h2>
                 Acknowledgement
             </h2>
+
 
             <p>
 
@@ -545,12 +821,16 @@
                 explore how decentralised technologies
                 can be applied to real-world problems.
 
+                <br><br>
+
                 The goal of VerifiedRecords is not only
                 to demonstrate blockchain functionality,
                 but also to explore how technology can
                 make academic credential verification
                 more efficient, transparent and
                 trustworthy.
+
+                <br><br>
 
                 This project represents an ongoing
                 learning journey in blockchain,
@@ -559,18 +839,23 @@
 
             </p>
 
+
         </section>
 
 
 
-        <!-- META INFORMATION -->
+        <!-- META -->
 
         <div class="about-meta">
+
 
             <div>
 
                 Published:
-                <strong>14 August 2026</strong>
+
+                <strong>
+                    14 August 2026
+                </strong>
 
             </div>
 
@@ -578,16 +863,217 @@
             <div>
 
                 Developer:
-                <strong>Siddhant Asati</strong>
+
+                <strong>
+                    Siddhant Asati
+                </strong>
 
             </div>
+
 
         </div>
 
 
     </div>
 
+
 </main>
+
+
+
+<!-- ==================================================
+     FIREBASE
+================================================== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+
+
+<script>
+
+
+/* ==================================================
+   FIREBASE CONFIG
+================================================== */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
+
+    authDomain:
+        "verifiedrecords.firebaseapp.com",
+
+    projectId:
+        "verifiedrecords",
+
+    storageBucket:
+        "verifiedrecords.firebasestorage.app",
+
+    messagingSenderId:
+        "823611310124",
+
+    appId:
+        "1:823611310124:web:8beb8902077e4a5eebd189"
+
+};
+
+
+
+/* INITIALIZE */
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(firebaseConfig);
+
+}
+
+const auth = firebase.auth();
+
+
+
+/* ==================================================
+   CHECK LOGIN
+================================================== */
+
+auth.onAuthStateChanged(function(user) {
+
+
+    const loginButton =
+        document.getElementById("loginButton");
+
+
+    const accountButton =
+        document.getElementById("accountButton");
+
+
+    const accountEmail =
+        document.getElementById("accountEmail");
+
+
+    if (user) {
+
+        /* LOGGED IN */
+
+        loginButton.style.display =
+            "none";
+
+        accountButton.style.display =
+            "block";
+
+
+        accountEmail.innerText =
+            user.email ||
+            "Signed in user";
+
+    }
+
+    else {
+
+        /* LOGGED OUT */
+
+        loginButton.style.display =
+            "block";
+
+        accountButton.style.display =
+            "none";
+
+    }
+
+});
+
+
+
+/* ==================================================
+   ACCOUNT MENU
+================================================== */
+
+function toggleAccountMenu() {
+
+    const menu =
+        document.getElementById("accountMenu");
+
+    menu.classList.toggle("show");
+
+}
+
+
+
+/* ==================================================
+   LOGOUT
+================================================== */
+
+async function logoutUser() {
+
+    try {
+
+        await auth.signOut();
+
+        window.location.href =
+            "index.html";
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/* ==================================================
+   CLOSE MENU
+================================================== */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+
+        const account =
+            document.getElementById(
+                "accountButton"
+            );
+
+
+        const menu =
+            document.getElementById(
+                "accountMenu"
+            );
+
+
+        if (
+
+            account.style.display !==
+                "none"
+
+            &&
+
+            !account.contains(
+                event.target
+            )
+
+        ) {
+
+            menu.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+</script>
 
 
 </body>

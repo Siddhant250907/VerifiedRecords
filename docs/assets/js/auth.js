@@ -1,40 +1,21 @@
 // =====================================================
-// FIREBASE CONFIG
+// FIREBASE AUTHENTICATION
 // =====================================================
 
 const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
-
-    authDomain:
-        "verifiedrecords.firebaseapp.com",
-
-    projectId:
-        "verifiedrecords",
-
-    storageBucket:
-        "verifiedrecords.firebasestorage.app",
-
-    messagingSenderId:
-        "823611310124",
-
-    appId:
-        "1:823611310124:web:8beb8902077e4a5eebd189"
-
+    apiKey: "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
+    authDomain: "verifiedrecords.firebaseapp.com",
+    projectId: "verifiedrecords",
+    storageBucket: "verifiedrecords.firebasestorage.app",
+    messagingSenderId: "823611310124",
+    appId: "1:823611310124:web:8beb8902077e4a5eebd189"
 };
 
 
-// =====================================================
-// INITIALIZE FIREBASE
-// =====================================================
-
+// Initialize Firebase only once
 if (!firebase.apps.length) {
-
     firebase.initializeApp(firebaseConfig);
-
 }
-
 
 const auth = firebase.auth();
 
@@ -43,16 +24,13 @@ const auth = firebase.auth();
 // CHECK LOGIN STATE
 // =====================================================
 
-auth.onAuthStateChanged(function(user) {
-
+auth.onAuthStateChanged(function (user) {
 
     const loginButton =
         document.getElementById("loginButton");
 
-
     const accountButton =
         document.getElementById("accountButton");
-
 
     const accountEmail =
         document.getElementById("accountEmail");
@@ -60,67 +38,39 @@ auth.onAuthStateChanged(function(user) {
 
     if (user) {
 
-
-        // =========================================
+        // ---------------------------------------------
         // USER IS LOGGED IN
-        // =========================================
+        // ---------------------------------------------
 
-        console.log(
-            "Logged in:",
-            user.email
-        );
-
+        console.log("Logged in:", user.email);
 
         if (loginButton) {
-
-            loginButton.style.display =
-                "none";
-
+            loginButton.style.display = "none";
         }
-
 
         if (accountButton) {
-
-            accountButton.style.display =
-                "flex";
-
+            accountButton.style.display = "block";
         }
-
 
         if (accountEmail) {
-
-            accountEmail.innerText =
-                user.email;
-
+            accountEmail.textContent =
+                user.email || "Logged in user";
         }
 
-    }
+    } else {
 
-    else {
-
-
-        // =========================================
+        // ---------------------------------------------
         // USER IS NOT LOGGED IN
-        // =========================================
+        // ---------------------------------------------
 
-        console.log(
-            "No user logged in."
-        );
-
+        console.log("User is not logged in.");
 
         if (loginButton) {
-
-            loginButton.style.display =
-                "flex";
-
+            loginButton.style.display = "block";
         }
 
-
         if (accountButton) {
-
-            accountButton.style.display =
-                "none";
-
+            accountButton.style.display = "none";
         }
 
     }
@@ -129,37 +79,20 @@ auth.onAuthStateChanged(function(user) {
 
 
 // =====================================================
-// ACCOUNT DROPDOWN
+// ACCOUNT MENU
 // =====================================================
 
 function toggleAccountMenu() {
 
-
     const menu =
-        document.getElementById(
-            "accountMenu"
-        );
+        document.getElementById("accountMenu");
 
-
-    if (!menu) {
-
-        return;
-
-    }
-
+    if (!menu) return;
 
     if (menu.style.display === "block") {
-
-        menu.style.display =
-            "none";
-
-    }
-
-    else {
-
-        menu.style.display =
-            "block";
-
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
     }
 
 }
@@ -171,31 +104,20 @@ function toggleAccountMenu() {
 
 function logoutUser() {
 
-
     auth.signOut()
+        .then(function () {
 
-        .then(function() {
+            console.log("Logged out.");
 
-
-            console.log(
-                "User logged out."
-            );
-
-
-            window.location.href =
-                "index.html";
-
+            window.location.href = "index.html";
 
         })
-
-        .catch(function(error) {
-
+        .catch(function (error) {
 
             console.error(
                 "Logout error:",
                 error
             );
-
 
         });
 
@@ -206,35 +128,27 @@ function logoutUser() {
 // CLOSE ACCOUNT MENU WHEN CLICKING OUTSIDE
 // =====================================================
 
-document.addEventListener(
-    "click",
-    function(event) {
+document.addEventListener("click", function (event) {
+
+    const accountButton =
+        document.getElementById("accountButton");
+
+    const accountMenu =
+        document.getElementById("accountMenu");
 
 
-        const accountContainer =
-            document.getElementById(
-                "accountButton"
-            );
+    if (!accountButton || !accountMenu) {
+        return;
+    }
 
 
-        const menu =
-            document.getElementById(
-                "accountMenu"
-            );
+    if (
+        !accountButton.contains(event.target) &&
+        !accountMenu.contains(event.target)
+    ) {
 
-
-        if (
-            accountContainer &&
-            menu &&
-            !accountContainer.contains(
-                event.target
-            )
-        ) {
-
-            menu.style.display =
-                "none";
-
-        }
+        accountMenu.style.display = "none";
 
     }
-);
+
+});

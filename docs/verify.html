@@ -2,95 +2,349 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>Verify Certificate - VerifiedRecords</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Verify Certificate - VerifiedRecords</title>
 
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
 
-        <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Fonts -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
+
+    <!-- Font Awesome -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- Main CSS -->
+
+    <link rel="stylesheet"
+          href="assets/css/style.css">
+
+
+    <!-- Account menu styling -->
+
+    <style>
+
+        /* ================================
+           ACCOUNT AREA
+        ================================= */
+
+        .auth-area {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+
+        /* LOGIN BUTTON */
+
+        .login-button {
+            text-decoration: none;
+            color: white;
+            border: 1px solid #e33b3b;
+            padding: 14px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: #e33b3b;
+            color: white;
+        }
+
+
+        /* ACCOUNT BUTTON */
+
+        .account-container {
+            position: relative;
+        }
+
+        .account-button {
+            width: 50px;
+            height: 50px;
+
+            border-radius: 50%;
+
+            border: 1px solid #20d45a;
+
+            background: transparent;
+
+            color: #20d45a;
+
+            font-size: 22px;
+
+            cursor: pointer;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        .account-button:hover {
+            background: #20d45a;
+            color: black;
+        }
+
+
+        /* ACCOUNT DROPDOWN */
+
+        .account-menu {
+
+            display: none;
+
+            position: absolute;
+
+            right: 0;
+
+            top: 60px;
+
+            width: 230px;
+
+            background: #120607;
+
+            border: 1px solid #49151b;
+
+            border-radius: 12px;
+
+            padding: 15px;
+
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.5);
+
+            z-index: 9999;
+        }
+
+
+        .account-menu.show {
+            display: block;
+        }
+
+
+        .account-email {
+
+            color: #20d45a;
+
+            font-size: 14px;
+
+            padding-bottom: 12px;
+
+            margin-bottom: 10px;
+
+            border-bottom:
+                1px solid #3a1518;
+
+            word-break: break-word;
+        }
+
+
+        .account-menu a,
+        .account-menu button {
+
+            display: block;
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 5px;
+
+            border-radius: 7px;
+
+            border: none;
+
+            background: transparent;
+
+            color: white;
+
+            text-align: left;
+
+            text-decoration: none;
+
+            cursor: pointer;
+
+            font-size: 14px;
+        }
+
+
+        .account-menu a:hover,
+        .account-menu button:hover {
+
+            background: #2a1012;
+
+            color: #20d45a;
+        }
+
+
+        /* VERIFY PAGE */
+
+        .verify-page {
+            margin-top: 40px;
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-<!-- ================= NAVBAR ================= -->
 
-<nav class="navbar">
+<!-- ==================================================
+     NAVBAR
+================================================== -->
+
+<nav class="top-navbar">
+
+
+    <!-- LEFT -->
 
     <div class="nav-left">
 
+
         <!-- HOME -->
-        <div class="nav-item" data-name="Home">
 
-            <a href="index.html"
-               class="nav-icon">
+        <a href="index.html"
+           class="nav-icon"
+           data-tooltip="Home">
 
-                🏠
+            <i class="fa-solid fa-house"></i>
 
-            </a>
-
-        </div>
+        </a>
 
 
         <!-- ADMIN -->
-        <div class="nav-item" data-name="Admin">
 
-            <a href="admin.html"
-               class="nav-icon">
+        <a href="admin.html"
+           class="nav-icon"
+           data-tooltip="Admin">
 
-                👨‍💼
+            <i class="fa-solid fa-user-shield"></i>
 
-            </a>
-
-        </div>
+        </a>
 
 
         <!-- VERIFY -->
-        <div class="nav-item" data-name="Verify">
 
-            <a href="verify.html"
-               class="nav-icon">
+        <a href="verify.html"
+           class="nav-icon"
+           data-tooltip="Verify">
 
-                🛡️
+            <i class="fa-solid fa-certificate"></i>
 
-            </a>
-
-        </div>
+        </a>
 
 
         <!-- ABOUT -->
-        <div class="nav-item" data-name="About">
 
-            <a href="about.html"
-               class="nav-icon">
+        <a href="about.html"
+           class="nav-icon"
+           data-tooltip="About">
 
-                ℹ️
+            <i class="fa-solid fa-circle-info"></i>
+
+        </a>
+
+
+    </div>
+
+
+    <!-- RIGHT -->
+
+    <div class="nav-right">
+
+        <div class="auth-area">
+
+
+            <!-- NOT LOGGED IN -->
+
+            <a href="login.html"
+               id="loginButton"
+               class="login-button">
+
+                LOGIN / SIGNUP
 
             </a>
+
+
+            <!-- LOGGED IN -->
+
+            <div id="accountButton"
+                 class="account-container"
+                 style="display:none;">
+
+
+                <button
+                    class="account-button"
+                    onclick="toggleAccountMenu()">
+
+                    <i class="fa-solid fa-user"></i>
+
+                </button>
+
+
+                <!-- DROPDOWN -->
+
+                <div id="accountMenu"
+                     class="account-menu">
+
+
+                    <div id="accountEmail"
+                         class="account-email">
+
+                    </div>
+
+
+                    <a href="admin.html">
+
+                        <i class="fa-solid fa-gauge"></i>
+                        Dashboard
+
+                    </a>
+
+
+                    <button onclick="logoutUser()">
+
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Logout
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
 
         </div>
 
     </div>
 
 
-    <!-- LOGIN -->
-
-    <a href="login.html"
-       class="login-button">
-
-        LOGIN / SIGNUP
-
-    </a>
-
 </nav>
 
 
 
-<!-- ================= BRAND ================= -->
+<!-- ==================================================
+     BRAND
+================================================== -->
 
 <div class="brand-section">
 
@@ -110,9 +364,12 @@
 
 
 
-<!-- ================= VERIFY BOX ================= -->
+<!-- ==================================================
+     VERIFY BOX
+================================================== -->
 
 <div class="container verify-page">
+
 
     <h1 class="page-title">
 
@@ -138,6 +395,7 @@
 
         <div class="form-group">
 
+
             <label for="certificateId">
 
                 Certificate ID
@@ -152,8 +410,8 @@
                 required
             >
 
-        </div>
 
+        </div>
 
 
         <button
@@ -167,11 +425,193 @@
 
     </form>
 
+
 </div>
 
 
 
+<!-- ==================================================
+     VERIFY JAVASCRIPT
+================================================== -->
+
 <script src="assets/js/verify.js"></script>
+
+
+
+<!-- ==================================================
+     FIREBASE
+================================================== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+
+
+<script>
+
+
+/* ==================================================
+   FIREBASE CONFIG
+================================================== */
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
+
+    authDomain:
+        "verifiedrecords.firebaseapp.com",
+
+    projectId:
+        "verifiedrecords",
+
+    storageBucket:
+        "verifiedrecords.firebasestorage.app",
+
+    messagingSenderId:
+        "823611310124",
+
+    appId:
+        "1:823611310124:web:8beb8902077e4a5eebd189"
+
+};
+
+
+
+/* INITIALIZE FIREBASE */
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(firebaseConfig);
+
+}
+
+const auth = firebase.auth();
+
+
+
+/* ==================================================
+   CHECK LOGIN STATUS
+================================================== */
+
+auth.onAuthStateChanged(function(user) {
+
+
+    const loginButton =
+        document.getElementById("loginButton");
+
+
+    const accountButton =
+        document.getElementById("accountButton");
+
+
+    const accountEmail =
+        document.getElementById("accountEmail");
+
+
+    if (user) {
+
+        /* USER IS LOGGED IN */
+
+        loginButton.style.display = "none";
+
+        accountButton.style.display = "block";
+
+
+        accountEmail.innerText =
+            user.email || "Signed in user";
+
+
+    }
+
+    else {
+
+        /* USER IS NOT LOGGED IN */
+
+        loginButton.style.display = "block";
+
+        accountButton.style.display = "none";
+
+    }
+
+});
+
+
+
+/* ==================================================
+   ACCOUNT MENU
+================================================== */
+
+function toggleAccountMenu() {
+
+    const menu =
+        document.getElementById("accountMenu");
+
+    menu.classList.toggle("show");
+
+}
+
+
+
+/* ==================================================
+   LOGOUT
+================================================== */
+
+async function logoutUser() {
+
+    try {
+
+        await auth.signOut();
+
+        window.location.href =
+            "index.html";
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/* ==================================================
+   CLOSE MENU WHEN CLICKING OUTSIDE
+================================================== */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        const account =
+            document.getElementById("accountButton");
+
+        const menu =
+            document.getElementById("accountMenu");
+
+
+        if (
+            account.style.display !== "none" &&
+            !account.contains(event.target)
+        ) {
+
+            menu.classList.remove("show");
+
+        }
+
+    }
+);
+
+
+</script>
+
 
 </body>
 

@@ -127,106 +127,66 @@
         <div class="nav-right">
 
 
-            <div class="auth-area">
+           <div class="auth-area">
+
+    <!-- ==========================================
+         LOGIN / SIGN UP
+    =========================================== -->
+
+    <a
+        href="login.html"
+        id="loginButton"
+        class="login-button"
+    >
+        Login / Sign Up
+    </a>
 
 
-                <!-- =================================
-                     LOGIN / SIGN UP
-                ================================== -->
+    <!-- ==========================================
+         LOGGED-IN ACCOUNT
+    =========================================== -->
 
-                <a
-                    href="login.html"
-                    id="loginButton"
-                    class="login-button"
-                >
+    <div
+        id="accountButton"
+        class="account-container"
+        style="display:none;"
+    >
 
-                    Login / Sign Up
-
-                </a>
-
-
-                <!-- =================================
-                     ACCOUNT
-                     Hidden until Firebase login
-                ================================== -->
-
-                <div
-                    id="accountButton"
-                    class="account-container"
-                    style="display: none;"
-                >
+        <button
+            class="account-button"
+            onclick="toggleAccountMenu()"
+            title="Account"
+        >
+            <i class="fa-solid fa-user"></i>
+        </button>
 
 
-                    <!-- ACCOUNT ICON -->
+        <div
+            id="accountMenu"
+            class="account-menu"
+        >
 
-                    <button
-                        type="button"
-                        class="account-button"
-                        onclick="toggleAccountMenu()"
-                        aria-label="Account"
-                    >
-
-                        <i class="fa-solid fa-user"></i>
-
-                    </button>
-
-
-                    <!-- =================================
-                         ACCOUNT DROPDOWN
-                    ================================== -->
-
-                    <div
-                        id="accountMenu"
-                        class="account-menu"
-                    >
-
-
-                        <!-- EMAIL -->
-
-                        <div
-                            id="accountEmail"
-                            class="account-email"
-                        >
-
-                            Loading...
-
-                        </div>
-
-
-                        <!-- DASHBOARD -->
-
-                        <a
-                            href="admin.html"
-                        >
-
-                            <i class="fa-solid fa-gauge"></i>
-
-                            Dashboard
-
-                        </a>
-
-
-                        <!-- LOGOUT -->
-
-                        <button
-                            type="button"
-                            onclick="logoutUser()"
-                        >
-
-                            <i class="fa-solid fa-right-from-bracket"></i>
-
-                            Logout
-
-                        </button>
-
-
-                    </div>
-
-                </div>
-
+            <div
+                id="accountEmail"
+                class="account-email"
+            >
             </div>
 
+
+            <a href="admin.html">
+                Dashboard
+            </a>
+
+
+            <button onclick="logoutUser()">
+                Logout
+            </button>
+
         </div>
+
+    </div>
+
+</div>
 
     </nav>
 
@@ -340,7 +300,12 @@
     ====================================================== -->
 
     <script src="assets/js/app.js"></script>
+    <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
+<!-- Our authentication -->
+<script src="assets/js/auth.js"></script>
 
 </body>
 
