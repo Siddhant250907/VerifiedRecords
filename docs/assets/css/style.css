@@ -1564,3 +1564,214 @@ a.login-button:active {
     color: #ffffff !important;
     transform: scale(0.92) !important;
 }
+
+/* =====================================================
+   FIREBASE ACCOUNT / LOGIN
+===================================================== */
+
+.auth-area {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+/* =====================================================
+   LOGIN / SIGN UP
+===================================================== */
+
+.login-button {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+}
+
+
+/* =====================================================
+   ACCOUNT CONTAINER
+===================================================== */
+
+.account-container {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+/* =====================================================
+   ACCOUNT BUTTON
+===================================================== */
+
+.account-button {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 50%;
+
+    border: 1px solid #20d45a;
+
+    background: #121212;
+
+    color: #20d45a;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition: 0.2s;
+
+}
+
+
+.account-button:hover {
+
+    background: #20d45a;
+
+    color: #080808;
+
+    transform: scale(1.05);
+
+}
+
+
+/* =====================================================
+   ACCOUNT DROPDOWN
+===================================================== */
+
+.account-menu {
+
+    display: none;
+
+    position: absolute;
+
+    right: 0;
+
+    top: 52px;
+
+    width: 230px;
+
+    padding: 12px;
+
+    background: #120607;
+
+    border: 1px solid #401016;
+
+    border-radius: 12px;
+
+    z-index: 99999;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.6);
+
+}
+
+
+/* =====================================================
+   ACCOUNT EMAIL
+===================================================== */
+
+.account-email {
+
+    padding: 10px;
+
+    margin-bottom: 5px;
+
+    color: #aaa;
+
+    font-size: 13px;
+
+    word-break: break-word;
+
+    border-bottom: 1px solid #333;
+
+}
+
+
+/* =====================================================
+   DROPDOWN LINKS
+===================================================== */
+
+.account-menu a {
+
+    display: block;
+
+    padding: 11px;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 7px;
+
+    font-size: 14px;
+
+}
+
+
+.account-menu a:hover {
+
+    background: #241013;
+
+}
+
+
+/* =====================================================
+   LOGOUT BUTTON
+===================================================== */
+
+.account-menu button {
+
+    width: 100%;
+
+    padding: 11px;
+
+    margin-top: 5px;
+
+    background: transparent;
+
+    border: 1px solid #ff4444;
+
+    color: #ff6666;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+
+    text-align: left;
+
+}
+
+
+.account-menu button:hover {
+
+    background: #ff4444;
+
+    color: white;
+
+}

@@ -5,23 +5,46 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>VerifiedRecords</title>
 
-    <!-- Fonts -->
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- =====================================================
+         FONTS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet"
     >
 
-    <!-- Our CSS -->
-    <link rel="stylesheet" href="assets/css/style.css">
+
+    <!-- =====================================================
+         YOUR CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
 
 </head>
 
@@ -30,65 +53,211 @@
 
 
     <!-- =====================================================
-         TOP NAVIGATION BOX
+         TOP NAVIGATION
     ====================================================== -->
 
-        <nav class="top-navbar">
+    <nav class="top-navbar">
 
-            <!-- LEFT SIDE -->
-            <div class="nav-left">
 
-                <a href="index.html" class="nav-icon" data-tooltip="Home">
-                    <i class="fa-solid fa-house"></i>
+        <!-- ============================
+             LEFT SIDE
+        ============================= -->
+
+        <div class="nav-left">
+
+
+            <!-- HOME -->
+
+            <a
+                href="index.html"
+                class="nav-icon"
+                data-tooltip="Home"
+            >
+
+                <i class="fa-solid fa-house"></i>
+
+            </a>
+
+
+            <!-- ADMIN / DASHBOARD -->
+
+            <a
+                href="admin.html"
+                class="nav-icon"
+                data-tooltip="Admin"
+            >
+
+                <i class="fa-solid fa-user-shield"></i>
+
+            </a>
+
+
+            <!-- VERIFY -->
+
+            <a
+                href="verify.html"
+                class="nav-icon"
+                data-tooltip="Verify"
+            >
+
+                <i class="fa-solid fa-certificate"></i>
+
+            </a>
+
+
+            <!-- ABOUT -->
+
+            <a
+                href="about.html"
+                class="nav-icon"
+                data-tooltip="About"
+            >
+
+                <i class="fa-solid fa-circle-info"></i>
+
+            </a>
+
+        </div>
+
+
+        <!-- ============================
+             RIGHT SIDE
+        ============================= -->
+
+        <div class="nav-right">
+
+
+            <div class="auth-area">
+
+
+                <!-- =================================
+                     LOGIN / SIGN UP
+                ================================== -->
+
+                <a
+                    href="login.html"
+                    id="loginButton"
+                    class="login-button"
+                >
+
+                    Login / Sign Up
+
                 </a>
 
-                <a href="admin.html" class="nav-icon" data-tooltip="Admin">
-                    <i class="fa-solid fa-user-shield"></i>
-                </a>
 
-                <a href="verify.html" class="nav-icon" data-tooltip="Verify">
-                    <i class="fa-solid fa-certificate"></i>
-                </a>
+                <!-- =================================
+                     ACCOUNT
+                     Hidden until Firebase login
+                ================================== -->
 
-                <a href="about.html" class="nav-icon" data-tooltip="About">
-                    <i class="fa-solid fa-circle-info"></i>
-                </a>
+                <div
+                    id="accountButton"
+                    class="account-container"
+                    style="display: none;"
+                >
+
+
+                    <!-- ACCOUNT ICON -->
+
+                    <button
+                        type="button"
+                        class="account-button"
+                        onclick="toggleAccountMenu()"
+                        aria-label="Account"
+                    >
+
+                        <i class="fa-solid fa-user"></i>
+
+                    </button>
+
+
+                    <!-- =================================
+                         ACCOUNT DROPDOWN
+                    ================================== -->
+
+                    <div
+                        id="accountMenu"
+                        class="account-menu"
+                    >
+
+
+                        <!-- EMAIL -->
+
+                        <div
+                            id="accountEmail"
+                            class="account-email"
+                        >
+
+                            Loading...
+
+                        </div>
+
+
+                        <!-- DASHBOARD -->
+
+                        <a
+                            href="admin.html"
+                        >
+
+                            <i class="fa-solid fa-gauge"></i>
+
+                            Dashboard
+
+                        </a>
+
+
+                        <!-- LOGOUT -->
+
+                        <button
+                            type="button"
+                            onclick="logoutUser()"
+                        >
+
+                            <i class="fa-solid fa-right-from-bracket"></i>
+
+                            Logout
+
+                        </button>
+
+
+                    </div>
+
+                </div>
 
             </div>
 
+        </div>
 
-            <!-- RIGHT SIDE -->
-            <div class="nav-right">
-
-                <a href="login.html" class="login-btn">
-                    <i class="fa-solid fa-user"></i>
-                    LOGIN / SIGNUP
-                </a>
-
-            </div>
-
-        </nav>
+    </nav>
 
 
 
     <!-- =====================================================
          WEBSITE NAME
-         BELOW THE NAVIGATION BOX
     ====================================================== -->
 
     <header class="site-header">
 
+
         <div class="brand">
 
+
             <div class="brand-name">
+
                 VerifiedRecords
+
             </div>
+
 
             <div class="brand-tagline">
+
                 BLOCKCHAIN • TRUST • VERIFICATION
+
             </div>
 
+
         </div>
+
 
     </header>
 
@@ -100,16 +269,23 @@
 
     <main class="hero">
 
+
         <div class="hero-content">
 
+
             <p class="hero-small">
+
                 BLOCKCHAIN CERTIFICATE VERIFICATION
+
             </p>
 
 
             <h1>
+
                 Records you can
+
                 <span>trust.</span>
+
             </h1>
 
 
@@ -122,13 +298,48 @@
             </p>
 
 
-            <a href="verify.html" class="hero-button">
+            <a
+                href="verify.html"
+                class="hero-button"
+            >
+
                 Verify a Certificate →
+
             </a>
+
 
         </div>
 
+
     </main>
+
+
+
+    <!-- =====================================================
+         FIREBASE
+    ====================================================== -->
+
+    <script
+        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
+    ></script>
+
+    <script
+        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
+    ></script>
+
+
+    <!-- =====================================================
+         AUTH.JS
+    ====================================================== -->
+
+    <script src="assets/js/auth.js"></script>
+
+
+    <!-- =====================================================
+         YOUR EXISTING APP.JS
+    ====================================================== -->
+
+    <script src="assets/js/app.js"></script>
 
 
 </body>
