@@ -8,194 +8,880 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Admin | VerifiedRecords</title>
+    <title>Admin - VerifiedRecords</title>
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <link rel="stylesheet"
-          href="assets/css/style.css">
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: Arial, sans-serif;
+
+            background: #080808;
+
+            color: white;
+
+            min-height: 100vh;
+        }
+
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        header {
+
+            width: 100%;
+
+            padding: 20px 40px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            border-bottom: 1px solid #351015;
+
+            background: #0d0d0d;
+        }
+
+
+        .logo {
+
+            font-size: 25px;
+
+            font-weight: bold;
+
+            color: #ffffff;
+        }
+
+
+        .user-section {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+        }
+
+
+        #userEmail {
+
+            color: #aaa;
+
+            font-size: 14px;
+        }
+
+
+        .logout-btn {
+
+            padding: 10px 18px;
+
+            border-radius: 7px;
+
+            border: 1px solid #ff4444;
+
+            background: transparent;
+
+            color: #ff6666;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+
+        .logout-btn:hover {
+
+            background: #ff4444;
+
+            color: white;
+        }
+
+
+        /* ================================
+           MAIN
+        ================================= */
+
+        main {
+
+            width: 100%;
+
+            display: flex;
+
+            justify-content: center;
+
+            padding: 50px 20px;
+        }
+
+
+        .admin-container {
+
+            width: 100%;
+
+            max-width: 700px;
+
+            background: #120607;
+
+            border: 1px solid #401016;
+
+            border-radius: 15px;
+
+            padding: 40px;
+
+            box-shadow:
+                0 0 30px rgba(255, 0, 50, 0.15);
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-top: 0;
+
+            margin-bottom: 10px;
+        }
+
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #aaa;
+
+            margin-bottom: 35px;
+        }
+
+
+        /* ================================
+           FORM
+        ================================= */
+
+        label {
+
+            display: block;
+
+            margin-bottom: 8px;
+
+            font-weight: bold;
+
+            color: #ddd;
+        }
+
+
+        input {
+
+            width: 100%;
+
+            padding: 14px;
+
+            margin-bottom: 22px;
+
+            border-radius: 8px;
+
+            border: 1px solid #444;
+
+            background: #181818;
+
+            color: white;
+
+            font-size: 15px;
+        }
+
+
+        input:focus {
+
+            outline: none;
+
+            border-color: #20d45a;
+
+            box-shadow:
+                0 0 5px rgba(32, 212, 90, 0.3);
+        }
+
+
+        .issue-btn {
+
+            width: 100%;
+
+            padding: 15px;
+
+            border: none;
+
+            border-radius: 8px;
+
+            background: #20d45a;
+
+            color: black;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+
+        .issue-btn:hover {
+
+            background: #19c750;
+        }
+
+
+        .issue-btn:disabled {
+
+            background: #555;
+
+            color: #aaa;
+
+            cursor: not-allowed;
+        }
+
+
+        #message {
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            min-height: 22px;
+
+            font-weight: bold;
+        }
+
+
+        /* ================================
+           LOADING
+        ================================= */
+
+        #loading {
+
+            position: fixed;
+
+            inset: 0;
+
+            background: #080808;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            z-index: 9999;
+
+            font-size: 20px;
+
+            color: #20d45a;
+        }
+
+
+        /* ================================
+           RESPONSIVE
+        ================================= */
+
+        @media (max-width: 600px) {
+
+            header {
+
+                padding: 15px 20px;
+
+            }
+
+
+            .user-section {
+
+                gap: 8px;
+
+            }
+
+
+            #userEmail {
+
+                display: none;
+
+            }
+
+
+            .admin-container {
+
+                padding: 25px;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-    <!-- NAVBAR -->
 
-    <nav class="top-navbar">
+<!-- =========================================
+     LOADING SCREEN
+========================================= -->
 
-        <div class="nav-left">
+<div id="loading">
 
-            <a href="index.html"
-               class="nav-icon"
-               data-tooltip="Home">
+    Checking login...
 
-                <i class="fa-solid fa-house"></i>
+</div>
 
-            </a>
 
-            <a href="admin.html"
-               class="nav-icon"
-               data-tooltip="Admin">
+<!-- =========================================
+     HEADER
+========================================= -->
 
-                <i class="fa-solid fa-user-shield"></i>
+<header>
 
-            </a>
+    <div class="logo">
 
-            <a href="verify.html"
-               class="nav-icon"
-               data-tooltip="Verify">
+        VerifiedRecords
 
-                <i class="fa-solid fa-certificate"></i>
+    </div>
 
-            </a>
 
-            <a href="about.html"
-               class="nav-icon"
-               data-tooltip="About">
+    <div class="user-section">
 
-                <i class="fa-solid fa-circle-info"></i>
+        <span id="userEmail"></span>
 
-            </a>
+        <button
+            class="logout-btn"
+            onclick="logoutUser()"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================
+     MAIN
+========================================= -->
+
+<main>
+
+    <div class="admin-container">
+
+        <h1>
+            Issue Certificate
+        </h1>
+
+
+        <div class="subtitle">
+
+            Create and record a new academic certificate.
 
         </div>
 
 
-        <div class="nav-right">
+        <!-- Student Name -->
 
-            <a href="login.html"
-               class="login-btn">
+        <label for="studentName">
 
-                <i class="fa-solid fa-user"></i>
+            Student Name
 
-                LOGIN / SIGNUP
+        </label>
 
-            </a>
-
-        </div>
-
-    </nav>
-
-
-    <!-- ADMIN CONTENT -->
-
-    <main class="admin-page">
-
-        <div class="admin-container">
-
-            <div class="admin-heading">
-
-                <p>VERIFIEDRECORDS ADMIN</p>
-
-                <h1>Issue Certificate</h1>
-
-                <span>
-                    Create and record a new academic certificate.
-                </span>
-
-            </div>
+        <input
+            type="text"
+            id="studentName"
+            placeholder="Enter student name"
+        >
 
 
-            <div class="certificate-card">
+        <!-- Roll Number -->
 
-                <form id="certificateForm">
+        <label for="rollNumber">
 
+            Roll Number
 
-                    <div class="input-group">
+        </label>
 
-                        <label for="studentName">
-                            Student Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="studentName"
-                            placeholder="Enter student name"
-                            required>
-
-                    </div>
+        <input
+            type="text"
+            id="rollNumber"
+            placeholder="Enter roll number"
+        >
 
 
-                    <div class="input-group">
+        <!-- Course -->
 
-                        <label for="rollNumber">
-                            Roll Number
-                        </label>
+        <label for="course">
 
-                        <input
-                            type="text"
-                            id="rollNumber"
-                            placeholder="Enter roll number"
-                            required>
+            Course
 
-                    </div>
+        </label>
 
-
-                    <div class="input-group">
-
-                        <label for="course">
-                            Course
-                        </label>
-
-                        <input
-                            type="text"
-                            id="course"
-                            placeholder="Enter course"
-                            required>
-
-                    </div>
+        <input
+            type="text"
+            id="course"
+            placeholder="Enter course"
+        >
 
 
-                    <div class="input-group">
+        <!-- Certificate ID -->
 
-                        <label for="certificateId">
-                            Certificate ID
-                        </label>
+        <label for="certificateId">
 
-                        <input
-                            type="text"
-                            id="certificateId"
-                            placeholder="Enter certificate ID"
-                            required>
+            Certificate ID
 
-                    </div>
+        </label>
 
-
-                    <div class="input-group">
-
-                        <label for="issueDate">
-                            Issue Date
-                        </label>
-
-                        <input
-                            type="date"
-                            id="issueDate"
-                            required>
-
-                    </div>
+        <input
+            type="text"
+            id="certificateId"
+            placeholder="Example: CERT_001"
+        >
 
 
-                    <button
-                        type="submit"
-                        class="issue-btn">
+        <!-- Issue Date -->
 
-                        <i class="fa-solid fa-file-circle-plus"></i>
+        <label for="issueDate">
 
-                        Issue Certificate →
+            Issue Date
 
-                    </button>
+        </label>
 
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </main>
+        <input
+            type="date"
+            id="issueDate"
+        >
 
 
-    <script src="assets/js/admin.js"></script>
+        <!-- Issue Button -->
+
+        <button
+            class="issue-btn"
+            id="issueButton"
+            onclick="issueCertificate()"
+        >
+
+            Issue Certificate →
+
+        </button>
+
+
+        <!-- Message -->
+
+        <div id="message"></div>
+
+    </div>
+
+</main>
+
+
+
+<!-- =========================================
+     FIREBASE
+========================================= -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+
+
+<script>
+
+
+// ==========================================
+// FIREBASE CONFIG
+// ==========================================
+
+const firebaseConfig = {
+
+    apiKey:
+        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
+
+    authDomain:
+        "verifiedrecords.firebaseapp.com",
+
+    projectId:
+        "verifiedrecords",
+
+    storageBucket:
+        "verifiedrecords.firebasestorage.app",
+
+    messagingSenderId:
+        "823611310124",
+
+    appId:
+        "1:823611310124:web:8beb8902077e4a5eebd189"
+
+};
+
+
+// ==========================================
+// INITIALIZE FIREBASE
+// ==========================================
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+
+
+// ==========================================
+// CHECK AUTHENTICATION
+// ==========================================
+
+auth.onAuthStateChanged(function(user) {
+
+
+    if (user) {
+
+        console.log(
+            "User is logged in:",
+            user.email
+        );
+
+
+        // Show email
+
+        document.getElementById(
+            "userEmail"
+        ).innerText = user.email;
+
+
+        // Remove loading screen
+
+        document.getElementById(
+            "loading"
+        ).style.display = "none";
+
+
+    }
+
+    else {
+
+        console.log(
+            "No user logged in."
+        );
+
+
+        // Send user back to login
+
+        window.location.href =
+            "login.html";
+
+    }
+
+});
+
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+function logoutUser() {
+
+
+    auth.signOut()
+
+        .then(function() {
+
+            console.log(
+                "User logged out."
+            );
+
+
+            window.location.href =
+                "login.html";
+
+        })
+
+        .catch(function(error) {
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        });
+
+}
+
+
+
+// ==========================================
+// MESSAGE
+// ==========================================
+
+function showMessage(
+    message,
+    success = false
+) {
+
+
+    const element =
+        document.getElementById(
+            "message"
+        );
+
+
+    element.innerText =
+        message;
+
+
+    element.style.color =
+        success
+            ? "#20d45a"
+            : "#ff6666";
+
+}
+
+
+
+// ==========================================
+// ISSUE CERTIFICATE
+// ==========================================
+
+async function issueCertificate() {
+
+
+    const studentName =
+        document.getElementById(
+            "studentName"
+        ).value.trim();
+
+
+    const rollNumber =
+        document.getElementById(
+            "rollNumber"
+        ).value.trim();
+
+
+    const course =
+        document.getElementById(
+            "course"
+        ).value.trim();
+
+
+    const certificateId =
+        document.getElementById(
+            "certificateId"
+        ).value.trim();
+
+
+    const issueDate =
+        document.getElementById(
+            "issueDate"
+        ).value;
+
+
+
+    // ======================================
+    // VALIDATION
+    // ======================================
+
+    if (
+        !studentName ||
+        !rollNumber ||
+        !course ||
+        !certificateId ||
+        !issueDate
+    ) {
+
+        showMessage(
+            "Please fill all fields."
+        );
+
+        return;
+
+    }
+
+
+
+    // ======================================
+    // DISABLE BUTTON
+    // ======================================
+
+    const button =
+        document.getElementById(
+            "issueButton"
+        );
+
+
+    button.disabled = true;
+
+
+    button.innerText =
+        "Issuing Certificate...";
+
+
+    showMessage(
+        "Connecting to backend...",
+        true
+    );
+
+
+
+    // ======================================
+    // SEND TO BACKEND
+    // ======================================
+
+    try {
+
+
+        const response =
+            await fetch(
+                "/api/certificate",
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        studentName:
+                            studentName,
+
+                        rollNumber:
+                            rollNumber,
+
+                        course:
+                            course,
+
+                        certificateId:
+                            certificateId,
+
+                        issueDate:
+                            issueDate
+
+                    })
+
+                }
+            );
+
+
+
+        // ==================================
+        // READ RESPONSE
+        // ==================================
+
+        const data =
+            await response.json();
+
+
+
+        // ==================================
+        // ERROR
+        // ==================================
+
+        if (!response.ok) {
+
+            showMessage(
+                data.message ||
+                "Failed to issue certificate."
+            );
+
+            return;
+
+        }
+
+
+
+        // ==================================
+        // SUCCESS
+        // ==================================
+
+        showMessage(
+            "Certificate issued successfully!",
+            true
+        );
+
+
+        console.log(
+            "Certificate:",
+            data.certificate
+        );
+
+
+
+        // Clear form
+
+        document.getElementById(
+            "studentName"
+        ).value = "";
+
+
+        document.getElementById(
+            "rollNumber"
+        ).value = "";
+
+
+        document.getElementById(
+            "course"
+        ).value = "";
+
+
+        document.getElementById(
+            "certificateId"
+        ).value = "";
+
+
+        document.getElementById(
+            "issueDate"
+        ).value = "";
+
+
+    }
+
+
+    catch (error) {
+
+
+        console.error(
+            "Backend error:",
+            error
+        );
+
+
+        showMessage(
+            "Cannot connect to backend."
+        );
+
+    }
+
+
+    finally {
+
+
+        button.disabled = false;
+
+
+        button.innerText =
+            "Issue Certificate →";
+
+    }
+
+}
+
+
+</script>
+
 
 </body>
 
