@@ -36,171 +36,6 @@
           href="assets/css/style.css">
 
 
-    <!-- Account menu styling -->
-
-    <style>
-
-        /* ================================
-           ACCOUNT AREA
-        ================================= */
-
-        .auth-area {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-
-        /* LOGIN BUTTON */
-
-        .login-button {
-            text-decoration: none;
-            color: white;
-            border: 1px solid #e33b3b;
-            padding: 14px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 16px;
-            transition: 0.3s ease;
-        }
-
-        .login-button:hover {
-            background: #e33b3b;
-            color: white;
-        }
-
-
-        /* ACCOUNT BUTTON */
-
-        .account-container {
-            position: relative;
-        }
-
-        .account-button {
-            width: 50px;
-            height: 50px;
-
-            border-radius: 50%;
-
-            border: 1px solid #20d45a;
-
-            background: transparent;
-
-            color: #20d45a;
-
-            font-size: 22px;
-
-            cursor: pointer;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-
-        .account-button:hover {
-            background: #20d45a;
-            color: black;
-        }
-
-
-        /* ACCOUNT DROPDOWN */
-
-        .account-menu {
-
-            display: none;
-
-            position: absolute;
-
-            right: 0;
-
-            top: 60px;
-
-            width: 230px;
-
-            background: #120607;
-
-            border: 1px solid #49151b;
-
-            border-radius: 12px;
-
-            padding: 15px;
-
-            box-shadow:
-                0 10px 30px rgba(0,0,0,0.5);
-
-            z-index: 9999;
-        }
-
-
-        .account-menu.show {
-            display: block;
-        }
-
-
-        .account-email {
-
-            color: #20d45a;
-
-            font-size: 14px;
-
-            padding-bottom: 12px;
-
-            margin-bottom: 10px;
-
-            border-bottom:
-                1px solid #3a1518;
-
-            word-break: break-word;
-        }
-
-
-        .account-menu a,
-        .account-menu button {
-
-            display: block;
-
-            width: 100%;
-
-            padding: 10px;
-
-            margin-top: 5px;
-
-            border-radius: 7px;
-
-            border: none;
-
-            background: transparent;
-
-            color: white;
-
-            text-align: left;
-
-            text-decoration: none;
-
-            cursor: pointer;
-
-            font-size: 14px;
-        }
-
-
-        .account-menu a:hover,
-        .account-menu button:hover {
-
-            background: #2a1012;
-
-            color: #20d45a;
-        }
-
-
-        /* VERIFY PAGE */
-
-        .verify-page {
-            margin-top: 40px;
-        }
-
-    </style>
-
 </head>
 
 
@@ -208,225 +43,341 @@
 
 
 <!-- ==================================================
-     NAVBAR
+     TOP NAVIGATION
 ================================================== -->
+<nav class="top-navbar" aria-label="Main Navigation">
 
-<nav class="top-navbar">
-
-
-    <!-- LEFT -->
-
+    <!-- LEFT SIDE -->
     <div class="nav-left">
-
-
-        <!-- HOME -->
-
-        <a href="index.html"
-           class="nav-icon"
-           data-tooltip="Home">
-
-            <i class="fa-solid fa-house"></i>
-
+        <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span class="nav-brand-text">VerifiedRecords</span>
         </a>
 
-
-        <!-- ADMIN -->
-
-        <a href="admin.html"
-           class="nav-icon"
-           data-tooltip="Admin">
-
-            <i class="fa-solid fa-user-shield"></i>
-
-        </a>
-
-
-        <!-- VERIFY -->
-
-        <a href="verify.html"
-           class="nav-icon"
-           data-tooltip="Verify">
-
-            <i class="fa-solid fa-certificate"></i>
-
-        </a>
-
-
-        <!-- ABOUT -->
-
-        <a href="about.html"
-           class="nav-icon"
-           data-tooltip="About">
-
-            <i class="fa-solid fa-circle-info"></i>
-
-        </a>
-
-
-    </div>
-
-
-    <!-- RIGHT -->
-
-    <div class="nav-right">
-
-        <div class="auth-area">
-
-
-            <!-- NOT LOGGED IN -->
-
-            <a href="login.html"
-               id="loginButton"
-               class="login-button">
-
-                LOGIN / SIGNUP
-
+        <div class="nav-links" role="navigation">
+            <!-- HOME -->
+            <a href="index.html" class="nav-item" id="navHome" title="Home">
+                <i class="fa-solid fa-house" aria-hidden="true"></i>
+                <span>Home</span>
             </a>
 
+            <!-- ADMIN / DASHBOARD -->
+            <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
+                <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                <span>Admin</span>
+            </a>
 
-            <!-- LOGGED IN -->
+            <!-- VERIFY (ACTIVE) -->
+            <a href="verify.html" class="nav-item active" id="navVerify" title="Verify" aria-current="page">
+                <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                <span>Verify</span>
+            </a>
 
-            <div id="accountButton"
-                 class="account-container"
-                 style="display:none;">
-
-
-                <button
-                    class="account-button"
-                    onclick="toggleAccountMenu()">
-
-                    <i class="fa-solid fa-user"></i>
-
-                </button>
-
-
-                <!-- DROPDOWN -->
-
-                <div id="accountMenu"
-                     class="account-menu">
-
-
-                    <div id="accountEmail"
-                         class="account-email">
-
-                    </div>
-
-
-                    <a href="admin.html">
-
-                        <i class="fa-solid fa-gauge"></i>
-                        Dashboard
-
-                    </a>
-
-
-                    <button onclick="logoutUser()">
-
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        Logout
-
-                    </button>
-
-
-                </div>
-
-            </div>
-
-
+            <!-- ABOUT -->
+            <a href="about.html" class="nav-item" id="navAbout" title="About">
+                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                <span>About</span>
+            </a>
         </div>
-
     </div>
 
+    <!-- RIGHT SIDE -->
+    <div class="nav-right">
+        <!-- THEME TOGGLE (SUN / MOON) -->
+        <button type="button"
+                id="themeToggle"
+                class="theme-toggle-btn"
+                aria-label="Toggle Light or Dark Theme"
+                title="Toggle Theme">
+            <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
+
+        <!-- AUTHENTICATION AREA -->
+        <div class="auth-area">
+            <!-- LOGGED-OUT: LOGIN / SIGN UP -->
+            <a href="login.html"
+               id="loginButton"
+               class="login-button"
+               aria-label="Login or Sign Up">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                <span>Login / Sign Up</span>
+            </a>
+
+            <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
+            <div id="accountButton"
+                 class="account-container auth-hidden"
+                 style="display:none;">
+                <button type="button"
+                        id="accountMenuTrigger"
+                        class="account-button"
+                        onclick="toggleAccountMenu()"
+                        aria-label="Account Menu"
+                        aria-expanded="false"
+                        title="Account Settings">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                </button>
+
+                <div id="accountMenu"
+                     class="account-menu"
+                     role="menu"
+                     aria-label="Account Options">
+                    <div id="accountEmail"
+                         class="account-email">
+                    </div>
+                    <a href="admin.html" role="menuitem">
+                        <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <button type="button" onclick="logoutUser()" role="menuitem">
+                        <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </nav>
 
 
 
 <!-- ==================================================
-     BRAND
+     VERIFY PAGE CONTENT
 ================================================== -->
+<main class="verify-page-wrapper">
+    <div class="verify-container">
 
-<div class="brand-section">
+        <!-- HEADER / HERO -->
+        <header class="verify-header">
+            <div class="verify-badge">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span>Official Registry Verification Portal</span>
+            </div>
+            <h1 class="page-title">
+                Verify <span>Certificate</span>
+            </h1>
+            <p class="verify-subtitle">
+                Validate the authenticity of academic credentials directly against the university's permanent records repository.
+            </p>
+        </header>
 
-    <div class="brand-name">
+        <!-- VERIFICATION FORM CARD -->
+        <div class="verify-card">
+            <form id="verifyForm" novalidate>
+                <div class="form-group">
+                    <label for="certificateId" class="verify-label">
+                        <span>Certificate Identification Number</span>
+                        <span class="label-hint">e.g. CERT_CSE001</span>
+                    </label>
+                    <div class="verify-input-group" id="verifyInputGroup">
+                        <span class="verify-input-icon" aria-hidden="true">
+                            <i class="fa-solid fa-barcode"></i>
+                        </span>
+                        <input
+                            type="text"
+                            id="certificateId"
+                            name="certificateId"
+                            class="verify-input mono"
+                            placeholder="Enter Certificate ID (e.g. CERT_CSE001)"
+                            autocomplete="off"
+                            spellcheck="false"
+                            required
+                        >
+                        <button
+                            type="button"
+                            id="clearInputBtn"
+                            class="clear-input-btn"
+                            title="Clear Certificate ID"
+                            aria-label="Clear Certificate ID"
+                            style="display: none;"
+                        >
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
 
-        VerifiedRecords
+                <!-- SUBMIT ACTION -->
+                <div class="verify-form-actions">
+                    <button
+                        type="submit"
+                        id="verifyBtn"
+                        class="primary-button verify-submit-btn"
+                    >
+                        <i class="fa-solid fa-magnifying-glass" id="verifyBtnIcon" aria-hidden="true"></i>
+                        <span id="verifyBtnText">Verify Certificate</span>
+                    </button>
+                </div>
+            </form>
 
-    </div>
-
-    <div class="brand-tagline">
-
-        BLOCKCHAIN • TRUST • VERIFICATION
-
-    </div>
-
-</div>
-
-
-
-<!-- ==================================================
-     VERIFY BOX
-================================================== -->
-
-<div class="container verify-page">
-
-
-    <h1 class="page-title">
-
-        Verify <span>Certificate</span>
-
-    </h1>
-
-
-    <p style="
-        color:#bbbbbb;
-        font-size:18px;
-        margin-bottom:30px;
-    ">
-
-        Enter the certificate ID to verify
-        its authenticity.
-
-    </p>
-
-
-    <form id="verifyForm">
-
-
-        <div class="form-group">
-
-
-            <label for="certificateId">
-
-                Certificate ID
-
-            </label>
-
-
-            <input
-                type="text"
-                id="certificateId"
-                placeholder="Example: CERT001"
-                required
-            >
-
-
+            <!-- INLINE ALERT BANNER -->
+            <div id="inlineAlert" class="inline-alert" role="alert" aria-live="polite" style="display: none;">
+                <i class="inline-alert-icon fa-solid fa-circle-exclamation" id="inlineAlertIcon" aria-hidden="true"></i>
+                <div class="inline-alert-content">
+                    <h4 class="inline-alert-title" id="inlineAlertTitle"></h4>
+                    <p class="inline-alert-message" id="inlineAlertMessage"></p>
+                </div>
+            </div>
         </div>
 
+        <!-- ==================================================
+             VERIFIED RESULT SECTION (RENDERED ON PAGE)
+        ================================================== -->
+        <section
+            id="verificationResult"
+            class="verification-result-wrapper"
+            aria-label="Verified Certificate Details"
+            style="display: none;"
+        >
+            <div class="certificate-result-card" id="certificateResultCard">
+                <!-- Status Banner -->
+                <div class="cert-status-banner">
+                    <div class="cert-status-indicator">
+                        <div class="status-pulse-dot" aria-hidden="true"></div>
+                        <span class="cert-status-text">
+                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                            Certificate Verified
+                        </span>
+                    </div>
+                    <span class="cert-status-meta" id="certRecordStatus">Official Registry Record</span>
+                </div>
 
+                <!-- Certificate Body -->
+                <div class="cert-card-body">
+                    <div class="cert-card-header">
+                        <div class="cert-crest-wrap" aria-hidden="true">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div class="cert-header-info">
+                            <span class="cert-institution-label">Institutional Credential Registry</span>
+                            <h2 class="cert-header-title">Certificate of Academic Achievement</h2>
+                        </div>
+                        <div class="cert-stamp">
+                            <i class="fa-solid fa-stamp" aria-hidden="true"></i>
+                            <span>AUTHENTIC RECORD</span>
+                        </div>
+                    </div>
+
+                    <!-- Credential Details Grid -->
+                    <div class="credential-details-grid" id="credentialDetailsGrid">
+                        <!-- Populated dynamically from backend response -->
+                    </div>
+
+                    <!-- Trust Footer -->
+                    <div class="cert-card-footer">
+                        <div class="cert-footer-meta">
+                            <i class="fa-solid fa-shield-check" aria-hidden="true"></i>
+                            <span>Authenticated and verified against permanent university database records. This verifiable record confirms academic completion in good standing.</span>
+                        </div>
+                        <div class="cert-footer-actions">
+                            <button type="button" class="cert-action-btn" id="printCertBtn">
+                                <i class="fa-solid fa-print" aria-hidden="true"></i>
+                                <span>Print Record</span>
+                            </button>
+                            <button type="button" class="cert-action-btn secondary" id="verifyAnotherBtn">
+                                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                                <span>Verify Another</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- ==================================================
+     ACCESSIBLE MODAL: CERTIFICATE NOT VERIFIED
+================================================== -->
+<div
+    id="invalidModal"
+    class="vr-modal-backdrop"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    aria-describedby="modalDesc"
+    style="display: none;"
+>
+    <div class="vr-modal-dialog">
         <button
-            type="submit"
-            class="primary-button">
-
-            Verify Certificate →
-
+            type="button"
+            class="vr-modal-close"
+            id="modalCloseBtn"
+            aria-label="Close modal dialog"
+        >
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
         </button>
 
+        <div class="vr-modal-icon-wrap" aria-hidden="true">
+            <i class="fa-solid fa-file-circle-xmark"></i>
+        </div>
 
-    </form>
+        <div class="vr-modal-content">
+            <h3 class="vr-modal-title" id="modalTitle">Certificate Could Not Be Verified</h3>
+            <p class="vr-modal-desc" id="modalDesc">
+                No matching record was found in the official university records registry. Please check the Certificate ID and try again.
+            </p>
 
+            <div class="vr-modal-tips">
+                <div class="tip-item">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>Verify the exact letters and numbers printed on your certificate.</span>
+                </div>
+                <div class="tip-item">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>Certificate IDs are not case sensitive but must match the registered issuance identifier.</span>
+                </div>
+            </div>
+        </div>
 
+        <div class="vr-modal-actions">
+            <button
+                type="button"
+                class="primary-button modal-confirm-btn"
+                id="modalDismissBtn"
+            >
+                Check ID & Try Again
+            </button>
+        </div>
+    </div>
 </div>
+
+<!-- ==================================================
+     SITE FOOTER
+================================================== -->
+<footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <h3>VerifiedRecords</h3>
+            <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Navigation</h4>
+                <a href="index.html">Home</a>
+                <a href="verify.html">Verify Certificate</a>
+                <a href="admin.html">Admin Dashboard</a>
+                <a href="about.html">About the Project</a>
+            </div>
+            <div class="footer-col">
+                <h4>Account</h4>
+                <a href="login.html">Sign In</a>
+                <a href="signup.html">Create Account</a>
+            </div>
+            <div class="footer-col">
+                <h4>System</h4>
+                <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                    Registry Operational
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
+        <div>Developed by Siddhant Asati</div>
+    </div>
+</footer>
 
 
 
@@ -439,181 +390,10 @@
 
 
 <!-- ==================================================
-     FIREBASE
+     FIREBASE & AUTHENTICATION
 ================================================== -->
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-
-
-<script>
-
-
-/* ==================================================
-   FIREBASE CONFIG
-================================================== */
-
-const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
-
-    authDomain:
-        "verifiedrecords.firebaseapp.com",
-
-    projectId:
-        "verifiedrecords",
-
-    storageBucket:
-        "verifiedrecords.firebasestorage.app",
-
-    messagingSenderId:
-        "823611310124",
-
-    appId:
-        "1:823611310124:web:8beb8902077e4a5eebd189"
-
-};
-
-
-
-/* INITIALIZE FIREBASE */
-
-if (!firebase.apps.length) {
-
-    firebase.initializeApp(firebaseConfig);
-
-}
-
-const auth = firebase.auth();
-
-
-
-/* ==================================================
-   CHECK LOGIN STATUS
-================================================== */
-
-auth.onAuthStateChanged(function(user) {
-
-
-    const loginButton =
-        document.getElementById("loginButton");
-
-
-    const accountButton =
-        document.getElementById("accountButton");
-
-
-    const accountEmail =
-        document.getElementById("accountEmail");
-
-
-    if (user) {
-
-        /* USER IS LOGGED IN */
-
-        loginButton.style.display = "none";
-
-        accountButton.style.display = "block";
-
-
-        accountEmail.innerText =
-            user.email || "Signed in user";
-
-
-    }
-
-    else {
-
-        /* USER IS NOT LOGGED IN */
-
-        loginButton.style.display = "block";
-
-        accountButton.style.display = "none";
-
-    }
-
-});
-
-
-
-/* ==================================================
-   ACCOUNT MENU
-================================================== */
-
-function toggleAccountMenu() {
-
-    const menu =
-        document.getElementById("accountMenu");
-
-    menu.classList.toggle("show");
-
-}
-
-
-
-/* ==================================================
-   LOGOUT
-================================================== */
-
-async function logoutUser() {
-
-    try {
-
-        await auth.signOut();
-
-        window.location.href =
-            "index.html";
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Logout error:",
-            error
-        );
-
-    }
-
-}
-
-
-
-/* ==================================================
-   CLOSE MENU WHEN CLICKING OUTSIDE
-================================================== */
-
-document.addEventListener(
-    "click",
-    function(event) {
-
-        const account =
-            document.getElementById("accountButton");
-
-        const menu =
-            document.getElementById("accountMenu");
-
-
-        if (
-            account.style.display !== "none" &&
-            !account.contains(event.target)
-        ) {
-
-            menu.classList.remove("show");
-
-        }
-
-    }
-);
-
-</script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
 <script src="assets/js/auth.js"></script>
 
 </body>

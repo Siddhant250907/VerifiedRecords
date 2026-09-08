@@ -8,13 +8,13 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>VerifiedRecords</title>
+    <title>VerifiedRecords — Academic Certificate Verification Platform</title>
+
+    <meta name="description"
+          content="VerifiedRecords is a university certificate verification platform designed to validate student credentials, prevent alteration, and streamline record verification for employers.">
 
 
-    <!-- =====================================================
-         FONTS
-    ====================================================== -->
-
+    <!-- Fonts -->
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -32,15 +32,12 @@
     >
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
         rel="stylesheet"
     >
 
 
-    <!-- =====================================================
-         YOUR CSS
-    ====================================================== -->
-
+    <!-- Shared Design System -->
     <link
         rel="stylesheet"
         href="assets/css/style.css"
@@ -53,232 +50,365 @@
 
 
     <!-- =====================================================
-         TOP NAVIGATION
+         1. TOP NAVIGATION
     ====================================================== -->
+    <nav class="top-navbar" aria-label="Main Navigation">
 
-    <nav class="top-navbar">
-
-
-        <!-- ============================
-             LEFT SIDE
-        ============================= -->
-
+        <!-- LEFT SIDE -->
         <div class="nav-left">
-
-
-            <!-- HOME -->
-
-            <a
-                href="index.html"
-                class="nav-icon"
-                data-tooltip="Home"
-            >
-
-                <i class="fa-solid fa-house"></i>
-
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-text">VerifiedRecords</span>
             </a>
 
+            <div class="nav-links" role="navigation">
+                <!-- HOME (ACTIVE) -->
+                <a href="index.html" class="nav-item active" id="navHome" title="Home" aria-current="page">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
 
-            <!-- ADMIN / DASHBOARD -->
+                <!-- ADMIN / DASHBOARD -->
+                <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </a>
 
-            <a
-                href="admin.html"
-                class="nav-icon"
-                data-tooltip="Admin"
-            >
+                <!-- VERIFY -->
+                <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <span>Verify</span>
+                </a>
 
-                <i class="fa-solid fa-user-shield"></i>
-
-            </a>
-
-
-            <!-- VERIFY -->
-
-            <a
-                href="verify.html"
-                class="nav-icon"
-                data-tooltip="Verify"
-            >
-
-                <i class="fa-solid fa-certificate"></i>
-
-            </a>
-
-
-            <!-- ABOUT -->
-
-            <a
-                href="about.html"
-                class="nav-icon"
-                data-tooltip="About"
-            >
-
-                <i class="fa-solid fa-circle-info"></i>
-
-            </a>
-
+                <!-- ABOUT -->
+                <a href="about.html" class="nav-item" id="navAbout" title="About">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+            </div>
         </div>
 
-
-        <!-- ============================
-             RIGHT SIDE
-        ============================= -->
-
+        <!-- RIGHT SIDE -->
         <div class="nav-right">
-
-
-           <div class="auth-area">
-
-    <!-- ==========================================
-         LOGIN / SIGN UP
-    =========================================== -->
-
-    <a
-        href="login.html"
-        id="loginButton"
-        class="login-button"
-    >
-        Login / Sign Up
-    </a>
-
-
-    <!-- ==========================================
-         LOGGED-IN ACCOUNT
-    =========================================== -->
-
-    <div
-        id="accountButton"
-        class="account-container"
-        style="display:none;"
-    >
-
-        <button
-            class="account-button"
-            onclick="toggleAccountMenu()"
-            title="Account"
-        >
-            <i class="fa-solid fa-user"></i>
-        </button>
-
-
-        <div
-            id="accountMenu"
-            class="account-menu"
-        >
-
-            <div
-                id="accountEmail"
-                class="account-email"
-            >
-            </div>
-
-
-            <a href="admin.html">
-                Dashboard
-            </a>
-
-
-            <button onclick="logoutUser()">
-                Logout
+            <!-- THEME TOGGLE (SUN / MOON) -->
+            <button type="button"
+                    id="themeToggle"
+                    class="theme-toggle-btn"
+                    aria-label="Toggle Light or Dark Theme"
+                    title="Toggle Theme">
+                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
             </button>
 
+            <!-- AUTHENTICATION AREA -->
+            <div class="auth-area">
+                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
+                <a href="login.html"
+                   id="loginButton"
+                   class="login-button"
+                   aria-label="Login or Sign Up">
+                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                    <span>Login / Sign Up</span>
+                </a>
+
+                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
+                <div id="accountButton"
+                     class="account-container auth-hidden"
+                     style="display:none;">
+                    <button type="button"
+                            id="accountMenuTrigger"
+                            class="account-button"
+                            onclick="toggleAccountMenu()"
+                            aria-label="Account Menu"
+                            aria-expanded="false"
+                            title="Account Settings">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="accountMenu"
+                         class="account-menu"
+                         role="menu"
+                         aria-label="Account Options">
+                        <div id="accountEmail"
+                             class="account-email">
+                        </div>
+                        <a href="admin.html" role="menuitem">
+                            <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <button type="button" onclick="logoutUser()" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-    </div>
-
-</div>
 
     </nav>
 
 
 
     <!-- =====================================================
-         WEBSITE NAME
+         2. MAIN INTRODUCTION & HERO SECTION
     ====================================================== -->
-
-    <header class="site-header">
-
-
-        <div class="brand">
-
-
-            <div class="brand-name">
-
-                VerifiedRecords
-
-            </div>
-
-
-            <div class="brand-tagline">
-
-                BLOCKCHAIN • TRUST • VERIFICATION
-
-            </div>
-
-
-        </div>
-
-
-    </header>
-
-
-
-    <!-- =====================================================
-         MAIN HOME SECTION
-    ====================================================== -->
-
     <main class="hero">
-
 
         <div class="hero-content">
 
-
-            <p class="hero-small">
-
-                BLOCKCHAIN CERTIFICATE VERIFICATION
-
-            </p>
-
+            <div class="portal-badge">
+                <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                Academic Credential Registry
+            </div>
 
             <h1>
-
-                Records you can
-
-                <span>trust.</span>
-
+                Academic records you can <span>verify with confidence.</span>
             </h1>
 
-
             <p class="hero-description">
-
-                VerifiedRecords is a blockchain-powered certificate
-                verification platform designed to make academic records
-                secure, transparent and easy to verify.
-
+                VerifiedRecords is a university certificate verification platform designed to make academic credentials secure, transparent, and straightforward to confirm. The system provides an authoritative reference for issued student certificates, helping prevent document alteration and simplifying verification for employers and institutions.
             </p>
 
+            <div class="home-actions">
+                <a href="verify.html" class="primary-button hero-button">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    Verify a Certificate
+                </a>
 
-            <a
-                href="verify.html"
-                class="hero-button"
-            >
+                <a href="admin.html" class="btn-outline">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    Registrar Portal
+                </a>
+            </div>
 
-                Verify a Certificate →
+            <!-- =============================================
+                 3. CLEAR CERTIFICATE VERIFICATION ACTION
+            ============================================== -->
+            <div class="quick-verify-card">
+                <div class="quick-verify-header">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <div>
+                        <h3>Quick Credential Lookup</h3>
+                        <p>Enter any registered Certificate ID to inspect student name, degree program, and issuance date.</p>
+                    </div>
+                </div>
 
-            </a>
+                <form action="verify.html" method="GET" class="quick-verify-form">
+                    <input
+                        type="text"
+                        name="id"
+                        id="quickCertInput"
+                        placeholder="Enter Certificate ID (e.g. CERT227, CERT_CSE001)"
+                        required
+                        autocomplete="off"
+                        aria-label="Certificate ID"
+                    >
+                    <button type="submit" class="primary-button">
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        Verify Now
+                    </button>
+                </form>
 
+                <div class="quick-verify-hint">
+                    <span>Try sample issued IDs:</span>
+                    <code onclick="setQuickId('CERT_CSE001')" title="Click to fill CERT_CSE001">CERT_CSE001</code>
+                    <code onclick="setQuickId('CERT_CSE002')" title="Click to fill CERT_CSE002">CERT_CSE002</code>
+                    <code onclick="setQuickId('CERT_567890')" title="Click to fill CERT_567890">CERT_567890</code>
+                </div>
+            </div>
 
         </div>
-
 
     </main>
 
 
 
     <!-- =====================================================
-         FIREBASE
+         4. HOW THE SERVICE WORKS
     ====================================================== -->
+    <section class="home-section" aria-labelledby="workflowHeading">
 
+        <div class="container">
+
+            <div class="home-section-header">
+                <div class="section-tag">Verification Workflow</div>
+                <h2 id="workflowHeading">How the Service Works</h2>
+                <p>A structured three-step process connects university department administrators with public verification.</p>
+            </div>
+
+            <div class="steps-grid">
+
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <h3>Certificate Issuance</h3>
+                    <p>An authorized administrator enters the student's full name, roll number, course of study, unique Certificate ID, and issue date through the secured dashboard.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <h3>Authoritative Record Storage</h3>
+                    <p>The record is registered in the database with an exact issuance timestamp, creating a persistent reference point that protects against unauthorized changes.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <h3>Instant Public Verification</h3>
+                    <p>Anyone in possession of the Certificate ID can perform a lookup to view the verified academic credential details and confirm authenticity in seconds.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         5. WHY VERIFICATION MATTERS
+    ====================================================== -->
+    <section class="home-section" aria-labelledby="whyMattersHeading">
+
+        <div class="container">
+
+            <div class="home-section-header">
+                <div class="section-tag">Academic Integrity</div>
+                <h2 id="whyMattersHeading">Why Digital Verification Matters</h2>
+                <p>Traditional paper certificates present practical challenges for universities, graduating students, and evaluating employers.</p>
+            </div>
+
+            <div class="about-grid">
+
+                <div class="about-card">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                    <h2>Tamper Resistance</h2>
+                    <p>Paper diplomas and basic PDF scans can be modified without obvious physical signs. Having a verified digital record ensures that academic achievements remain exactly as granted by the institution.</p>
+                </div>
+
+                <div class="about-card">
+                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
+                    <h2>Immediate Turnaround</h2>
+                    <p>Employers verifying academic backgrounds typically wait days or weeks for manual registrar office responses. Online validation delivers immediate confirmation of credentials.</p>
+                </div>
+
+                <div class="about-card">
+                    <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+                    <h2>Reliable Credential Sharing</h2>
+                    <p>Graduates can share their unique certificate identifier with hiring teams and postgraduate institutions, knowing their qualifications can be confirmed at any time.</p>
+                </div>
+
+                <div class="about-card">
+                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                    <h2>Institutional Trust</h2>
+                    <p>Academic institutions protect the value of the degrees they award by ensuring that only genuine recipients can claim completion of their academic programs.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         6. ROLE-BASED PORTAL PATHWAYS
+    ====================================================== -->
+    <section class="home-section" aria-labelledby="pathwaysHeading">
+
+        <div class="container">
+
+            <div class="home-section-header">
+                <div class="section-tag">Platform Access</div>
+                <h2 id="pathwaysHeading">Choose Your Service Pathway</h2>
+                <p>Access the appropriate area depending on whether you need to confirm a credential or manage student records.</p>
+            </div>
+
+            <div class="roles-grid">
+
+                <div class="role-card">
+                    <div>
+                        <div class="role-card-header">
+                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                            <h3>For Employers & Public Verifiers</h3>
+                        </div>
+                        <p>Quickly confirm the authenticity of academic certificates. No account registration or login is required to perform verification queries.</p>
+                    </div>
+                    <a href="verify.html" class="primary-button" style="align-self: flex-start;">
+                        Open Verification Tool →
+                    </a>
+                </div>
+
+                <div class="role-card">
+                    <div>
+                        <div class="role-card-header">
+                            <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                            <h3>For Academic Administrators</h3>
+                        </div>
+                        <p>Authorized department staff can sign in to issue new student certificates, assign identifiers, and maintain university record accuracy.</p>
+                    </div>
+                    <a href="admin.html" class="btn-outline" style="align-self: flex-start;">
+                        Access Admin Dashboard →
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         7. ACADEMIC FOOTER
+    ====================================================== -->
+    <footer class="site-footer">
+
+        <div class="footer-content">
+
+            <div class="footer-brand">
+                <h3>VerifiedRecords</h3>
+                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+            </div>
+
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <a href="index.html">Home</a>
+                    <a href="verify.html">Verify Certificate</a>
+                    <a href="admin.html">Admin Dashboard</a>
+                    <a href="about.html">About the Project</a>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <a href="login.html">Sign In</a>
+                    <a href="signup.html">Create Account</a>
+                </div>
+
+                <div class="footer-col">
+                    <h4>System</h4>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                        Registry Operational
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
+            <div>Developed by Siddhant Asati</div>
+        </div>
+
+    </footer>
+
+
+
+    <!-- =====================================================
+         FIREBASE SDKs
+    ====================================================== -->
     <script
         src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
     ></script>
@@ -289,23 +419,26 @@
 
 
     <!-- =====================================================
-         AUTH.JS
+         SHARED AUTH CONTROLLER (Handles session & navbar)
     ====================================================== -->
-
     <script src="assets/js/auth.js"></script>
 
 
     <!-- =====================================================
-         YOUR EXISTING APP.JS
+         PAGE SCRIPT
     ====================================================== -->
+    <script>
+        function setQuickId(certId) {
+            const input = document.getElementById("quickCertInput");
+            if (input) {
+                input.value = certId;
+                input.focus();
+            }
+        }
+    </script>
 
+    <!-- APP UTILITIES -->
     <script src="assets/js/app.js"></script>
-    <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<!-- Our authentication -->
-<script src="assets/js/auth.js"></script>
 
 </body>
 

@@ -8,320 +8,46 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Admin - VerifiedRecords</title>
+    <title>Admin Dashboard - VerifiedRecords</title>
 
+    <meta name="description"
+          content="VerifiedRecords Admin Dashboard — Issue and manage blockchain-verified academic certificates.">
 
-    <style>
 
-        * {
-            box-sizing: border-box;
-        }
+    <!-- =====================================================
+         FONTS
+    ====================================================== -->
 
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
 
-        body {
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
 
-            margin: 0;
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
-            font-family: Arial, sans-serif;
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
 
-            background: #080808;
 
-            color: white;
+    <!-- =====================================================
+         SHARED CSS DESIGN SYSTEM
+    ====================================================== -->
 
-            min-height: 100vh;
-        }
-
-
-        /* ================================
-           HEADER
-        ================================= */
-
-        header {
-
-            width: 100%;
-
-            padding: 20px 40px;
-
-            display: flex;
-
-            justify-content: space-between;
-
-            align-items: center;
-
-            border-bottom: 1px solid #351015;
-
-            background: #0d0d0d;
-        }
-
-
-        .logo {
-
-            font-size: 25px;
-
-            font-weight: bold;
-
-            color: #ffffff;
-        }
-
-
-        .user-section {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 15px;
-        }
-
-
-        #userEmail {
-
-            color: #aaa;
-
-            font-size: 14px;
-        }
-
-
-        .logout-btn {
-
-            padding: 10px 18px;
-
-            border-radius: 7px;
-
-            border: 1px solid #ff4444;
-
-            background: transparent;
-
-            color: #ff6666;
-
-            cursor: pointer;
-
-            font-weight: bold;
-        }
-
-
-        .logout-btn:hover {
-
-            background: #ff4444;
-
-            color: white;
-        }
-
-
-        /* ================================
-           MAIN
-        ================================= */
-
-        main {
-
-            width: 100%;
-
-            display: flex;
-
-            justify-content: center;
-
-            padding: 50px 20px;
-        }
-
-
-        .admin-container {
-
-            width: 100%;
-
-            max-width: 700px;
-
-            background: #120607;
-
-            border: 1px solid #401016;
-
-            border-radius: 15px;
-
-            padding: 40px;
-
-            box-shadow:
-                0 0 30px rgba(255, 0, 50, 0.15);
-        }
-
-
-        h1 {
-
-            text-align: center;
-
-            margin-top: 0;
-
-            margin-bottom: 10px;
-        }
-
-
-        .subtitle {
-
-            text-align: center;
-
-            color: #aaa;
-
-            margin-bottom: 35px;
-        }
-
-
-        /* ================================
-           FORM
-        ================================= */
-
-        label {
-
-            display: block;
-
-            margin-bottom: 8px;
-
-            font-weight: bold;
-
-            color: #ddd;
-        }
-
-
-        input {
-
-            width: 100%;
-
-            padding: 14px;
-
-            margin-bottom: 22px;
-
-            border-radius: 8px;
-
-            border: 1px solid #444;
-
-            background: #181818;
-
-            color: white;
-
-            font-size: 15px;
-        }
-
-
-        input:focus {
-
-            outline: none;
-
-            border-color: #20d45a;
-
-            box-shadow:
-                0 0 5px rgba(32, 212, 90, 0.3);
-        }
-
-
-        .issue-btn {
-
-            width: 100%;
-
-            padding: 15px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            background: #20d45a;
-
-            color: black;
-
-            font-size: 17px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-        }
-
-
-        .issue-btn:hover {
-
-            background: #19c750;
-        }
-
-
-        .issue-btn:disabled {
-
-            background: #555;
-
-            color: #aaa;
-
-            cursor: not-allowed;
-        }
-
-
-        #message {
-
-            text-align: center;
-
-            margin-top: 20px;
-
-            min-height: 22px;
-
-            font-weight: bold;
-        }
-
-
-        /* ================================
-           LOADING
-        ================================= */
-
-        #loading {
-
-            position: fixed;
-
-            inset: 0;
-
-            background: #080808;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            z-index: 9999;
-
-            font-size: 20px;
-
-            color: #20d45a;
-        }
-
-
-        /* ================================
-           RESPONSIVE
-        ================================= */
-
-        @media (max-width: 600px) {
-
-            header {
-
-                padding: 15px 20px;
-
-            }
-
-
-            .user-section {
-
-                gap: 8px;
-
-            }
-
-
-            #userEmail {
-
-                display: none;
-
-            }
-
-
-            .admin-container {
-
-                padding: 25px;
-
-            }
-
-        }
-
-    </style>
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
 
 </head>
 
@@ -329,564 +55,454 @@
 <body>
 
 
-<!-- =========================================
-     LOADING SCREEN
-========================================= -->
+    <!-- =====================================================
+         LOADING SCREEN (shows while checking auth)
+    ====================================================== -->
 
-<div id="loading">
-
-    Checking login...
-
-</div>
-
-
-<!-- =========================================
-     HEADER
-========================================= -->
-
-<header>
-
-    <div class="logo">
-
-        VerifiedRecords
-
+    <div id="loading">
+        <i class="fa-solid fa-shield-halved" style="margin-right: 10px;"></i>
+        Checking login...
     </div>
 
 
-    <div class="user-section">
+    <!-- =====================================================
+         TOP NAVIGATION (SHARED)
+    ====================================================== -->
 
-        <span id="userEmail"></span>
+    <nav class="top-navbar" aria-label="Main Navigation">
 
-        <button
-            class="logout-btn"
-            onclick="logoutUser()"
-        >
-            Logout
-        </button>
+        <!-- ============================
+             LEFT SIDE
+        ============================= -->
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-text">VerifiedRecords</span>
+            </a>
 
-    </div>
+            <div class="nav-links" role="navigation">
+                <!-- HOME -->
+                <a href="index.html" class="nav-item" id="navHome" title="Home">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
 
-</header>
+                <!-- ADMIN / DASHBOARD (ACTIVE) -->
+                <a href="admin.html" class="nav-item active" id="navAdmin" title="Admin" aria-current="page">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </a>
+
+                <!-- VERIFY -->
+                <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <span>Verify</span>
+                </a>
+
+                <!-- ABOUT -->
+                <a href="about.html" class="nav-item" id="navAbout" title="About">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================
+             RIGHT SIDE
+        ============================= -->
+        <div class="nav-right">
+            <!-- THEME TOGGLE (SUN / MOON) -->
+            <button type="button"
+                    id="themeToggle"
+                    class="theme-toggle-btn"
+                    aria-label="Toggle Light or Dark Theme"
+                    title="Toggle Theme">
+                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
+            </button>
+
+            <!-- AUTHENTICATION AREA -->
+            <div class="auth-area">
+                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
+                <a href="login.html"
+                   id="loginButton"
+                   class="login-button"
+                   aria-label="Login or Sign Up">
+                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                    <span>Login / Sign Up</span>
+                </a>
+
+                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
+                <div id="accountButton"
+                     class="account-container auth-hidden"
+                     style="display:none;">
+                    <button type="button"
+                            id="accountMenuTrigger"
+                            class="account-button"
+                            onclick="toggleAccountMenu()"
+                            aria-label="Account Menu"
+                            aria-expanded="false"
+                            title="Account Settings">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="accountMenu"
+                         class="account-menu"
+                         role="menu"
+                         aria-label="Account Options">
+                        <div id="accountEmail"
+                             class="account-email">
+                        </div>
+                        <a href="admin.html" role="menuitem">
+                            <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <button type="button" onclick="logoutUser()" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </nav>
 
 
-<!-- =========================================
-     MAIN
-========================================= -->
 
-<main>
+    <!-- =====================================================
+         ADMIN DASHBOARD CONTENT
+    ====================================================== -->
 
-    <div class="admin-container">
+    <main class="admin-page-wrapper">
 
-        <h1>
-            Issue Certificate
-        </h1>
+        <div class="admin-container">
+
+            <!-- ADMINISTRATIVE HEADER -->
+            <header class="admin-header">
+                <div class="admin-badge">
+                    <i class="fa-solid fa-stamp" aria-hidden="true"></i>
+                    <span>Office of the Registrar • Certificate Issuance Terminal</span>
+                </div>
+
+                <h1 class="page-title">
+                    Issue Academic <span>Certificate</span>
+                </h1>
+
+                <p class="admin-subtitle">
+                    Record and register an official academic degree or diploma in the university's permanent repository.
+                </p>
+
+                <!-- Officer email display (Preserved for auth.js) -->
+                <div class="admin-user-badge" id="adminUserBadge" style="display:none;">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Authorized Registrar:</span>
+                    <span id="userEmail"></span>
+                </div>
+            </header>
 
 
-        <div class="subtitle">
+            <!-- ==========================================
+                 ADMINISTRATIVE CERTIFICATE FORM
+            =========================================== -->
 
-            Create and record a new academic certificate.
+            <div class="admin-form-card">
+
+                <form id="certificateForm" novalidate>
+
+                    <!-- SECTION 1: CANDIDATE INFORMATION -->
+                    <div class="admin-form-section">
+                        <div class="admin-section-header">
+                            <i class="fa-solid fa-user-graduate admin-section-icon" aria-hidden="true"></i>
+                            <h2 class="admin-section-title">Candidate Details</h2>
+                        </div>
+
+                        <div class="admin-form-grid">
+                            <!-- Student Name -->
+                            <div class="admin-form-group full-width">
+                                <label for="studentName" class="admin-label">
+                                    <span>Student Full Name<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">As officially registered on university records</span>
+                                </label>
+                                <div class="admin-input-group" id="groupStudentName">
+                                    <span class="admin-input-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-user"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="studentName"
+                                        name="studentName"
+                                        class="admin-input"
+                                        placeholder="e.g. Eleanor Vance"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Roll Number -->
+                            <div class="admin-form-group full-width">
+                                <label for="rollNumber" class="admin-label">
+                                    <span>Roll / Enrollment Number<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">Institutional student identification number</span>
+                                </label>
+                                <div class="admin-input-group" id="groupRollNumber">
+                                    <span class="admin-input-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="rollNumber"
+                                        name="rollNumber"
+                                        class="admin-input mono"
+                                        placeholder="e.g. 25BCE1633"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- SECTION 2: ACADEMIC CREDENTIAL DETAILS -->
+                    <div class="admin-form-section">
+                        <div class="admin-section-header">
+                            <i class="fa-solid fa-graduation-cap admin-section-icon" aria-hidden="true"></i>
+                            <h2 class="admin-section-title">Academic Credential & Registry Record</h2>
+                        </div>
+
+                        <div class="admin-form-grid">
+                            <!-- Course / Degree Program -->
+                            <div class="admin-form-group full-width">
+                                <label for="course" class="admin-label">
+                                    <span>Degree Program / Academic Discipline<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">e.g. Computer Science & Engineering</span>
+                                </label>
+                                <div class="admin-input-group" id="groupCourse">
+                                    <span class="admin-input-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-book-open"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="course"
+                                        name="course"
+                                        class="admin-input"
+                                        placeholder="e.g. Computer Science and Engineering"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Certificate ID -->
+                            <div class="admin-form-group">
+                                <label for="certificateId" class="admin-label">
+                                    <span>Certificate Identifier<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">Must be unique</span>
+                                </label>
+                                <div class="admin-input-group" id="groupCertificateId">
+                                    <span class="admin-input-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-barcode"></i>
+                                    </span>
+                                    <input
+                                        type="text"
+                                        id="certificateId"
+                                        name="certificateId"
+                                        class="admin-input mono"
+                                        placeholder="e.g. CERT_CSE005"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Issue Date -->
+                            <div class="admin-form-group">
+                                <label for="issueDate" class="admin-label">
+                                    <span>Conferral Date<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">Official date of issue</span>
+                                </label>
+                                <div class="admin-input-group" id="groupIssueDate">
+                                    <span class="admin-input-icon" aria-hidden="true">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </span>
+                                    <input
+                                        type="date"
+                                        id="issueDate"
+                                        name="issueDate"
+                                        class="admin-input"
+                                        required
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- ADMINISTRATIVE ATTESTATION -->
+                    <div class="admin-attestation">
+                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                        <span>
+                            <strong>Official Notice:</strong> Certificates registered here are entered directly into the institutional MongoDB repository. Verify all recipient details and conferral dates against departmental records before issuance.
+                        </span>
+                    </div>
+
+
+                    <!-- FORM ACTIONS -->
+                    <div class="admin-form-actions">
+                        <button
+                            type="button"
+                            class="admin-reset-btn"
+                            id="resetButton"
+                        >
+                            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                            Reset Fields
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="primary-button admin-submit-btn"
+                            id="issueButton"
+                        >
+                            <i class="fa-solid fa-stamp" id="issueBtnIcon" aria-hidden="true"></i>
+                            <span id="issueBtnText">Issue & Register Certificate</span>
+                        </button>
+                    </div>
+
+                </form>
+
+
+                <!-- NOTIFICATION MESSAGE BANNER (Preserved #message ID) -->
+                <div id="message" class="admin-message" role="alert" aria-live="polite"></div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 ISSUANCE SUCCESS CONFIRMATION CARD
+            =========================================== -->
+            <div id="issuanceSuccessCard" class="issuance-success-card" role="region" aria-label="Issuance Confirmation">
+                <div class="issuance-success-banner">
+                    <div class="issuance-success-title">
+                        <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                        <span>Certificate Successfully Issued & Registered</span>
+                    </div>
+                    <span class="issuance-success-meta">Official University Record</span>
+                </div>
+
+                <div class="issuance-success-body">
+                    <div class="issuance-summary-grid">
+                        <div class="issuance-summary-item featured">
+                            <span class="issuance-summary-label">Candidate Name</span>
+                            <span class="issuance-summary-val prominent" id="confirmStudentName">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item">
+                            <span class="issuance-summary-label">Roll / Enrollment ID</span>
+                            <span class="issuance-summary-val mono" id="confirmRollNumber">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item">
+                            <span class="issuance-summary-label">Certificate ID</span>
+                            <span class="issuance-summary-val mono" id="confirmCertId">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item">
+                            <span class="issuance-summary-label">Degree Program</span>
+                            <span class="issuance-summary-val" id="confirmCourse">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item">
+                            <span class="issuance-summary-label">Conferral Date</span>
+                            <span class="issuance-summary-val" id="confirmIssueDate">—</span>
+                        </div>
+                    </div>
+
+                    <div class="issuance-success-actions">
+                        <a href="#" id="verifyLink" class="issuance-portal-link" target="_blank">
+                            <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                            <span>View in Public Verification Portal</span>
+                        </a>
+
+                        <button type="button" id="issueAnotherButton" class="issuance-another-btn">
+                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                            <span>Issue Another Certificate</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
-
-        <!-- Student Name -->
-
-        <label for="studentName">
-
-            Student Name
-
-        </label>
-
-        <input
-            type="text"
-            id="studentName"
-            placeholder="Enter student name"
-        >
-
-
-        <!-- Roll Number -->
-
-        <label for="rollNumber">
-
-            Roll Number
-
-        </label>
-
-        <input
-            type="text"
-            id="rollNumber"
-            placeholder="Enter roll number"
-        >
-
-
-        <!-- Course -->
-
-        <label for="course">
-
-            Course
-
-        </label>
-
-        <input
-            type="text"
-            id="course"
-            placeholder="Enter course"
-        >
-
-
-        <!-- Certificate ID -->
-
-        <label for="certificateId">
-
-            Certificate ID
-
-        </label>
-
-        <input
-            type="text"
-            id="certificateId"
-            placeholder="Example: CERT_001"
-        >
-
-
-        <!-- Issue Date -->
-
-        <label for="issueDate">
-
-            Issue Date
-
-        </label>
-
-        <input
-            type="date"
-            id="issueDate"
-        >
-
-
-        <!-- Issue Button -->
-
-        <button
-            class="issue-btn"
-            id="issueButton"
-            onclick="issueCertificate()"
-        >
-
-            Issue Certificate →
-
-        </button>
-
-
-        <!-- Message -->
-
-        <div id="message"></div>
-
-    </div>
-
-</main>
-
-
-
-<!-- =========================================
-     FIREBASE
-========================================= -->
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-
-
-<script>
-
-
-// ==========================================
-// FIREBASE CONFIG
-// ==========================================
-
-const firebaseConfig = {
-
-    apiKey:
-        "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
-
-    authDomain:
-        "verifiedrecords.firebaseapp.com",
-
-    projectId:
-        "verifiedrecords",
-
-    storageBucket:
-        "verifiedrecords.firebasestorage.app",
-
-    messagingSenderId:
-        "823611310124",
-
-    appId:
-        "1:823611310124:web:8beb8902077e4a5eebd189"
-
-};
-
-
-// ==========================================
-// INITIALIZE FIREBASE
-// ==========================================
-
-firebase.initializeApp(firebaseConfig);
-
-const auth = firebase.auth();
-
-
-
-// ==========================================
-// CHECK AUTHENTICATION
-// ==========================================
-
-auth.onAuthStateChanged(function(user) {
-
-
-    if (user) {
-
-        console.log(
-            "User is logged in:",
-            user.email
-        );
-
-
-        // Show email
-
-        document.getElementById(
-            "userEmail"
-        ).innerText = user.email;
-
-
-        // Remove loading screen
-
-        document.getElementById(
-            "loading"
-        ).style.display = "none";
-
-
-    }
-
-    else {
-
-        console.log(
-            "No user logged in."
-        );
-
-
-        // Send user back to login
-
-        window.location.href =
-            "login.html";
-
-    }
-
-});
-
-
-
-// ==========================================
-// LOGOUT
-// ==========================================
-
-function logoutUser() {
-
-
-    auth.signOut()
-
-        .then(function() {
-
-            console.log(
-                "User logged out."
-            );
-
-
-            window.location.href =
-                "login.html";
-
-        })
-
-        .catch(function(error) {
-
-            console.error(
-                "Logout error:",
-                error
-            );
-
-        });
-
-}
-
-
-
-// ==========================================
-// MESSAGE
-// ==========================================
-
-function showMessage(
-    message,
-    success = false
-) {
-
-
-    const element =
-        document.getElementById(
-            "message"
-        );
-
-
-    element.innerText =
-        message;
-
-
-    element.style.color =
-        success
-            ? "#20d45a"
-            : "#ff6666";
-
-}
-
-
-
-// ==========================================
-// ISSUE CERTIFICATE
-// ==========================================
-
-async function issueCertificate() {
-
-
-    const studentName =
-        document.getElementById(
-            "studentName"
-        ).value.trim();
-
-
-    const rollNumber =
-        document.getElementById(
-            "rollNumber"
-        ).value.trim();
-
-
-    const course =
-        document.getElementById(
-            "course"
-        ).value.trim();
-
-
-    const certificateId =
-        document.getElementById(
-            "certificateId"
-        ).value.trim();
-
-
-    const issueDate =
-        document.getElementById(
-            "issueDate"
-        ).value;
-
-
-
-    // ======================================
-    // VALIDATION
-    // ======================================
-
-    if (
-        !studentName ||
-        !rollNumber ||
-        !course ||
-        !certificateId ||
-        !issueDate
-    ) {
-
-        showMessage(
-            "Please fill all fields."
-        );
-
-        return;
-
-    }
-
-
-
-    // ======================================
-    // DISABLE BUTTON
-    // ======================================
-
-    const button =
-        document.getElementById(
-            "issueButton"
-        );
-
-
-    button.disabled = true;
-
-
-    button.innerText =
-        "Issuing Certificate...";
-
-
-    showMessage(
-        "Connecting to backend...",
-        true
-    );
-
-
-
-    // ======================================
-    // SEND TO BACKEND
-    // ======================================
-
-    try {
-
-
-        const response =
-            await fetch(
-                "/api/certificate",
-                {
-
-                    method: "POST",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body: JSON.stringify({
-
-                        studentName:
-                            studentName,
-
-                        rollNumber:
-                            rollNumber,
-
-                        course:
-                            course,
-
-                        certificateId:
-                            certificateId,
-
-                        issueDate:
-                            issueDate
-
-                    })
-
-                }
-            );
-
-
-
-        // ==================================
-        // READ RESPONSE
-        // ==================================
-
-        const data =
-            await response.json();
-
-
-
-        // ==================================
-        // ERROR
-        // ==================================
-
-        if (!response.ok) {
-
-            showMessage(
-                data.message ||
-                "Failed to issue certificate."
-            );
-
-            return;
-
-        }
-
-
-
-        // ==================================
-        // SUCCESS
-        // ==================================
-
-        showMessage(
-            "Certificate issued successfully!",
-            true
-        );
-
-
-        console.log(
-            "Certificate:",
-            data.certificate
-        );
-
-
-
-        // Clear form
-
-        document.getElementById(
-            "studentName"
-        ).value = "";
-
-
-        document.getElementById(
-            "rollNumber"
-        ).value = "";
-
-
-        document.getElementById(
-            "course"
-        ).value = "";
-
-
-        document.getElementById(
-            "certificateId"
-        ).value = "";
-
-
-        document.getElementById(
-            "issueDate"
-        ).value = "";
-
-
-    }
-
-
-    catch (error) {
-
-
-        console.error(
-            "Backend error:",
-            error
-        );
-
-
-        showMessage(
-            "Cannot connect to backend."
-        );
-
-    }
-
-
-    finally {
-
-
-        button.disabled = false;
-
-
-        button.innerText =
-            "Issue Certificate →";
-
-    }
-
-}
-
-
-</script>
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-
-<!-- Our authentication -->
-<script src="assets/js/auth.js"></script>
+    </main>
+
+
+    <!-- =====================================================
+         ACADEMIC FOOTER
+    ====================================================== -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>VerifiedRecords</h3>
+                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <a href="index.html">Home</a>
+                    <a href="verify.html">Verify Certificate</a>
+                    <a href="admin.html">Admin Dashboard</a>
+                    <a href="about.html">About the Project</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <a href="login.html">Sign In</a>
+                    <a href="signup.html">Create Account</a>
+                </div>
+                <div class="footer-col">
+                    <h4>System</h4>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                        Registry Operational
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
+            <div>Developed by Siddhant Asati</div>
+        </div>
+    </footer>
+
+
+
+    <!-- =====================================================
+         FIREBASE
+    ====================================================== -->
+
+    <script
+        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
+    ></script>
+
+    <script
+        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
+    ></script>
+
+
+    <!-- =====================================================
+         AUTH.JS (SHARED — handles Firebase init, auth state,
+         theme toggle, logout, account dropdown)
+    ====================================================== -->
+
+    <script src="assets/js/auth.js"></script>
+
+
+    <!-- =====================================================
+         ADMIN.JS (Certificate issuing logic)
+    ====================================================== -->
+
+    <script src="assets/js/admin.js"></script>
 
 
 </body>

@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const links = document.querySelectorAll(
-        ".nav-link, .login-button"
+        ".nav-item, .nav-link, .login-button"
     );
 
     links.forEach(link => {

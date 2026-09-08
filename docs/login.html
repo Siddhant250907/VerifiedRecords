@@ -10,222 +10,40 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Login - VerifiedRecords</title>
-
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-
-        body {
-
-            margin: 0;
-
-            font-family: Arial, sans-serif;
-
-            background: #080808;
-
-            color: white;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            min-height: 100vh;
-
-        }
-
-
-        /* =========================================
-           LOGIN CONTAINER
-        ========================================= */
-
-        .login-container {
-
-            width: 400px;
-
-            padding: 35px;
-
-            background: #120607;
-
-            border: 1px solid #401016;
-
-            border-radius: 15px;
-
-            box-shadow:
-                0 0 30px rgba(255, 0, 50, 0.15);
-
-        }
-
-
-        h1 {
-
-            text-align: center;
-
-            margin-bottom: 10px;
-
-        }
-
-
-        .subtitle {
-
-            text-align: center;
-
-            color: #aaa;
-
-            margin-bottom: 30px;
-
-        }
-
-
-        /* =========================================
-           INPUTS
-        ========================================= */
-
-        input {
-
-            width: 100%;
-
-            padding: 14px;
-
-            margin-bottom: 15px;
-
-            border-radius: 8px;
-
-            border: 1px solid #444;
-
-            background: #181818;
-
-            color: white;
-
-            font-size: 15px;
-
-            outline: none;
-
-        }
-
-
-        input:focus {
-
-            border-color: #20d45a;
-
-        }
-
-
-        /* =========================================
-           BUTTONS
-        ========================================= */
-
-        button {
-
-            width: 100%;
-
-            padding: 14px;
-
-            margin-top: 8px;
-
-            border: none;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-        }
-
-
-        .login-btn {
-
-            background: #20d45a;
-
-            color: black;
-
-        }
-
-
-        .login-btn:hover {
-
-            background: #18b84c;
-
-        }
-
-
-        .google-btn {
-
-            background: white;
-
-            color: black;
-
-        }
-
-
-        .google-btn:hover {
-
-            background: #eeeeee;
-
-        }
-
-
-        .create-btn {
-
-            background: transparent;
-
-            color: #20d45a;
-
-            border: 1px solid #20d45a;
-
-        }
-
-
-        .create-btn:hover {
-
-            background: #20d45a;
-
-            color: black;
-
-        }
-
-
-        /* =========================================
-           DIVIDER
-        ========================================= */
-
-        .divider {
-
-            text-align: center;
-
-            margin: 20px 0;
-
-            color: #777;
-
-        }
-
-
-        /* =========================================
-           MESSAGE
-        ========================================= */
-
-        #message {
-
-            text-align: center;
-
-            margin-top: 18px;
-
-            color: #ff6666;
-
-            min-height: 20px;
-
-        }
-
-    </style>
+    <title>Sign In - VerifiedRecords</title>
+
+    <meta name="description"
+          content="Sign in to VerifiedRecords to manage and verify academic credential records.">
+
+
+    <!-- Fonts -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Shared CSS Design System -->
+    <link
+        rel="stylesheet"
+        href="assets/css/style.css"
+    >
 
 </head>
 
@@ -233,511 +51,431 @@
 <body>
 
 
-    <!-- =========================================
-         LOGIN BOX
-    ========================================= -->
+    <!-- =====================================================
+         TOP NAVIGATION
+    ====================================================== -->
+    <nav class="top-navbar" aria-label="Main Navigation">
 
-    <div class="login-container">
+        <!-- LEFT SIDE -->
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-text">VerifiedRecords</span>
+            </a>
+
+            <div class="nav-links" role="navigation">
+                <!-- HOME -->
+                <a href="index.html" class="nav-item" id="navHome" title="Home">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
+
+                <!-- ADMIN / DASHBOARD -->
+                <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </a>
+
+                <!-- VERIFY -->
+                <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <span>Verify</span>
+                </a>
+
+                <!-- ABOUT -->
+                <a href="about.html" class="nav-item" id="navAbout" title="About">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="nav-right">
+            <!-- THEME TOGGLE (SUN / MOON) -->
+            <button type="button"
+                    id="themeToggle"
+                    class="theme-toggle-btn"
+                    aria-label="Toggle Light or Dark Theme"
+                    title="Toggle Theme">
+                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
+            </button>
+
+            <!-- AUTHENTICATION AREA -->
+            <div class="auth-area">
+                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
+                <a href="login.html"
+                   id="loginButton"
+                   class="login-button"
+                   aria-label="Login or Sign Up">
+                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                    <span>Login / Sign Up</span>
+                </a>
+
+                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
+                <div id="accountButton"
+                     class="account-container auth-hidden"
+                     style="display:none;">
+                    <button type="button"
+                            id="accountMenuTrigger"
+                            class="account-button"
+                            onclick="toggleAccountMenu()"
+                            aria-label="Account Menu"
+                            aria-expanded="false"
+                            title="Account Settings">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="accountMenu"
+                         class="account-menu"
+                         role="menu"
+                         aria-label="Account Options">
+                        <div id="accountEmail"
+                             class="account-email">
+                        </div>
+                        <a href="admin.html" role="menuitem">
+                            <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <button type="button" onclick="logoutUser()" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </nav>
 
 
-        <h1>
 
-            VerifiedRecords
+    <!-- =====================================================
+         LOGIN PAGE CONTENT
+    ====================================================== -->
+    <main class="login-page">
 
-        </h1>
+        <div class="login-container card">
+
+            <h1>VerifiedRecords</h1>
+
+            <div class="subtitle">
+                Sign in to your account
+            </div>
 
 
-        <div class="subtitle">
+            <!-- =====================================
+                 LOGIN FORM
+            ====================================== -->
+            <form id="loginForm" onsubmit="event.preventDefault(); loginUser();">
 
-            Login to your account
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input
+                        type="email"
+                        id="email"
+                        placeholder="Enter your email address"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-input-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="password-toggle-btn"
+                            id="passwordToggleBtn"
+                            onclick="togglePasswordVisibility('password', 'passwordToggleIcon')"
+                            aria-label="Toggle password visibility"
+                            title="Show or hide password"
+                        >
+                            <i id="passwordToggleIcon" class="fa-regular fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+                <!-- SUBMIT BUTTON -->
+                <button
+                    type="submit"
+                    id="loginSubmitBtn"
+                    class="primary-button login-btn"
+                    style="width: 100%; margin-top: 8px;"
+                >
+                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                    <span>Sign In</span>
+                </button>
+
+            </form>
+
+
+            <!-- DIVIDER -->
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+
+            <!-- GOOGLE LOGIN -->
+            <button
+                type="button"
+                id="googleLoginBtn"
+                class="google-btn"
+                onclick="googleLogin()"
+            >
+                <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                <span>Continue with Google</span>
+            </button>
+
+
+            <!-- CREATE ACCOUNT LINK -->
+            <button
+                type="button"
+                id="createAccountBtn"
+                class="create-btn"
+                onclick="goToSignup()"
+                style="width: 100%; margin-top: 10px;"
+            >
+                <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                <span>Create New Account</span>
+            </button>
+
+
+            <!-- FEEDBACK MESSAGE -->
+            <div id="message" role="status" aria-live="polite"></div>
 
         </div>
 
-
-        <!-- =====================================
-             EMAIL
-        ====================================== -->
-
-        <input
-            type="email"
-            id="email"
-            placeholder="Email"
-            autocomplete="email"
-        >
+    </main>
 
 
-        <!-- =====================================
-             PASSWORD
-        ====================================== -->
-
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            autocomplete="current-password"
-        >
-
-
-        <!-- =====================================
-             EMAIL LOGIN
-        ====================================== -->
-
-        <button
-            type="button"
-            class="login-btn"
-            onclick="loginUser()"
-        >
-
-            Sign In
-
-        </button>
-
-
-        <!-- =====================================
-             DIVIDER
-        ====================================== -->
-
-        <div class="divider">
-
-            OR
-
+    <!-- =====================================================
+         ACADEMIC FOOTER
+    ====================================================== -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>VerifiedRecords</h3>
+                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <a href="index.html">Home</a>
+                    <a href="verify.html">Verify Certificate</a>
+                    <a href="admin.html">Admin Dashboard</a>
+                    <a href="about.html">About the Project</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <a href="login.html">Sign In</a>
+                    <a href="signup.html">Create Account</a>
+                </div>
+                <div class="footer-col">
+                    <h4>System</h4>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
+                        Registry Operational
+                    </span>
+                </div>
+            </div>
         </div>
-
-
-        <!-- =====================================
-             GOOGLE LOGIN
-        ====================================== -->
-
-        <button
-            type="button"
-            class="google-btn"
-            onclick="googleLogin()"
-        >
-
-            🔵 Continue with Google
-
-        </button>
-
-
-        <!-- =====================================
-             CREATE ACCOUNT
-        ====================================== -->
-
-        <button
-            type="button"
-            class="create-btn"
-            onclick="goToSignup()"
-        >
-
-            Create New Account
-
-        </button>
-
-
-        <!-- =====================================
-             MESSAGE
-        ====================================== -->
-
-        <div id="message"></div>
-
-
-    </div>
+        <div class="footer-bottom">
+            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
+            <div>Developed by Siddhant Asati</div>
+        </div>
+    </footer>
 
 
 
-    <!-- =========================================
-         FIREBASE
-    ========================================= -->
-
+    <!-- =====================================================
+         FIREBASE SDKs
+    ====================================================== -->
     <script
         src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">
     </script>
-
 
     <script
         src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js">
     </script>
 
 
+    <!-- =====================================================
+         SHARED AUTH CONTROLLER (Single Source of Truth)
+    ====================================================== -->
+    <script src="assets/js/auth.js"></script>
 
+
+    <!-- =====================================================
+         LOGIN PAGE LOGIC
+    ====================================================== -->
     <script>
 
         // =========================================
-        // FIREBASE CONFIG
+        // PASSWORD VISIBILITY TOGGLE
         // =========================================
+        function togglePasswordVisibility(fieldId, iconId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
+            if (!field || !icon) return;
 
-        const firebaseConfig = {
-
-            apiKey:
-                "AIzaSyDWzv5T0GjwDAlghvi2DLmc5V6T0Pq19ps",
-
-            authDomain:
-                "verifiedrecords.firebaseapp.com",
-
-            projectId:
-                "verifiedrecords",
-
-            storageBucket:
-                "verifiedrecords.firebasestorage.app",
-
-            messagingSenderId:
-                "823611310124",
-
-            appId:
-                "1:823611310124:web:8beb8902077e4a5eebd189"
-
-        };
-
-
-        // =========================================
-        // INITIALIZE FIREBASE
-        // =========================================
-
-        if (!firebase.apps.length) {
-
-            firebase.initializeApp(
-                firebaseConfig
-            );
-
+            if (field.type === "password") {
+                field.type = "text";
+                icon.className = "fa-regular fa-eye-slash";
+            } else {
+                field.type = "password";
+                icon.className = "fa-regular fa-eye";
+            }
         }
 
 
-        const auth = firebase.auth();
-
-
-
         // =========================================
-        // MESSAGE FUNCTION
+        // MESSAGE DISPLAY
         // =========================================
+        function showMessage(message, success = false) {
+            const element = document.getElementById("message");
+            if (!element) return;
 
-        function showMessage(
-            message,
-            success = false
-        ) {
-
-            const element =
-                document.getElementById(
-                    "message"
-                );
-
-
-            element.innerText =
-                message;
-
-
-            element.style.color =
-                success
-                    ? "#20d45a"
-                    : "#ff6666";
-
+            element.innerText = message;
+            element.className = success ? "success" : "error";
+            element.style.color = success
+                ? "var(--color-verified-text, #34d37c)"
+                : "var(--color-danger-text, #f87171)";
         }
 
 
-
         // =========================================
-        // CREATE ACCOUNT PAGE
+        // FORM BUSY / LOADING STATE
         // =========================================
+        function setFormLoading(isLoading, buttonText = "Sign In") {
+            const submitBtn = document.getElementById("loginSubmitBtn");
+            const googleBtn = document.getElementById("googleLoginBtn");
+            const createBtn = document.getElementById("createAccountBtn");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
 
-        function goToSignup() {
-
-            window.location.href =
-                "signup.html";
-
-        }
-
-
-
-        // =========================================
-        // EMAIL LOGIN
-        // =========================================
-
-        async function loginUser() {
-
-
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
-
-
-            const password =
-                document
-                    .getElementById("password")
-                    .value;
-
-
-            // -----------------------------
-            // CHECK INPUT
-            // -----------------------------
-
-            if (!email || !password) {
-
-                showMessage(
-                    "Please enter email and password."
-                );
-
-                return;
-
+            if (submitBtn) {
+                submitBtn.disabled = isLoading;
+                submitBtn.innerHTML = isLoading
+                    ? '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> <span>Signing in...</span>'
+                    : '<i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> <span>' + buttonText + '</span>';
             }
 
+            if (googleBtn) googleBtn.disabled = isLoading;
+            if (createBtn) createBtn.disabled = isLoading;
+            if (emailInput) emailInput.disabled = isLoading;
+            if (passwordInput) passwordInput.disabled = isLoading;
+        }
 
-            // -----------------------------
-            // SHOW LOADING
-            // -----------------------------
 
-            showMessage(
-                "Signing in...",
-                true
-            );
+        // =========================================
+        // GO TO SIGNUP PAGE
+        // =========================================
+        function goToSignup() {
+            window.location.href = "signup.html";
+        }
 
+
+        // =========================================
+        // EMAIL / PASSWORD LOGIN
+        // =========================================
+        async function loginUser() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            // Input Validation
+            if (!email || !password) {
+                showMessage("Please enter your email and password.");
+                return;
+            }
+
+            setFormLoading(true);
+            showMessage("Signing in...", true);
 
             try {
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                console.log("VerifiedRecords Auth: Signed in as", result.user.email);
 
+                showMessage("Sign in successful. Redirecting...", true);
 
-                // -------------------------
-                // FIREBASE LOGIN
-                // -------------------------
+                setTimeout(function() {
+                    window.location.href = "admin.html";
+                }, 700);
 
-                const result =
-                    await auth
-                        .signInWithEmailAndPassword(
-                            email,
-                            password
-                        );
-
-
-                console.log(
-                    "Logged in user:",
-                    result.user
-                );
-
-
-                // -------------------------
-                // SUCCESS
-                // -------------------------
-
-                showMessage(
-                    "Login successful!",
-                    true
-                );
-
-
-                // -------------------------
-                // GO TO MAIN WEBSITE
-                // -------------------------
-
-                setTimeout(
-                    function() {
-
-                        window.location.href =
-                            "index.html";
-
-                    },
-                    700
-                );
-
-
-            }
-
-            catch (error) {
-
-
-                console.error(
-                    "Login error:",
-                    error
-                );
-
-
-                // -------------------------
-                // ERROR MESSAGE
-                // -------------------------
+            } catch (error) {
+                console.error("Login error:", error);
+                setFormLoading(false);
 
                 if (
-                    error.code ===
-                    "auth/invalid-credential"
+                    error.code === "auth/invalid-credential" ||
+                    error.code === "auth/wrong-password"
                 ) {
-
-                    showMessage(
-                        "Incorrect email or password."
-                    );
-
+                    showMessage("Incorrect email or password.");
+                } else if (error.code === "auth/user-not-found") {
+                    showMessage("No registered account found with this email.");
+                } else if (error.code === "auth/invalid-email") {
+                    showMessage("Please enter a valid email address.");
+                } else if (error.code === "auth/too-many-requests") {
+                    showMessage("Too many failed attempts. Please try again later.");
+                } else if (error.code === "auth/network-request-failed") {
+                    showMessage("Network error. Please verify your internet connection.");
+                } else {
+                    showMessage(error.message || "Failed to sign in. Please try again.");
                 }
-
-                else if (
-                    error.code ===
-                    "auth/user-not-found"
-                ) {
-
-                    showMessage(
-                        "No account found with this email."
-                    );
-
-                }
-
-                else if (
-                    error.code ===
-                    "auth/wrong-password"
-                ) {
-
-                    showMessage(
-                        "Incorrect password."
-                    );
-
-                }
-
-                else if (
-                    error.code ===
-                    "auth/invalid-email"
-                ) {
-
-                    showMessage(
-                        "Please enter a valid email."
-                    );
-
-                }
-
-                else {
-
-                    showMessage(
-                        error.message
-                    );
-
-                }
-
             }
-
         }
 
 
-
         // =========================================
-        // GOOGLE LOGIN
+        // GOOGLE AUTH LOGIN
         // =========================================
-
         async function googleLogin() {
+            setFormLoading(true, "Sign In");
+            showMessage("Opening Google authentication...", true);
 
-
-            showMessage(
-                "Opening Google login...",
-                true
-            );
-
-
-            // -----------------------------
-            // GOOGLE PROVIDER
-            // -----------------------------
-
-            const provider =
-                new firebase
-                    .auth
-                    .GoogleAuthProvider();
-
-
+            const provider = new firebase.auth.GoogleAuthProvider();
             provider.setCustomParameters({
-
-                prompt:
-                    "select_account"
-
+                prompt: "select_account"
             });
 
-
             try {
+                const result = await auth.signInWithPopup(provider);
+                console.log("VerifiedRecords Auth: Google user", result.user.email);
 
+                showMessage("Google sign in successful. Redirecting...", true);
 
-                // -------------------------
-                // GOOGLE POPUP
-                // -------------------------
+                setTimeout(function() {
+                    window.location.href = "admin.html";
+                }, 700);
 
-                const result =
-                    await auth
-                        .signInWithPopup(
-                            provider
-                        );
+            } catch (error) {
+                console.error("Google login error:", error);
+                setFormLoading(false);
 
-
-                console.log(
-                    "Google user:",
-                    result.user
-                );
-
-
-                // -------------------------
-                // SUCCESS
-                // -------------------------
-
-                showMessage(
-                    "Google login successful!",
-                    true
-                );
-
-
-                // -------------------------
-                // GO TO MAIN WEBSITE
-                // -------------------------
-
-                setTimeout(
-                    function() {
-
-                        window.location.href =
-                            "index.html";
-
-                    },
-                    700
-                );
-
-
+                if (error.code === "auth/popup-closed-by-user") {
+                    showMessage("Google sign in was cancelled.");
+                } else if (error.code === "auth/popup-blocked") {
+                    showMessage("Popup was blocked by your browser. Please enable popups.");
+                } else {
+                    showMessage(error.message || "Google sign in failed. Please try again.");
+                }
             }
-
-            catch (error) {
-
-
-                console.error(
-                    "Google login error:",
-                    error
-                );
-
-
-                // -------------------------
-                // USER CLOSED POPUP
-                // -------------------------
-
-                if (
-                    error.code ===
-                    "auth/popup-closed-by-user"
-                ) {
-
-                    showMessage(
-                        "Google login was cancelled."
-                    );
-
-                }
-
-                // -------------------------
-                // POPUP BLOCKED
-                // -------------------------
-
-                else if (
-                    error.code ===
-                    "auth/popup-blocked"
-                ) {
-
-                    showMessage(
-                        "Please allow popups for this website."
-                    );
-
-                }
-
-                else {
-
-                    showMessage(
-                        error.message
-                    );
-
-                }
-
-            }
-
         }
 
     </script>
