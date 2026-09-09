@@ -227,38 +227,38 @@
             `;
         }
 
-        // 2. Certificate ID
-        if (cert.certificateId) {
-            fieldsHtml += `
-                <div class="credential-field">
-                    <span class="credential-label">
-                        <i class="fa-solid fa-barcode" aria-hidden="true"></i> Certificate Identifier
-                    </span>
-                    <span class="credential-value mono">${escapeHtml(cert.certificateId)}</span>
-                </div>
-            `;
-        }
-
-        // 3. Roll Number
+        // 2. Roll Number
         if (cert.rollNumber) {
             fieldsHtml += `
                 <div class="credential-field">
                     <span class="credential-label">
-                        <i class="fa-solid fa-id-card" aria-hidden="true"></i> Student Roll Number
+                        <i class="fa-solid fa-id-card" aria-hidden="true"></i> Roll Number
                     </span>
                     <span class="credential-value mono">${escapeHtml(cert.rollNumber)}</span>
                 </div>
             `;
         }
 
-        // 4. Course / Academic Program
+        // 3. Course
         if (cert.course) {
             fieldsHtml += `
                 <div class="credential-field">
                     <span class="credential-label">
-                        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Academic Program
+                        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i> Course
                     </span>
                     <span class="credential-value">${escapeHtml(cert.course)}</span>
+                </div>
+            `;
+        }
+
+        // 4. Certificate ID
+        if (cert.certificateId) {
+            fieldsHtml += `
+                <div class="credential-field">
+                    <span class="credential-label">
+                        <i class="fa-solid fa-barcode" aria-hidden="true"></i> Certificate ID
+                    </span>
+                    <span class="credential-value mono">${escapeHtml(cert.certificateId)}</span>
                 </div>
             `;
         }
@@ -268,7 +268,7 @@
             fieldsHtml += `
                 <div class="credential-field">
                     <span class="credential-label">
-                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Conferral Date
+                        <i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Issue Date
                     </span>
                     <span class="credential-value">${formattedIssueDate}</span>
                 </div>
@@ -338,9 +338,11 @@
         if (verifyBtn) {
             verifyBtn.disabled = isLoading;
             if (isLoading) {
+                verifyBtn.classList.add("loading");
                 if (verifyBtnIcon) verifyBtnIcon.className = "fa-solid fa-circle-notch fa-spin";
-                if (verifyBtnText) verifyBtnText.textContent = "Verifying Credential...";
+                if (verifyBtnText) verifyBtnText.textContent = "Verifying...";
             } else {
+                verifyBtn.classList.remove("loading");
                 if (verifyBtnIcon) verifyBtnIcon.className = "fa-solid fa-magnifying-glass";
                 if (verifyBtnText) verifyBtnText.textContent = "Verify Certificate";
             }
@@ -354,6 +356,18 @@
             clearInputBtn.disabled = isLoading;
         }
     }
+
+    // Expose quick fill helper for sample ID chips
+    window.fillVerifyInput = function (certId) {
+        if (!certificateIdInput) return;
+        certificateIdInput.value = certId;
+        certificateIdInput.focus();
+        if (clearInputBtn) {
+            clearInputBtn.style.display = "flex";
+        }
+        hideInlineAlert();
+        hideVerificationResult();
+    };
 
     // -------------------------------------------------------------------------
     // MAIN VERIFICATION HANDLER
@@ -373,7 +387,7 @@
             showInlineAlert(
                 "warning",
                 "Certificate ID Required",
-                "Please enter a valid Certificate ID to verify its authenticity."
+                "Please enter a Certificate ID to verify."
             );
             if (certificateIdInput) certificateIdInput.focus();
             return;
@@ -422,22 +436,13 @@
 
             // A. NOT VERIFIED / NOT FOUND (404 or verified === false)
             if (!response.ok || !result || result.verified !== true) {
-                // Determine user message (human-friendly, non-technical)
-                let message = "Certificate could not be verified.";
-                let subtext = "Please check the Certificate ID and try again.";
+                const message = "Certificate could not be verified.";
+                const subtext = "Please check the Certificate ID and try again.";
 
-                if (response.status === 404 || (result && result.message === "Certificate not found.")) {
-                    message = "Certificate could not be verified.";
-                    subtext = "No matching record was found in the official registry. Please check the Certificate ID and try again.";
-                } else if (response.status >= 500) {
-                    message = "Verification Service Temporarily Unavailable";
-                    subtext = "The registry server encountered an issue. Please try again in a few moments.";
-                }
-
-                // 1. Show ONE professional popup/modal
+                // 1. Show ONE clean, non-alarming popup/modal
                 openInvalidModal(message, subtext);
 
-                // 2. ALSO show a clear inline message on the verification page
+                // 2. ALSO show a short inline message on the verification page
                 if (verifyInputGroup) verifyInputGroup.classList.add("input-error");
                 showInlineAlert("danger", message, subtext);
 
@@ -455,22 +460,17 @@
                 renderVerifiedResult(result.certificate);
             } else {
                 // Fallback for unexpected valid HTTP with missing certificate body
-                openInvalidModal(
-                    "Certificate could not be verified.",
-                    "The returned record was incomplete. Please check the Certificate ID and try again."
-                );
-                showInlineAlert(
-                    "danger",
-                    "Certificate could not be verified.",
-                    "Please check the Certificate ID and try again."
-                );
+                const message = "Certificate could not be verified.";
+                const subtext = "Please check the Certificate ID and try again.";
+                openInvalidModal(message, subtext);
+                showInlineAlert("danger", message, subtext);
             }
 
         } catch (error) {
             console.error("Verification error:", error);
 
-            const friendlyTitle = "Connection Error";
-            const friendlyMsg = "Unable to connect to the verification server. Please check your internet connection and try again.";
+            const friendlyTitle = "Certificate could not be verified.";
+            const friendlyMsg = "Please check your network connection and try again.";
 
             // 1. Show modal
             openInvalidModal(friendlyTitle, friendlyMsg);

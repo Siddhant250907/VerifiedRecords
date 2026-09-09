@@ -4,79 +4,50 @@
 <head>
 
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Admin Dashboard - VerifiedRecords</title>
 
     <meta name="description"
-          content="VerifiedRecords Admin Dashboard — Issue and manage blockchain-verified academic certificates.">
+          content="VerifiedRecords Admin Dashboard — Issue and manage verified academic certificates.">
 
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- =====================================================
-         FONTS
-    ====================================================== -->
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <!-- =====================================================
-         SHARED CSS DESIGN SYSTEM
-    ====================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="assets/css/style.css"
-    >
+    <!-- Shared CSS Design System -->
+    <link rel="stylesheet"
+          href="assets/css/style.css">
 
 </head>
 
-
 <body>
 
-
     <!-- =====================================================
-         LOADING SCREEN (shows while checking auth)
+         LOADING SCREEN (Checking authentication session)
     ====================================================== -->
-
     <div id="loading">
         <i class="fa-solid fa-shield-halved" style="margin-right: 10px;"></i>
-        Checking login...
+        Checking credentials...
     </div>
 
-
     <!-- =====================================================
-         TOP NAVIGATION (SHARED)
+         TOP NAVIGATION (NEUMORPHIC MASTHEAD)
     ====================================================== -->
-
     <nav class="top-navbar" aria-label="Main Navigation">
 
-        <!-- ============================
-             LEFT SIDE
-        ============================= -->
+        <!-- LEFT SIDE -->
         <div class="nav-left">
             <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
-                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
                 <span class="nav-brand-text">VerifiedRecords</span>
             </a>
 
@@ -107,19 +78,8 @@
             </div>
         </div>
 
-        <!-- ============================
-             RIGHT SIDE
-        ============================= -->
+        <!-- RIGHT SIDE -->
         <div class="nav-right">
-            <!-- THEME TOGGLE (SUN / MOON) -->
-            <button type="button"
-                    id="themeToggle"
-                    class="theme-toggle-btn"
-                    aria-label="Toggle Light or Dark Theme"
-                    title="Toggle Theme">
-                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
-            </button>
-
             <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
                 <!-- LOGGED-OUT: LOGIN / SIGN UP -->
@@ -168,12 +128,16 @@
     </nav>
 
 
-
     <!-- =====================================================
          ADMIN DASHBOARD CONTENT
     ====================================================== -->
-
     <main class="admin-page-wrapper">
+
+        <!-- Ambient Background Layer for Glassmorphic Depth -->
+        <div class="page-ambient-layer" aria-hidden="true">
+            <div class="ambient-orb ambient-orb-1"></div>
+            <div class="ambient-orb ambient-orb-2"></div>
+        </div>
 
         <div class="admin-container">
 
@@ -202,9 +166,8 @@
 
 
             <!-- ==========================================
-                 ADMINISTRATIVE CERTIFICATE FORM
+                 ADMINISTRATIVE CERTIFICATE FORM (GLASSMORPHIC)
             =========================================== -->
-
             <div class="admin-form-card">
 
                 <form id="certificateForm" novalidate>
@@ -221,7 +184,6 @@
                             <div class="admin-form-group full-width">
                                 <label for="studentName" class="admin-label">
                                     <span>Student Full Name<span class="required-star">*</span></span>
-                                    <span class="admin-label-hint">As officially registered on university records</span>
                                 </label>
                                 <div class="admin-input-group" id="groupStudentName">
                                     <span class="admin-input-icon" aria-hidden="true">
@@ -243,7 +205,6 @@
                             <div class="admin-form-group full-width">
                                 <label for="rollNumber" class="admin-label">
                                     <span>Roll / Enrollment Number<span class="required-star">*</span></span>
-                                    <span class="admin-label-hint">Institutional student identification number</span>
                                 </label>
                                 <div class="admin-input-group" id="groupRollNumber">
                                     <span class="admin-input-icon" aria-hidden="true">
@@ -268,15 +229,14 @@
                     <div class="admin-form-section">
                         <div class="admin-section-header">
                             <i class="fa-solid fa-graduation-cap admin-section-icon" aria-hidden="true"></i>
-                            <h2 class="admin-section-title">Academic Credential & Registry Record</h2>
+                            <h2 class="admin-section-title">Credential Details</h2>
                         </div>
 
                         <div class="admin-form-grid">
                             <!-- Course / Degree Program -->
                             <div class="admin-form-group full-width">
                                 <label for="course" class="admin-label">
-                                    <span>Degree Program / Academic Discipline<span class="required-star">*</span></span>
-                                    <span class="admin-label-hint">e.g. Computer Science & Engineering</span>
+                                    <span>Degree Program / Discipline<span class="required-star">*</span></span>
                                 </label>
                                 <div class="admin-input-group" id="groupCourse">
                                     <span class="admin-input-icon" aria-hidden="true">
@@ -297,8 +257,7 @@
                             <!-- Certificate ID -->
                             <div class="admin-form-group">
                                 <label for="certificateId" class="admin-label">
-                                    <span>Certificate Identifier<span class="required-star">*</span></span>
-                                    <span class="admin-label-hint">Must be unique</span>
+                                    <span>Certificate ID<span class="required-star">*</span></span>
                                 </label>
                                 <div class="admin-input-group" id="groupCertificateId">
                                     <span class="admin-input-icon" aria-hidden="true">
@@ -321,7 +280,6 @@
                             <div class="admin-form-group">
                                 <label for="issueDate" class="admin-label">
                                     <span>Conferral Date<span class="required-star">*</span></span>
-                                    <span class="admin-label-hint">Official date of issue</span>
                                 </label>
                                 <div class="admin-input-group" id="groupIssueDate">
                                     <span class="admin-input-icon" aria-hidden="true">
@@ -337,15 +295,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-
-                    <!-- ADMINISTRATIVE ATTESTATION -->
-                    <div class="admin-attestation">
-                        <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                        <span>
-                            <strong>Official Notice:</strong> Certificates registered here are entered directly into the institutional MongoDB repository. Verify all recipient details and conferral dates against departmental records before issuance.
-                        </span>
                     </div>
 
 
@@ -372,7 +321,6 @@
 
                 </form>
 
-
                 <!-- NOTIFICATION MESSAGE BANNER (Preserved #message ID) -->
                 <div id="message" class="admin-message" role="alert" aria-live="polite"></div>
 
@@ -386,7 +334,7 @@
                 <div class="issuance-success-banner">
                     <div class="issuance-success-title">
                         <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                        <span>Certificate Successfully Issued & Registered</span>
+                        <span>Certificate Successfully Registered</span>
                     </div>
                     <span class="issuance-success-meta">Official University Record</span>
                 </div>
@@ -476,34 +424,14 @@
     </footer>
 
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-    <!-- =====================================================
-         FIREBASE
-    ====================================================== -->
-
-    <script
-        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
-    ></script>
-
-    <script
-        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
-    ></script>
-
-
-    <!-- =====================================================
-         AUTH.JS (SHARED — handles Firebase init, auth state,
-         theme toggle, logout, account dropdown)
-    ====================================================== -->
-
+    <!-- Auth & Admin Scripts -->
     <script src="assets/js/auth.js"></script>
-
-
-    <!-- =====================================================
-         ADMIN.JS (Certificate issuing logic)
-    ====================================================== -->
-
     <script src="assets/js/admin.js"></script>
-
+    <script src="assets/js/app.js"></script>
 
 </body>
 

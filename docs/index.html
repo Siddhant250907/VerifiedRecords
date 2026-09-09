@@ -4,60 +4,42 @@
 <head>
 
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>VerifiedRecords — Academic Certificate Verification Platform</title>
 
     <meta name="description"
-          content="VerifiedRecords is a university certificate verification platform designed to validate student credentials, prevent alteration, and streamline record verification for employers.">
+          content="VerifiedRecords is an official university certificate verification platform to validate student credentials, prevent alteration, and streamline record verification.">
 
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <!-- Fonts -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet"
-    >
-
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
 
     <!-- Shared Design System -->
-    <link
-        rel="stylesheet"
-        href="assets/css/style.css"
-    >
+    <link rel="stylesheet"
+          href="assets/css/style.css">
 
 </head>
 
-
 <body>
 
-
     <!-- =====================================================
-         1. TOP NAVIGATION
+         1. TOP NAVIGATION (NEUMORPHIC MASTHEAD)
     ====================================================== -->
     <nav class="top-navbar" aria-label="Main Navigation">
 
         <!-- LEFT SIDE -->
         <div class="nav-left">
             <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
-                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
                 <span class="nav-brand-text">VerifiedRecords</span>
             </a>
 
@@ -90,15 +72,6 @@
 
         <!-- RIGHT SIDE -->
         <div class="nav-right">
-            <!-- THEME TOGGLE (SUN / MOON) -->
-            <button type="button"
-                    id="themeToggle"
-                    class="theme-toggle-btn"
-                    aria-label="Toggle Light or Dark Theme"
-                    title="Toggle Theme">
-                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
-            </button>
-
             <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
                 <!-- LOGGED-OUT: LOGIN / SIGN UP -->
@@ -147,83 +120,126 @@
     </nav>
 
 
-
     <!-- =====================================================
-         2. MAIN INTRODUCTION & HERO SECTION
+         2. HERO SECTION & INTERACTIVE CREDENTIAL LOOKUP
     ====================================================== -->
     <main class="hero">
 
-        <div class="hero-content">
+        <!-- Subtle Ambient Background Layer (Restrained Depth) -->
+        <div class="hero-ambient-layer" aria-hidden="true">
+            <div class="ambient-orb ambient-orb-1"></div>
+            <div class="ambient-orb ambient-orb-2"></div>
+            <div class="ambient-grid-overlay"></div>
+        </div>
 
-            <div class="portal-badge">
-                <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
-                Academic Credential Registry
-            </div>
+        <div class="hero-container">
+            <div class="hero-content">
 
-            <h1>
-                Academic records you can <span>verify with confidence.</span>
-            </h1>
+                <div class="portal-badge">
+                    <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                    Official Academic Credential Registry
+                </div>
 
-            <p class="hero-description">
-                VerifiedRecords is a university certificate verification platform designed to make academic credentials secure, transparent, and straightforward to confirm. The system provides an authoritative reference for issued student certificates, helping prevent document alteration and simplifying verification for employers and institutions.
-            </p>
+                <h1>Verify a University Certificate</h1>
 
-            <div class="home-actions">
-                <a href="verify.html" class="primary-button hero-button">
-                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                    Verify a Certificate
-                </a>
+                <p class="hero-description">
+                    Instant, cryptographic credential authentication directly from the institutional registry.
+                </p>
 
-                <a href="admin.html" class="btn-outline">
-                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
-                    Registrar Portal
-                </a>
-            </div>
+                <div class="home-actions">
+                    <a href="verify.html" class="primary-button hero-button">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        Verify a Certificate
+                    </a>
 
-            <!-- =============================================
-                 3. CLEAR CERTIFICATE VERIFICATION ACTION
-            ============================================== -->
-            <div class="quick-verify-card">
-                <div class="quick-verify-header">
-                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
-                    <div>
-                        <h3>Quick Credential Lookup</h3>
-                        <p>Enter any registered Certificate ID to inspect student name, degree program, and issuance date.</p>
+                    <a href="admin.html" class="btn-outline">
+                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                        Registrar Portal
+                    </a>
+                </div>
+
+                <!-- INTERACTIVE CERTIFICATE LOOKUP COMPONENT (TACTILE NEUMORPHIC) -->
+                <div class="interactive-lookup-card">
+                    <div class="lookup-card-topbar">
+                        <div class="lookup-card-title">
+                            <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+                            <span>Credential Query Console</span>
+                        </div>
+                        <div class="registry-status-pill">
+                            <span class="status-pulse-dot" aria-hidden="true"></span>
+                            <span>Registry Online</span>
+                        </div>
+                    </div>
+
+                    <form action="verify.html" method="GET" class="lookup-form" id="quickVerifyForm">
+                        <div class="lookup-input-wrap">
+                            <i class="fa-solid fa-barcode lookup-field-icon" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                name="id"
+                                id="quickCertInput"
+                                class="lookup-input"
+                                placeholder="Enter Certificate ID (e.g. CERT_CSE001)"
+                                required
+                                autocomplete="off"
+                                aria-label="Certificate ID"
+                            >
+                            <button type="button" class="lookup-clear-btn" id="quickClearBtn" title="Clear input" aria-label="Clear Input" onclick="clearQuickInput()">
+                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="primary-button lookup-submit-btn">
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            <span>Verify Record</span>
+                        </button>
+                    </form>
+
+                    <div class="lookup-chips-row">
+                        <span class="lookup-chips-label">
+                            <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                            Sample IDs:
+                        </span>
+                        <div class="lookup-chips-list">
+                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE001')" title="Query CERT_CSE001">
+                                <code>CERT_CSE001</code>
+                            </button>
+                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE002')" title="Query CERT_CSE002">
+                                <code>CERT_CSE002</code>
+                            </button>
+                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_567890')" title="Query CERT_567890">
+                                <code>CERT_567890</code>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="lookup-attributes-bar">
+                        <div class="attribute-pill">
+                            <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+                            <span>Student Identity</span>
+                        </div>
+                        <div class="attribute-pill">
+                            <i class="fa-solid fa-award" aria-hidden="true"></i>
+                            <span>Degree Program</span>
+                        </div>
+                        <div class="attribute-pill">
+                            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
+                            <span>Conferral Date</span>
+                        </div>
+                        <div class="attribute-pill">
+                            <i class="fa-solid fa-fingerprint" aria-hidden="true"></i>
+                            <span>Cryptographic Record</span>
+                        </div>
                     </div>
                 </div>
 
-                <form action="verify.html" method="GET" class="quick-verify-form">
-                    <input
-                        type="text"
-                        name="id"
-                        id="quickCertInput"
-                        placeholder="Enter Certificate ID (e.g. CERT227, CERT_CSE001)"
-                        required
-                        autocomplete="off"
-                        aria-label="Certificate ID"
-                    >
-                    <button type="submit" class="primary-button">
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                        Verify Now
-                    </button>
-                </form>
-
-                <div class="quick-verify-hint">
-                    <span>Try sample issued IDs:</span>
-                    <code onclick="setQuickId('CERT_CSE001')" title="Click to fill CERT_CSE001">CERT_CSE001</code>
-                    <code onclick="setQuickId('CERT_CSE002')" title="Click to fill CERT_CSE002">CERT_CSE002</code>
-                    <code onclick="setQuickId('CERT_567890')" title="Click to fill CERT_567890">CERT_567890</code>
-                </div>
             </div>
-
         </div>
 
     </main>
 
 
-
     <!-- =====================================================
-         4. HOW THE SERVICE WORKS
+         3. HOW THE SERVICE WORKS
     ====================================================== -->
     <section class="home-section" aria-labelledby="workflowHeading">
 
@@ -232,7 +248,7 @@
             <div class="home-section-header">
                 <div class="section-tag">Verification Workflow</div>
                 <h2 id="workflowHeading">How the Service Works</h2>
-                <p>A structured three-step process connects university department administrators with public verification.</p>
+                <p>A simple three-step process connects university departments with public record verification.</p>
             </div>
 
             <div class="steps-grid">
@@ -240,19 +256,19 @@
                 <div class="step-card">
                     <div class="step-num">01</div>
                     <h3>Certificate Issuance</h3>
-                    <p>An authorized administrator enters the student's full name, roll number, course of study, unique Certificate ID, and issue date through the secured dashboard.</p>
+                    <p>Department administrators issue student credentials and unique identifiers via the registrar terminal.</p>
                 </div>
 
                 <div class="step-card">
                     <div class="step-num">02</div>
-                    <h3>Authoritative Record Storage</h3>
-                    <p>The record is registered in the database with an exact issuance timestamp, creating a persistent reference point that protects against unauthorized changes.</p>
+                    <h3>Registry Record</h3>
+                    <p>Records are registered with official conferral timestamps, establishing a verifiable reference point.</p>
                 </div>
 
                 <div class="step-card">
                     <div class="step-num">03</div>
-                    <h3>Instant Public Verification</h3>
-                    <p>Anyone in possession of the Certificate ID can perform a lookup to view the verified academic credential details and confirm authenticity in seconds.</p>
+                    <h3>Instant Verification</h3>
+                    <p>Anyone with the Certificate ID can query the registry to review degree details and confirm authenticity.</p>
                 </div>
 
             </div>
@@ -262,65 +278,17 @@
     </section>
 
 
-
     <!-- =====================================================
-         5. WHY VERIFICATION MATTERS
-    ====================================================== -->
-    <section class="home-section" aria-labelledby="whyMattersHeading">
-
-        <div class="container">
-
-            <div class="home-section-header">
-                <div class="section-tag">Academic Integrity</div>
-                <h2 id="whyMattersHeading">Why Digital Verification Matters</h2>
-                <p>Traditional paper certificates present practical challenges for universities, graduating students, and evaluating employers.</p>
-            </div>
-
-            <div class="about-grid">
-
-                <div class="about-card">
-                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                    <h2>Tamper Resistance</h2>
-                    <p>Paper diplomas and basic PDF scans can be modified without obvious physical signs. Having a verified digital record ensures that academic achievements remain exactly as granted by the institution.</p>
-                </div>
-
-                <div class="about-card">
-                    <i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i>
-                    <h2>Immediate Turnaround</h2>
-                    <p>Employers verifying academic backgrounds typically wait days or weeks for manual registrar office responses. Online validation delivers immediate confirmation of credentials.</p>
-                </div>
-
-                <div class="about-card">
-                    <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
-                    <h2>Reliable Credential Sharing</h2>
-                    <p>Graduates can share their unique certificate identifier with hiring teams and postgraduate institutions, knowing their qualifications can be confirmed at any time.</p>
-                </div>
-
-                <div class="about-card">
-                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
-                    <h2>Institutional Trust</h2>
-                    <p>Academic institutions protect the value of the degrees they award by ensuring that only genuine recipients can claim completion of their academic programs.</p>
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         6. ROLE-BASED PORTAL PATHWAYS
+         4. ACCESS PATHWAYS
     ====================================================== -->
     <section class="home-section" aria-labelledby="pathwaysHeading">
 
         <div class="container">
 
             <div class="home-section-header">
-                <div class="section-tag">Platform Access</div>
-                <h2 id="pathwaysHeading">Choose Your Service Pathway</h2>
-                <p>Access the appropriate area depending on whether you need to confirm a credential or manage student records.</p>
+                <div class="section-tag">Access Channels</div>
+                <h2 id="pathwaysHeading">Select Your Service Pathway</h2>
+                <p>Choose between the public verification portal and the authorized administrative terminal.</p>
             </div>
 
             <div class="roles-grid">
@@ -331,7 +299,7 @@
                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                             <h3>For Employers & Public Verifiers</h3>
                         </div>
-                        <p>Quickly confirm the authenticity of academic certificates. No account registration or login is required to perform verification queries.</p>
+                        <p>Confirm the authenticity of candidate degrees and diplomas. No account registration or login is required.</p>
                     </div>
                     <a href="verify.html" class="primary-button" style="align-self: flex-start;">
                         Open Verification Tool →
@@ -344,10 +312,10 @@
                             <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
                             <h3>For Academic Administrators</h3>
                         </div>
-                        <p>Authorized department staff can sign in to issue new student certificates, assign identifiers, and maintain university record accuracy.</p>
+                        <p>Authorized department staff can sign in to register newly conferred certificates and maintain university records.</p>
                     </div>
                     <a href="admin.html" class="btn-outline" style="align-self: flex-start;">
-                        Access Admin Dashboard →
+                        Access Admin Portal →
                     </a>
                 </div>
 
@@ -358,9 +326,8 @@
     </section>
 
 
-
     <!-- =====================================================
-         7. ACADEMIC FOOTER
+         5. ACADEMIC FOOTER
     ====================================================== -->
     <footer class="site-footer">
 
@@ -405,39 +372,47 @@
     </footer>
 
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-    <!-- =====================================================
-         FIREBASE SDKs
-    ====================================================== -->
-    <script
-        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"
-    ></script>
-
-    <script
-        src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
-    ></script>
-
-
-    <!-- =====================================================
-         SHARED AUTH CONTROLLER (Handles session & navbar)
-    ====================================================== -->
+    <!-- Shared Auth Controller -->
     <script src="assets/js/auth.js"></script>
 
-
-    <!-- =====================================================
-         PAGE SCRIPT
-    ====================================================== -->
+    <!-- Interactive Lookup Component Script -->
     <script>
         function setQuickId(certId) {
             const input = document.getElementById("quickCertInput");
+            const clearBtn = document.getElementById("quickClearBtn");
             if (input) {
                 input.value = certId;
                 input.focus();
+                if (clearBtn) clearBtn.style.display = "inline-flex";
             }
         }
+
+        function clearQuickInput() {
+            const input = document.getElementById("quickCertInput");
+            const clearBtn = document.getElementById("quickClearBtn");
+            if (input) {
+                input.value = "";
+                input.focus();
+                if (clearBtn) clearBtn.style.display = "none";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const input = document.getElementById("quickCertInput");
+            const clearBtn = document.getElementById("quickClearBtn");
+            if (input && clearBtn) {
+                input.addEventListener("input", function() {
+                    clearBtn.style.display = input.value.trim() ? "inline-flex" : "none";
+                });
+            }
+        });
     </script>
 
-    <!-- APP UTILITIES -->
+    <!-- App Utilities -->
     <script src="assets/js/app.js"></script>
 
 </body>

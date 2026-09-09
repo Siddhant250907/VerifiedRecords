@@ -4,47 +4,12 @@
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// 1. THEME CONTROLLER (LIGHT / DARK THEME TOGGLE)
+// 1. LIGHT THEME ENFORCEMENT (DARK MODE PERMANENTLY REMOVED)
 // --------------------------------------------------------------------------
-function initTheme() {
-    const savedTheme = localStorage.getItem("vr_theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-    updateThemeIcon(savedTheme);
-}
-
-function updateThemeIcon(theme) {
-    const icon = document.getElementById("themeToggleIcon");
-    if (!icon) return;
-
-    if (theme === "light") {
-        icon.className = "fa-solid fa-moon";
-        icon.setAttribute("title", "Switch to Dark Mode");
-    } else {
-        icon.className = "fa-solid fa-sun";
-        icon.setAttribute("title", "Switch to Light Mode");
-    }
-}
-
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
-    const nextTheme = currentTheme === "dark" ? "light" : "dark";
-
-    document.documentElement.setAttribute("data-theme", nextTheme);
-    localStorage.setItem("vr_theme", nextTheme);
-    updateThemeIcon(nextTheme);
-}
-
-// Run theme init immediately to prevent flash of wrong theme
-initTheme();
-
-// Attach listener once DOM is ready
-document.addEventListener("DOMContentLoaded", function() {
-    initTheme();
-    const themeBtn = document.getElementById("themeToggle");
-    if (themeBtn) {
-        themeBtn.addEventListener("click", toggleTheme);
-    }
-});
+document.documentElement.setAttribute("data-theme", "light");
+try {
+    localStorage.removeItem("vr_theme");
+} catch (e) {}
 
 
 // --------------------------------------------------------------------------

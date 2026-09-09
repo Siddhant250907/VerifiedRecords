@@ -4,15 +4,12 @@
 <head>
 
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>About - VerifiedRecords</title>
 
     <meta name="description"
           content="About VerifiedRecords — An academic university certificate verification project developed by Siddhant Asati.">
-
 
     <!-- Fonts & Icons -->
     <link rel="stylesheet"
@@ -20,14 +17,11 @@
 
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
-
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
-
 
     <!-- Main Shared CSS -->
     <link rel="stylesheet"
@@ -35,19 +29,17 @@
 
 </head>
 
-
 <body>
 
-
 <!-- ==================================================
-     TOP NAVIGATION
+     TOP NAVIGATION (NEUMORPHIC MASTHEAD)
 ================================================== -->
 <nav class="top-navbar" aria-label="Main Navigation">
 
     <!-- LEFT SIDE -->
     <div class="nav-left">
         <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
-            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
             <span class="nav-brand-text">VerifiedRecords</span>
         </a>
 
@@ -80,15 +72,6 @@
 
     <!-- RIGHT SIDE -->
     <div class="nav-right">
-        <!-- THEME TOGGLE (SUN / MOON) -->
-        <button type="button"
-                id="themeToggle"
-                class="theme-toggle-btn"
-                aria-label="Toggle Light or Dark Theme"
-                title="Toggle Theme">
-            <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
-        </button>
-
         <!-- AUTHENTICATION AREA -->
         <div class="auth-area">
             <!-- LOGGED-OUT: LOGIN / SIGN UP -->
@@ -137,16 +120,21 @@
 </nav>
 
 
-
 <!-- ==================================================
      ABOUT CONTENT
 ================================================== -->
 <main class="about-page">
 
+    <!-- Ambient Background Layer for Glassmorphic Depth -->
+    <div class="page-ambient-layer" aria-hidden="true">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
     <div class="about-container">
 
         <div class="about-label">
-            COLLEGE PROJECT OVERVIEW
+            College Project Overview
         </div>
 
         <h1 class="about-title">
@@ -154,7 +142,7 @@
         </h1>
 
         <p class="about-intro">
-            VerifiedRecords is an academic credential verification project developed by Siddhant Asati as an engineering college project. It was created to explore how digital technologies can replace slow, manual certificate checking with an instant, trustworthy verification workflow.
+            VerifiedRecords is an academic certificate verification web application developed by Siddhant Asati as an engineering college blockchain project. It provides an immediate, trustworthy digital alternative to slow, manual degree validation.
         </p>
 
 
@@ -163,9 +151,9 @@
 
             <div class="about-card">
                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-                <h2>The Problem It Addresses</h2>
+                <h2>The Problem Addressed</h2>
                 <p>
-                    Paper certificates and scanned PDFs are easy to forge or alter with basic image editors. When employers, graduate schools, or government agencies need to verify a student's degree, they often have to email or call the university registrar's office, waiting days or even weeks for manual confirmation.
+                    Paper certificates and scanned PDFs are easy to forge or alter. Verifying qualifications through university registrar offices typically requires days or weeks of manual correspondence.
                 </p>
             </div>
 
@@ -173,23 +161,23 @@
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                 <h2>How Verification Works</h2>
                 <p>
-                    Each certificate is assigned a unique Certificate ID when issued. Anyone who needs to verify a degree—such as a recruiter or university admissions officer—can simply enter that ID on the public verification page. The system queries the university repository and displays authentic conferral details directly on screen in seconds.
+                    Each certificate is issued with a unique Certificate ID. Verifiers enter the ID on the lookup page to instantly view authentic candidate, degree, and conferral details retrieved directly from institutional records.
                 </p>
             </div>
 
             <div class="about-card">
                 <i class="fa-solid fa-cubes" aria-hidden="true"></i>
-                <h2>Why Blockchain Is Relevant</h2>
+                <h2>Why Blockchain Is Used</h2>
                 <p>
-                    In an ideal credential system, once an academic degree is granted, it should never be altered or revoked without full auditability. The project explores blockchain technology (using Ethereum smart contracts written in Solidity) because decentralized ledgers provide permanent, tamper-resistant record keeping without a single point of failure.
+                    Academic credentials should be permanent and tamper-resistant. In this project, Ethereum smart contracts were developed with Solidity to prototype immutable, auditable credential records that cannot be modified after issuance.
                 </p>
             </div>
 
             <div class="about-card">
                 <i class="fa-solid fa-laptop-code" aria-hidden="true"></i>
-                <h2>What the Project Currently Does</h2>
+                <h2>Current Implementation</h2>
                 <p>
-                    The platform currently provides a live, interactive web system: authorized staff can issue and store student certificates through a secure administrative portal, and the public can verify credentials in real time via our REST API connected to a live MongoDB database, with smart contract prototypes developed alongside it.
+                    Authorized staff sign in to record student certificates through the registrar portal, while public users can query and verify credentials in real time through a live Node.js REST API and MongoDB database.
                 </p>
             </div>
 
@@ -197,71 +185,62 @@
 
 
         <!-- TECHNOLOGIES USED -->
-        <section class="acknowledgement" style="border-left-color: var(--color-academic-blue);">
+        <section class="acknowledgement">
             <h2>Technologies Used</h2>
             <p style="margin-bottom: var(--space-4);">
-                This project integrates several web and database technologies across the frontend, backend, and decentralized layers:
+                The application brings together web, database, and decentralized technologies across the stack:
             </p>
 
             <div class="tech-stack-grid">
                 <div class="tech-item">
                     <div class="tech-item-name">
-                        <i class="fa-brands fa-html5" style="color: #e34f26;" aria-hidden="true"></i> HTML5 & Vanilla CSS3
+                        <i class="fa-brands fa-html5" style="color: #e34f26;" aria-hidden="true"></i> HTML5 & CSS3
                     </div>
-                    <div class="tech-item-role">Semantic structure, custom academic design tokens, and responsive light/dark themes.</div>
+                    <div class="tech-item-role">Semantic structure, tactile neumorphic controls, frosted glass panels, and responsive academic layouts.</div>
                 </div>
 
                 <div class="tech-item">
                     <div class="tech-item-name">
-                        <i class="fa-brands fa-js" style="color: #f7df1e;" aria-hidden="true"></i> Vanilla JavaScript
+                        <i class="fa-brands fa-js" style="color: #f7df1e;" aria-hidden="true"></i> JavaScript
                     </div>
-                    <div class="tech-item-role">Client-side state management, form UX, input validation, and asynchronous API calls.</div>
+                    <div class="tech-item-role">Client-side state management, form validation, input handling, and asynchronous API calls.</div>
                 </div>
 
                 <div class="tech-item">
                     <div class="tech-item-name">
                         <i class="fa-brands fa-node-js" style="color: #68a063;" aria-hidden="true"></i> Node.js & Express
                     </div>
-                    <div class="tech-item-role">RESTful backend handling verification lookups and administrative certificate registration.</div>
+                    <div class="tech-item-role">REST API backend serving certificate lookups and administrative registration requests.</div>
                 </div>
 
                 <div class="tech-item">
                     <div class="tech-item-name">
                         <i class="fa-solid fa-database" style="color: #47a248;" aria-hidden="true"></i> MongoDB
                     </div>
-                    <div class="tech-item-role">Persistent document store with case-insensitive indexing for Certificate IDs.</div>
+                    <div class="tech-item-role">Persistent document store with indexed Certificate IDs for fast and reliable retrieval.</div>
                 </div>
 
                 <div class="tech-item">
                     <div class="tech-item-name">
-                        <i class="fa-solid fa-fire" style="color: #ffca28;" aria-hidden="true"></i> Firebase Authentication
+                        <i class="fa-solid fa-fire" style="color: #ffca28;" aria-hidden="true"></i> Firebase Auth
                     </div>
-                    <div class="tech-item-role">User login, session monitoring, and route protection for registrar officers.</div>
+                    <div class="tech-item-role">Administrative user sign-in, session monitoring, and protected dashboard access.</div>
                 </div>
 
                 <div class="tech-item">
                     <div class="tech-item-name">
                         <i class="fa-brands fa-ethereum" style="color: #627eea;" aria-hidden="true"></i> Solidity & Truffle
                     </div>
-                    <div class="tech-item-role">Smart contracts developed to model decentralized, tamper-proof credential storage.</div>
+                    <div class="tech-item-role">Smart contracts written to model decentralized, tamper-evident certificate records.</div>
                 </div>
             </div>
-        </section>
-
-
-        <!-- PROJECT CONTEXT & ACKNOWLEDGEMENT -->
-        <section class="acknowledgement">
-            <h2>Project Context</h2>
-            <p>
-                VerifiedRecords represents a hands-on learning journey in full-stack web development, REST API design, database modeling, and decentralized smart contract concepts. It is designed to demonstrate practical software engineering principles applied to real-world academic administration.
-            </p>
         </section>
 
 
         <!-- METADATA -->
         <div class="about-meta">
             <div>
-                Project Type: <strong>BlockChain Based Academic Certificate Verification</strong>
+                Project: <strong>Academic Certificate Verification System</strong>
             </div>
 
             <div>
@@ -269,7 +248,7 @@
             </div>
 
             <div>
-                Status: <strong>Currently Functioning</strong>
+                Status: <strong>Active & Operational</strong>
             </div>
         </div>
 
@@ -316,12 +295,11 @@
 </footer>
 
 
-<!-- ==================================================
-     FIREBASE & AUTHENTICATION
-================================================== -->
+<!-- FIREBASE & AUTHENTICATION -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="assets/js/auth.js"></script>
+<script src="assets/js/app.js"></script>
 
 </body>
 

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -10,36 +11,35 @@
     <meta name="description"
           content="Create an account on VerifiedRecords to access academic certificate registry services.">
 
-    <!-- Fonts -->
+    <!-- Fonts & Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
-
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
 
     <!-- Shared Design System -->
     <link rel="stylesheet"
           href="assets/css/style.css">
+
 </head>
 
 <body>
 
     <!-- =====================================================
-         TOP NAVIGATION
+         TOP NAVIGATION (NEUMORPHIC MASTHEAD)
     ====================================================== -->
     <nav class="top-navbar" aria-label="Main Navigation">
 
         <!-- LEFT SIDE -->
         <div class="nav-left">
             <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
-                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
                 <span class="nav-brand-text">VerifiedRecords</span>
             </a>
 
@@ -72,15 +72,6 @@
 
         <!-- RIGHT SIDE -->
         <div class="nav-right">
-            <!-- THEME TOGGLE (SUN / MOON) -->
-            <button type="button"
-                    id="themeToggle"
-                    class="theme-toggle-btn"
-                    aria-label="Toggle Light or Dark Theme"
-                    title="Toggle Theme">
-                <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
-            </button>
-
             <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
                 <!-- LOGGED-OUT: LOGIN / SIGN UP -->
@@ -130,39 +121,70 @@
 
 
     <!-- =====================================================
-         SIGNUP PAGE CONTENT
+         SIGNUP PAGE CONTENT (GLASSMORPHIC PANEL)
     ====================================================== -->
     <main class="login-page">
 
+        <!-- Subtle Ambient Background Layer -->
+        <div class="auth-ambient-bg" aria-hidden="true">
+            <div class="auth-orb auth-orb-1"></div>
+            <div class="auth-orb auth-orb-2"></div>
+        </div>
+
         <div class="signup-container card">
 
-            <h1>VerifiedRecords</h1>
-
-            <div class="subtitle">
-                Create your registry account
+            <div class="auth-header">
+                <div class="auth-brand-badge">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                    <span>Institutional Registry</span>
+                </div>
+                <h1>Create Account</h1>
+                <p class="subtitle">Register an administrative account for credential issuance</p>
             </div>
+
+            <!-- FEEDBACK MESSAGE BANNER -->
+            <div id="message" class="auth-alert" role="status" aria-live="polite" style="display: none;"></div>
 
             <!-- =====================================
                  SIGNUP FORM
             ====================================== -->
-            <form id="signupForm" onsubmit="event.preventDefault(); createAccount();">
+            <form id="signupForm" novalidate onsubmit="event.preventDefault(); createAccount();">
 
-                <!-- Email -->
+                <!-- EMAIL -->
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input
-                        type="email"
-                        id="email"
-                        placeholder="Enter your email address"
-                        autocomplete="email"
-                        required
-                    >
+                    <div class="auth-input-wrapper" id="emailWrapper">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="e.g. registrar@university.edu"
+                            autocomplete="email"
+                            spellcheck="false"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="auth-clear-btn"
+                            id="emailClearBtn"
+                            title="Clear email"
+                            aria-label="Clear email"
+                            style="display: none;"
+                        >
+                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Password -->
+                <!-- PASSWORD -->
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <div class="password-input-wrapper">
+                    <div class="auth-input-wrapper" id="passwordWrapper">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
                         <input
                             type="password"
                             id="password"
@@ -183,14 +205,17 @@
                     </div>
                 </div>
 
-                <!-- Confirm Password -->
+                <!-- CONFIRM PASSWORD -->
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <div class="password-input-wrapper">
+                    <div class="auth-input-wrapper" id="confirmPasswordWrapper">
+                        <span class="auth-input-icon" aria-hidden="true">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </span>
                         <input
                             type="password"
                             id="confirmPassword"
-                            placeholder="Re-enter your password"
+                            placeholder="Re-enter password"
                             autocomplete="new-password"
                             required
                         >
@@ -207,25 +232,24 @@
                     </div>
                 </div>
 
-                <!-- Create Account Button -->
+                <!-- SUBMIT BUTTON -->
                 <button
                     type="submit"
                     id="signupSubmitBtn"
-                    class="primary-button signup-btn"
-                    style="width: 100%; margin-top: 8px;"
+                    class="primary-button auth-submit-btn"
                 >
-                    <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-                    <span>Create Account</span>
+                    <i class="fa-solid fa-user-plus" id="signupBtnIcon" aria-hidden="true"></i>
+                    <span id="signupBtnText">Create Account</span>
                 </button>
 
             </form>
 
-            <!-- Divider -->
+            <!-- DIVIDER -->
             <div class="divider">
-                <span>OR</span>
+                <span>Or Continue With</span>
             </div>
 
-            <!-- Google Signup Button -->
+            <!-- GOOGLE SIGNUP -->
             <button
                 type="button"
                 id="googleSignupBtn"
@@ -241,20 +265,14 @@
                 <span>Continue with Google</span>
             </button>
 
-            <!-- Back to Login -->
-            <button
-                type="button"
-                id="backToLoginBtn"
-                class="create-btn"
-                onclick="goToLogin()"
-                style="width: 100%; margin-top: 10px;"
-            >
-                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                <span>Already registered? Return to Sign In</span>
-            </button>
-
-            <!-- Message Area -->
-            <div id="message" role="status" aria-live="polite"></div>
+            <!-- SWITCH TO LOGIN -->
+            <div class="auth-switch-prompt">
+                <span>Already registered?</span>
+                <a href="login.html" id="backToLoginBtn" class="auth-switch-link" onclick="goToLogin(); return false;">
+                    <span>Sign In</span>
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
 
         </div>
 
@@ -299,25 +317,15 @@
     </footer>
 
 
-    <!-- =====================================================
-         FIREBASE SDKs
-    ====================================================== -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
-    <!-- =====================================================
-         SHARED AUTH CONTROLLER (Initializes Firebase & Navbar)
-    ====================================================== -->
+    <!-- Shared Auth Controller -->
     <script src="assets/js/auth.js"></script>
 
-
-    <!-- =====================================================
-         SIGNUP LOGIC
-    ====================================================== -->
+    <!-- Signup Logic -->
     <script>
-        // ==========================================
-        // PASSWORD VISIBILITY TOGGLE
-        // ==========================================
         function togglePasswordVisibility(fieldId, iconId) {
             const field = document.getElementById(fieldId);
             const icon = document.getElementById(iconId);
@@ -332,54 +340,95 @@
             }
         }
 
-        // ==========================================
-        // MESSAGE DISPLAY
-        // ==========================================
-        function showMessage(message, success = false) {
+        function showMessage(message, isSuccess = false) {
             const element = document.getElementById("message");
             if (!element) return;
 
-            element.innerText = message;
-            element.className = success ? "success" : "error";
-            element.style.color = success
-                ? "var(--color-verified-text, #34d37c)"
-                : "var(--color-danger-text, #f87171)";
+            if (!message) {
+                element.style.display = "none";
+                element.innerHTML = "";
+                return;
+            }
+
+            element.style.display = "flex";
+            element.className = "auth-alert " + (isSuccess ? "success" : "error");
+            const icon = isSuccess ? "fa-circle-check" : "fa-circle-exclamation";
+            element.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i><span>' + message + '</span>';
         }
 
-        // ==========================================
-        // FORM BUSY / LOADING STATE
-        // ==========================================
         function setFormLoading(isLoading, buttonText = "Create Account") {
             const submitBtn = document.getElementById("signupSubmitBtn");
+            const btnIcon = document.getElementById("signupBtnIcon");
+            const btnText = document.getElementById("signupBtnText");
             const googleBtn = document.getElementById("googleSignupBtn");
-            const backBtn = document.getElementById("backToLoginBtn");
             const emailInput = document.getElementById("email");
             const passwordInput = document.getElementById("password");
             const confirmInput = document.getElementById("confirmPassword");
+            const emailClearBtn = document.getElementById("emailClearBtn");
 
             if (submitBtn) {
                 submitBtn.disabled = isLoading;
-                submitBtn.innerHTML = isLoading
-                    ? '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> <span>Creating account...</span>'
-                    : '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> <span>' + buttonText + '</span>';
+                if (isLoading) {
+                    submitBtn.classList.add("loading");
+                    if (btnIcon) btnIcon.className = "fa-solid fa-circle-notch fa-spin";
+                    if (btnText) btnText.textContent = "Creating account...";
+                } else {
+                    submitBtn.classList.remove("loading");
+                    if (btnIcon) btnIcon.className = "fa-solid fa-user-plus";
+                    if (btnText) btnText.textContent = buttonText;
+                }
             }
 
             if (googleBtn) googleBtn.disabled = isLoading;
-            if (backBtn) backBtn.disabled = isLoading;
             if (emailInput) emailInput.disabled = isLoading;
             if (passwordInput) passwordInput.disabled = isLoading;
             if (confirmInput) confirmInput.disabled = isLoading;
+            if (emailClearBtn) emailClearBtn.disabled = isLoading;
         }
 
-        // ==========================================
-        // CREATE ACCOUNT (EMAIL / PASSWORD)
-        // ==========================================
+        function getFriendlyErrorMessage(error) {
+            if (!error) return "An unexpected error occurred. Please try again.";
+            switch (error.code) {
+                case "auth/email-already-in-use":
+                    return "This email is already registered. Please sign in instead.";
+                case "auth/invalid-email":
+                    return "Please enter a valid email address.";
+                case "auth/weak-password":
+                    return "Password is too weak. Please use at least 6 characters.";
+                case "auth/network-request-failed":
+                    return "Network error. Please check your internet connection.";
+                case "auth/popup-closed-by-user":
+                    return "Google sign-in was cancelled.";
+                case "auth/popup-blocked":
+                    return "Popup was blocked by your browser. Please allow popups.";
+                default:
+                    return error.message || "Failed to create account. Please try again.";
+            }
+        }
+
+        // Email Clear Button Listener
+        const emailInput = document.getElementById("email");
+        const emailClearBtn = document.getElementById("emailClearBtn");
+        if (emailInput && emailClearBtn) {
+            emailInput.addEventListener("input", function() {
+                emailClearBtn.style.display = this.value.trim() ? "inline-flex" : "none";
+            });
+            emailClearBtn.addEventListener("click", function() {
+                emailInput.value = "";
+                emailClearBtn.style.display = "none";
+                emailInput.focus();
+            });
+        }
+
+        function goToLogin() {
+            window.location.href = "login.html";
+        }
+
         async function createAccount() {
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
 
-            // Form Validation
             if (!email || !password || !confirmPassword) {
                 showMessage("Please fill in all required fields.");
                 return;
@@ -409,32 +458,18 @@
 
                 setTimeout(function() {
                     window.location.href = "admin.html";
-                }, 1000);
+                }, 900);
 
             } catch (error) {
                 console.error("Signup error:", error);
                 setFormLoading(false);
-
-                if (error.code === "auth/email-already-in-use") {
-                    showMessage("This email address is already registered. Please sign in.");
-                } else if (error.code === "auth/invalid-email") {
-                    showMessage("Please enter a valid email address.");
-                } else if (error.code === "auth/weak-password") {
-                    showMessage("Password is too weak. Please use at least 6 characters.");
-                } else if (error.code === "auth/network-request-failed") {
-                    showMessage("Network error. Please check your internet connection.");
-                } else {
-                    showMessage(error.message || "Failed to create account. Please try again.");
-                }
+                showMessage(getFriendlyErrorMessage(error));
             }
         }
 
-        // ==========================================
-        // GOOGLE SIGNUP
-        // ==========================================
         async function googleSignup() {
             setFormLoading(true, "Create Account");
-            showMessage("Opening Google authentication...", true);
+            showMessage("Connecting to Google...", true);
 
             const provider = new firebase.auth.GoogleAuthProvider();
 
@@ -450,24 +485,11 @@
             } catch (error) {
                 console.error("Google signup error:", error);
                 setFormLoading(false);
-
-                if (error.code === "auth/popup-closed-by-user") {
-                    showMessage("Google sign-in was cancelled.");
-                } else if (error.code === "auth/popup-blocked") {
-                    showMessage("Popup was blocked by your browser. Please allow popups.");
-                } else {
-                    showMessage(error.message || "Google sign-in failed. Please try again.");
-                }
+                showMessage(getFriendlyErrorMessage(error));
             }
         }
-
-        // ==========================================
-        // BACK TO LOGIN
-        // ==========================================
-        function goToLogin() {
-            window.location.href = "login.html";
-        }
     </script>
+    <script src="assets/js/app.js"></script>
 
 </body>
 

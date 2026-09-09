@@ -4,53 +4,42 @@
 <head>
 
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Verify Certificate - VerifiedRecords</title>
 
+    <meta name="description"
+          content="Verify academic credentials directly against the university records registry.">
 
-    <!-- Fonts -->
-
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap"
-          rel="stylesheet">
-
-
-    <!-- Font Awesome -->
-
+    <!-- Fonts & Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
 
     <!-- Main CSS -->
-
     <link rel="stylesheet"
           href="assets/css/style.css">
 
-
 </head>
-
 
 <body>
 
-
 <!-- ==================================================
-     TOP NAVIGATION
+     TOP NAVIGATION (NEUMORPHIC MASTHEAD)
 ================================================== -->
 <nav class="top-navbar" aria-label="Main Navigation">
 
     <!-- LEFT SIDE -->
     <div class="nav-left">
         <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
-            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
             <span class="nav-brand-text">VerifiedRecords</span>
         </a>
 
@@ -83,15 +72,6 @@
 
     <!-- RIGHT SIDE -->
     <div class="nav-right">
-        <!-- THEME TOGGLE (SUN / MOON) -->
-        <button type="button"
-                id="themeToggle"
-                class="theme-toggle-btn"
-                aria-label="Toggle Light or Dark Theme"
-                title="Toggle Theme">
-            <i id="themeToggleIcon" class="fa-solid fa-sun" aria-hidden="true"></i>
-        </button>
-
         <!-- AUTHENTICATION AREA -->
         <div class="auth-area">
             <!-- LOGGED-OUT: LOGIN / SIGN UP -->
@@ -140,34 +120,39 @@
 </nav>
 
 
-
 <!-- ==================================================
      VERIFY PAGE CONTENT
 ================================================== -->
 <main class="verify-page-wrapper">
+
+    <!-- Ambient Background Layer for Glassmorphic Depth -->
+    <div class="page-ambient-layer" aria-hidden="true">
+        <div class="ambient-orb ambient-orb-1"></div>
+        <div class="ambient-orb ambient-orb-2"></div>
+    </div>
+
     <div class="verify-container">
 
         <!-- HEADER / HERO -->
         <header class="verify-header">
             <div class="verify-badge">
                 <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                <span>Official Registry Verification Portal</span>
+                <span>Official Registry Verification</span>
             </div>
             <h1 class="page-title">
                 Verify <span>Certificate</span>
             </h1>
             <p class="verify-subtitle">
-                Validate the authenticity of academic credentials directly against the university's permanent records repository.
+                Validate student degree credentials against official institutional records.
             </p>
         </header>
 
-        <!-- VERIFICATION FORM CARD -->
+        <!-- VERIFICATION FORM CARD (REFINED SUBTLE GLASSMORPHISM) -->
         <div class="verify-card">
             <form id="verifyForm" novalidate>
                 <div class="form-group">
                     <label for="certificateId" class="verify-label">
-                        <span>Certificate Identification Number</span>
-                        <span class="label-hint">e.g. CERT_CSE001</span>
+                        <span>Certificate ID</span>
                     </label>
                     <div class="verify-input-group" id="verifyInputGroup">
                         <span class="verify-input-icon" aria-hidden="true">
@@ -208,6 +193,25 @@
                     </button>
                 </div>
             </form>
+
+            <!-- QUICK SAMPLE SELECTION -->
+            <div class="verify-quick-samples">
+                <span class="verify-samples-label">
+                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                    Sample IDs:
+                </span>
+                <div class="verify-samples-list">
+                    <button type="button" class="verify-sample-chip" onclick="fillVerifyInput('CERT_CSE001')" title="Query CERT_CSE001">
+                        <code>CERT_CSE001</code>
+                    </button>
+                    <button type="button" class="verify-sample-chip" onclick="fillVerifyInput('CERT_CSE002')" title="Query CERT_CSE002">
+                        <code>CERT_CSE002</code>
+                    </button>
+                    <button type="button" class="verify-sample-chip" onclick="fillVerifyInput('CERT_567890')" title="Query CERT_567890">
+                        <code>CERT_567890</code>
+                    </button>
+                </div>
+            </div>
 
             <!-- INLINE ALERT BANNER -->
             <div id="inlineAlert" class="inline-alert" role="alert" aria-live="polite" style="display: none;">
@@ -259,14 +263,14 @@
 
                     <!-- Credential Details Grid -->
                     <div class="credential-details-grid" id="credentialDetailsGrid">
-                        <!-- Populated dynamically from backend response -->
+                        <!-- Populated dynamically from backend response: Student Name, Roll Number, Course, Certificate ID, Issue Date -->
                     </div>
 
                     <!-- Trust Footer -->
                     <div class="cert-card-footer">
                         <div class="cert-footer-meta">
                             <i class="fa-solid fa-shield-check" aria-hidden="true"></i>
-                            <span>Authenticated and verified against permanent university database records. This verifiable record confirms academic completion in good standing.</span>
+                            <span>Authenticated and verified against permanent university records. Confirms academic completion in good standing.</span>
                         </div>
                         <div class="cert-footer-actions">
                             <button type="button" class="cert-action-btn" id="printCertBtn">
@@ -309,25 +313,14 @@
         </button>
 
         <div class="vr-modal-icon-wrap" aria-hidden="true">
-            <i class="fa-solid fa-file-circle-xmark"></i>
+            <i class="fa-solid fa-circle-question"></i>
         </div>
 
         <div class="vr-modal-content">
             <h3 class="vr-modal-title" id="modalTitle">Certificate Could Not Be Verified</h3>
             <p class="vr-modal-desc" id="modalDesc">
-                No matching record was found in the official university records registry. Please check the Certificate ID and try again.
+                Please check the Certificate ID and try again.
             </p>
-
-            <div class="vr-modal-tips">
-                <div class="tip-item">
-                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                    <span>Verify the exact letters and numbers printed on your certificate.</span>
-                </div>
-                <div class="tip-item">
-                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                    <span>Certificate IDs are not case sensitive but must match the registered issuance identifier.</span>
-                </div>
-            </div>
         </div>
 
         <div class="vr-modal-actions">
@@ -379,22 +372,14 @@
     </div>
 </footer>
 
-
-
-<!-- ==================================================
-     VERIFY JAVASCRIPT
-================================================== -->
-
+<!-- VERIFY JAVASCRIPT -->
 <script src="assets/js/verify.js"></script>
 
-
-
-<!-- ==================================================
-     FIREBASE & AUTHENTICATION
-================================================== -->
+<!-- FIREBASE & AUTHENTICATION -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="assets/js/auth.js"></script>
+<script src="assets/js/app.js"></script>
 
 </body>
 
