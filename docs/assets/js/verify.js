@@ -256,7 +256,7 @@
             fieldsHtml += `
                 <div class="credential-field">
                     <span class="credential-label">
-                        <i class="fa-solid fa-barcode" aria-hidden="true"></i> Certificate ID
+                        <i class="fa-solid fa-id-card-clip" aria-hidden="true"></i> Certificate ID
                     </span>
                     <span class="credential-value mono">${escapeHtml(cert.certificateId)}</span>
                 </div>

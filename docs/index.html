@@ -38,7 +38,7 @@
 
         <!-- LEFT SIDE -->
         <div class="nav-left">
-            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home" title="Click to replay Security Intro Animation" onclick="if(window.replaySecurityIntro){window.replaySecurityIntro();return false;}">
                 <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
                 <span class="nav-brand-text">VerifiedRecords</span>
             </a>
@@ -136,8 +136,8 @@
             <div class="hero-content">
 
                 <div class="portal-badge">
-                    <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
-                    Official Academic Credential Registry
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                    Ease to Security
                 </div>
 
                 <h1>Verify a University Certificate</h1>
@@ -173,7 +173,7 @@
 
                     <form action="verify.html" method="GET" class="lookup-form" id="quickVerifyForm">
                         <div class="lookup-input-wrap">
-                            <i class="fa-solid fa-barcode lookup-field-icon" aria-hidden="true"></i>
+                            <i class="fa-solid fa-id-card-clip lookup-field-icon" aria-hidden="true"></i>
                             <input
                                 type="text"
                                 name="id"
@@ -201,13 +201,13 @@
                         </span>
                         <div class="lookup-chips-list">
                             <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE001')" title="Query CERT_CSE001">
-                                <code>CERT_CSE001</code>
+                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_CSE001</code>
                             </button>
                             <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE002')" title="Query CERT_CSE002">
-                                <code>CERT_CSE002</code>
+                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_CSE002</code>
                             </button>
                             <button type="button" class="lookup-chip" onclick="setQuickId('CERT_567890')" title="Query CERT_567890">
-                                <code>CERT_567890</code>
+                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_567890</code>
                             </button>
                         </div>
                     </div>
@@ -411,6 +411,9 @@
             }
         });
     </script>
+
+    <!-- Security Intro Animation -->
+    <script src="assets/js/intro.js"></script>
 
     <!-- App Utilities -->
     <script src="assets/js/app.js"></script>
