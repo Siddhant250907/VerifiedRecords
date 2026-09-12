@@ -266,6 +266,112 @@
                         <!-- Populated dynamically from backend response: Student Name, Roll Number, Course, Certificate ID, Issue Date -->
                     </div>
 
+                    <!-- ==================================================
+                         ON-CHAIN CRYPTOGRAPHIC PROOF (VERIFIED ONLY)
+                    ================================================== -->
+                    <div class="blockchain-proof-panel" id="blockchainProofPanel" style="display: none;">
+                        <div class="proof-panel-header">
+                            <div class="proof-header-left">
+                                <div class="proof-header-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-cube"></i>
+                                </div>
+                                <div class="proof-header-text">
+                                    <h3 class="proof-panel-title">On-Chain Cryptographic Proof</h3>
+                                    <span class="proof-panel-subtitle">Permanent cryptographic record verified directly from the Ethereum smart contract</span>
+                                </div>
+                            </div>
+                            <div class="proof-status-pill">
+                                <span class="proof-status-dot" aria-hidden="true"></span>
+                                <span class="proof-status-text">Blockchain Status: <strong>Verified</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="proof-grid">
+                            <!-- Issuer Address -->
+                            <div class="proof-item">
+                                <span class="proof-label">
+                                    <i class="fa-solid fa-key" aria-hidden="true"></i> Issuer Address
+                                </span>
+                                <div class="proof-value-row">
+                                    <span class="proof-value mono" id="proofIssuer">—</span>
+                                    <button type="button" class="proof-copy-icon-btn" id="copyIssuerBtn" title="Copy Issuer Address" aria-label="Copy Issuer Address">
+                                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Blockchain Timestamp -->
+                            <div class="proof-item">
+                                <span class="proof-label">
+                                    <i class="fa-solid fa-clock" aria-hidden="true"></i> Blockchain Timestamp
+                                </span>
+                                <div class="proof-value-row">
+                                    <span class="proof-value" id="proofTimestamp">—</span>
+                                </div>
+                            </div>
+
+                            <!-- Contract Address -->
+                            <div class="proof-item">
+                                <span class="proof-label">
+                                    <i class="fa-solid fa-file-contract" aria-hidden="true"></i> Contract Address
+                                </span>
+                                <div class="proof-value-row">
+                                    <span class="proof-value mono" id="proofContract">—</span>
+                                    <button type="button" class="proof-copy-icon-btn" id="copyContractBtn" title="Copy Contract Address" aria-label="Copy Contract Address">
+                                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Block Number -->
+                            <div class="proof-item" id="proofBlockItem">
+                                <span class="proof-label">
+                                    <i class="fa-solid fa-cubes" aria-hidden="true"></i> Block Number
+                                </span>
+                                <div class="proof-value-row">
+                                    <span class="proof-value mono" id="proofBlockNumber">—</span>
+                                </div>
+                            </div>
+
+                            <!-- Certificate Hash -->
+                            <div class="proof-item full-width">
+                                <span class="proof-label">
+                                    <i class="fa-solid fa-fingerprint" aria-hidden="true"></i> Deterministic Hash (On-Chain)
+                                </span>
+                                <div class="proof-value-row">
+                                    <span class="proof-value mono" id="proofCertHash">—</span>
+                                    <button type="button" class="proof-copy-icon-btn" id="copyCertHashBtn" title="Copy Certificate Hash" aria-label="Copy Certificate Hash">
+                                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Issuance Transaction Hash (Featured Full-Width Row, Clickable & Copyable) -->
+                            <div class="proof-item full-width highlight-tx">
+                                <div class="proof-tx-header">
+                                    <span class="proof-label">
+                                        <i class="fa-solid fa-receipt" aria-hidden="true"></i> Original Issuance Transaction
+                                    </span>
+                                    <span class="proof-tx-badge">
+                                        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Mined On-Chain
+                                    </span>
+                                </div>
+                                <div class="proof-tx-action-wrap">
+                                    <div class="proof-tx-clickable" id="proofTxHashClickable" title="Click to copy Transaction Hash" role="button" tabindex="0">
+                                        <span class="proof-value mono tx-hash-val" id="proofTxHash">—</span>
+                                    </div>
+                                    <button type="button" class="proof-copy-pill-btn" id="copyTxHashBtn" title="Copy Issuance Transaction Hash" aria-label="Copy Issuance Transaction Hash">
+                                        <i class="fa-regular fa-copy" id="copyTxIcon" aria-hidden="true"></i>
+                                        <span id="copyTxText">Copy</span>
+                                    </button>
+                                </div>
+                                <div class="proof-copy-toast" id="proofCopyToast" aria-live="polite" style="display: none;">
+                                    <i class="fa-solid fa-check" aria-hidden="true"></i> Copied to clipboard!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Trust Footer -->
                     <div class="cert-card-footer">
                         <div class="cert-footer-meta">

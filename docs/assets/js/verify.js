@@ -21,9 +21,9 @@
     "use strict";
 
     // -------------------------------------------------------------------------
-    // EXISTING BACKEND API ENDPOINT (PRESERVED)
+    // BACKEND API ENDPOINT (DEFAULT TO RELATIVE FOR SAME-ORIGIN / LOCALHOST)
     // -------------------------------------------------------------------------
-    const API_BASE = "https://verifiedrecords.onrender.com/api/certificate/";
+    const API_BASE = "/api/certificate/";
 
     // -------------------------------------------------------------------------
     // DOM ELEMENTS
@@ -46,6 +46,23 @@
     const printCertBtn = document.getElementById("printCertBtn");
     const verifyAnotherBtn = document.getElementById("verifyAnotherBtn");
 
+    // Blockchain Proof Panel DOM elements
+    const blockchainProofPanel = document.getElementById("blockchainProofPanel");
+    const proofIssuer = document.getElementById("proofIssuer");
+    const copyIssuerBtn = document.getElementById("copyIssuerBtn");
+    const proofTimestamp = document.getElementById("proofTimestamp");
+    const proofContract = document.getElementById("proofContract");
+    const copyContractBtn = document.getElementById("copyContractBtn");
+    const proofBlockNumber = document.getElementById("proofBlockNumber");
+    const proofCertHash = document.getElementById("proofCertHash");
+    const copyCertHashBtn = document.getElementById("copyCertHashBtn");
+    const proofTxHash = document.getElementById("proofTxHash");
+    const proofTxHashClickable = document.getElementById("proofTxHashClickable");
+    const copyTxHashBtn = document.getElementById("copyTxHashBtn");
+    const copyTxIcon = document.getElementById("copyTxIcon");
+    const copyTxText = document.getElementById("copyTxText");
+    const proofCopyToast = document.getElementById("proofCopyToast");
+
     const invalidModal = document.getElementById("invalidModal");
     const modalTitle = document.getElementById("modalTitle");
     const modalDesc = document.getElementById("modalDesc");
@@ -53,6 +70,61 @@
     const modalDismissBtn = document.getElementById("modalDismissBtn");
 
     let isSubmitting = false;
+
+    // -------------------------------------------------------------------------
+    // CLIPBOARD COPY UTILITIES WITH VISUAL FEEDBACK
+    // -------------------------------------------------------------------------
+    async function copyToClipboard(text, isTxAction = false, triggerBtn = null) {
+        if (!text || text === "—" || text === "N/A") return;
+
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                document.body.removeChild(ta);
+            }
+        } catch (copyErr) {
+            console.warn("Clipboard write failed:", copyErr);
+        }
+
+        // Show floating copy toast
+        if (proofCopyToast) {
+            proofCopyToast.style.display = "inline-flex";
+            clearTimeout(proofCopyToast._timer);
+            proofCopyToast._timer = setTimeout(() => {
+                proofCopyToast.style.display = "none";
+            }, 2500);
+        }
+
+        // Dedicated feedback for transaction button
+        if (isTxAction) {
+            if (copyTxIcon) copyTxIcon.className = "fa-solid fa-check";
+            if (copyTxText) copyTxText.textContent = "Copied!";
+            if (copyTxHashBtn) copyTxHashBtn.classList.add("copied");
+
+            setTimeout(() => {
+                if (copyTxIcon) copyTxIcon.className = "fa-regular fa-copy";
+                if (copyTxText) copyTxText.textContent = "Copy";
+                if (copyTxHashBtn) copyTxHashBtn.classList.remove("copied");
+            }, 2500);
+        } else if (triggerBtn) {
+            const icon = triggerBtn.querySelector("i");
+            if (icon) {
+                const origClass = icon.className;
+                icon.className = "fa-solid fa-check";
+                setTimeout(() => {
+                    icon.className = origClass;
+                }, 2000);
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // INLINE ALERT HELPERS
@@ -168,7 +240,7 @@
     // -------------------------------------------------------------------------
     // RESULT SECTION RENDERING (ON-PAGE ONLY)
     // -------------------------------------------------------------------------
-    function renderVerifiedResult(cert) {
+    function renderVerifiedResult(cert, blockchain) {
         if (!verificationResult || !credentialDetailsGrid) return;
 
         // Escape HTML to prevent injection
@@ -289,6 +361,72 @@
 
         credentialDetailsGrid.innerHTML = fieldsHtml;
 
+        // ---------------------------------------------------------------------
+        // POPULATE ON-CHAIN BLOCKCHAIN PROOF PANEL
+        // ---------------------------------------------------------------------
+        const issuerVal = (blockchain && blockchain.issuer) || cert.blockchainIssuer || "—";
+        const contractVal = (blockchain && blockchain.contractAddress) || cert.contractAddress || "—";
+        const certHashVal = (blockchain && (blockchain.certificateHash || blockchain.computedHash)) || cert.certificateHash || "—";
+        // Original Issuance Transaction Hash from MongoDB
+        const origTxHashVal = (blockchain && blockchain.transactionHash) || cert.transactionHash || "";
+
+        if (proofIssuer) {
+            proofIssuer.textContent = issuerVal;
+            proofIssuer.title = issuerVal;
+        }
+
+        if (proofContract) {
+            proofContract.textContent = contractVal;
+            proofContract.title = contractVal;
+        }
+
+        const blockNumVal = (blockchain && blockchain.blockNumber) !== undefined ? blockchain.blockNumber : (cert && cert.blockNumber);
+        if (proofBlockNumber) {
+            proofBlockNumber.textContent = (blockNumVal !== null && blockNumVal !== undefined) ? `#${blockNumVal}` : "—";
+        }
+
+        if (proofCertHash) {
+            proofCertHash.textContent = certHashVal;
+            proofCertHash.title = certHashVal;
+        }
+
+        if (proofTxHash) {
+            proofTxHash.textContent = origTxHashVal || "Not Recorded";
+            proofTxHash.title = origTxHashVal ? "Issuance Transaction: " + origTxHashVal : "";
+        }
+
+        // Format Blockchain Timestamp
+        const rawTs = Number((blockchain && blockchain.issuedAt) || cert.blockchainIssuedAt || 0);
+        if (proofTimestamp) {
+            if (rawTs > 0) {
+                try {
+                    const blockDate = new Date(rawTs * 1000);
+                    const formattedBlockTime = blockDate.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        timeZoneName: "short"
+                    });
+                    proofTimestamp.innerHTML = `
+                        <span>${escapeHtml(formattedBlockTime)}</span>
+                        <span class="proof-unix-ts mono">(Unix: ${rawTs})</span>
+                    `;
+                } catch (e) {
+                    proofTimestamp.textContent = String(rawTs);
+                }
+            } else {
+                proofTimestamp.textContent = "—";
+            }
+        }
+
+        // Display blockchain proof panel
+        if (blockchainProofPanel) {
+            blockchainProofPanel.style.display = "block";
+        }
+
         // Reveal the section smoothly
         verificationResult.style.display = "block";
         verificationResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -300,6 +438,12 @@
         }
         if (credentialDetailsGrid) {
             credentialDetailsGrid.innerHTML = "";
+        }
+        if (blockchainProofPanel) {
+            blockchainProofPanel.style.display = "none";
+        }
+        if (proofCopyToast) {
+            proofCopyToast.style.display = "none";
         }
     }
 
@@ -456,8 +600,8 @@
                 closeInvalidModal();
                 hideInlineAlert();
 
-                // Render verified certificate directly on page
-                renderVerifiedResult(result.certificate);
+                // Render verified certificate directly on page with blockchain proof
+                renderVerifiedResult(result.certificate, result.blockchain);
             } else {
                 // Fallback for unexpected valid HTTP with missing certificate body
                 const message = "Certificate could not be verified.";
@@ -482,6 +626,53 @@
         } finally {
             setLoading(false);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // ATTACH COPY EVENT LISTENERS
+    // -------------------------------------------------------------------------
+    if (copyTxHashBtn) {
+        copyTxHashBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const val = proofTxHash ? proofTxHash.textContent.trim() : "";
+            copyToClipboard(val, true, copyTxHashBtn);
+        });
+    }
+
+    if (proofTxHashClickable) {
+        proofTxHashClickable.addEventListener("click", function () {
+            const val = proofTxHash ? proofTxHash.textContent.trim() : "";
+            copyToClipboard(val, true, copyTxHashBtn);
+        });
+
+        proofTxHashClickable.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                const val = proofTxHash ? proofTxHash.textContent.trim() : "";
+                copyToClipboard(val, true, copyTxHashBtn);
+            }
+        });
+    }
+
+    if (copyIssuerBtn) {
+        copyIssuerBtn.addEventListener("click", function () {
+            const val = proofIssuer ? proofIssuer.textContent.trim() : "";
+            copyToClipboard(val, false, copyIssuerBtn);
+        });
+    }
+
+    if (copyContractBtn) {
+        copyContractBtn.addEventListener("click", function () {
+            const val = proofContract ? proofContract.textContent.trim() : "";
+            copyToClipboard(val, false, copyContractBtn);
+        });
+    }
+
+    if (copyCertHashBtn) {
+        copyCertHashBtn.addEventListener("click", function () {
+            const val = proofCertHash ? proofCertHash.textContent.trim() : "";
+            copyToClipboard(val, false, copyCertHashBtn);
+        });
     }
 
     // -------------------------------------------------------------------------

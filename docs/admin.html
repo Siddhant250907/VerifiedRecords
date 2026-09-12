@@ -162,6 +162,13 @@
                     <span>Authorized Registrar:</span>
                     <span id="userEmail"></span>
                 </div>
+
+                <!-- MetaMask status badge -->
+                <div class="admin-user-badge" id="adminWalletBadge" style="display:none; margin-top: 8px;">
+                    <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+                    <span>MetaMask Issuer:</span>
+                    <span id="adminWalletAccount" class="mono">Not Connected</span>
+                </div>
             </header>
 
 
@@ -364,6 +371,11 @@
                         <div class="issuance-summary-item">
                             <span class="issuance-summary-label">Conferral Date</span>
                             <span class="issuance-summary-val" id="confirmIssueDate">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item featured" id="confirmTxItem" style="display:none;">
+                            <span class="issuance-summary-label">Blockchain Transaction Hash</span>
+                            <span class="issuance-summary-val mono" id="confirmTxHash" style="font-size: 0.8rem; word-break: break-all;">—</span>
                         </div>
                     </div>
 

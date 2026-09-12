@@ -30,6 +30,36 @@ const certificateSchema = new mongoose.Schema({
     issuedAt: {
         type: Date,
         default: Date.now
+    },
+
+    certificateHash: {
+        type: String,
+        default: null
+    },
+
+    transactionHash: {
+        type: String,
+        default: null
+    },
+
+    contractAddress: {
+        type: String,
+        default: null
+    },
+
+    blockchainIssuer: {
+        type: String,
+        default: null
+    },
+
+    blockchainIssuedAt: {
+        type: Number,
+        default: null
+    },
+
+    blockNumber: {
+        type: Number,
+        default: null
     }
 });
 
