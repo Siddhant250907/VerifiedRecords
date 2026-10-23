@@ -41,10 +41,7 @@
  * https://trufflesuite.com/docs/truffle/getting-started/using-the-truffle-dashboard/
  */
 
-// require('dotenv').config();
-// const { MNEMONIC, PROJECT_ID } = process.env;
-
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+require("dotenv").config();
 
 module.exports = {
   /**
@@ -60,42 +57,61 @@ module.exports = {
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
-    // You should run a client (like ganache, geth, or parity) in a separate terminal
-    // tab if you use this network and you must also set the `host`, `port` and `network_id`
-    // options below to some value.
-    //
     development: {
       host: "127.0.0.1",     // Localhost (Ganache)
       port: 7545,            // Ganache standard RPC port
       network_id: "*",       // Match any network id (Ganache: 5777)
     },
-    //
-    // An additional network, but with some advanced options…
-    // advanced: {
-    //   port: 8777,             // Custom port
-    //   network_id: 1342,       // Custom network
-    //   gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
-    //   gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
-    //   from: <address>,        // Account to send transactions from (default: accounts[0])
-    //   websocket: true         // Enable EventEmitter interface for web3 (default: false)
-    // },
-    //
-    // Useful for deploying to a public network.
-    // Note: It's important to wrap the provider as a function to ensure truffle uses a new provider every time.
-    // goerli: {
-    //   provider: () => new HDWalletProvider(MNEMONIC, `https://goerli.infura.io/v3/${PROJECT_ID}`),
-    //   network_id: 5,       // Goerli's id
-    //   confirmations: 2,    // # of confirmations to wait between deployments. (default: 0)
-    //   timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-    //   skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-    // },
-    //
-    // Useful for private networks
-    // private: {
-    //   provider: () => new HDWalletProvider(MNEMONIC, `https://network.io`),
-    //   network_id: 2111,   // This network is yours, in the cloud.
-    //   production: true    // Treats this network as if it was a public net. (default: false)
-    // }
+
+    // Public Ethereum Sepolia testnet deployment
+    // Lazily instantiates HDWalletProvider only when the sepolia network is invoked
+    sepolia: {
+      provider: () => {
+        const { DEPLOYER_PRIVATE_KEY, SEPOLIA_RPC_URL } = process.env;
+        if (!DEPLOYER_PRIVATE_KEY || !SEPOLIA_RPC_URL) {
+          throw new Error(
+            "Sepolia deployment requires DEPLOYER_PRIVATE_KEY and SEPOLIA_RPC_URL environment variables to be set."
+          );
+        }
+        const privateKey = DEPLOYER_PRIVATE_KEY.trim();
+        const rpcUrl = SEPOLIA_RPC_URL.trim();
+        const customProvider = {
+          send: (payload, cb) => customProvider.sendAsync(payload, cb),
+          sendAsync: (payload, cb) => {
+            fetch(rpcUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            })
+              .then(async (res) => {
+                if (!res.ok) {
+                  const text = await res.text();
+                  return cb(new Error(`HTTP ${res.status}: ${text}`));
+                }
+                const json = await res.json();
+                cb(null, json);
+              })
+              .catch((err) => cb(err));
+          }
+        };
+        const HDWalletProvider = require("@truffle/hdwallet-provider");
+        return new HDWalletProvider({
+          privateKeys: [privateKey],
+          provider: customProvider,
+          numberOfAddresses: 1,
+          chainId: 11155111,
+          pollingInterval: 8000
+        });
+      },
+      network_id: 11155111,
+      chain_id: 11155111,
+      gas: 9500000,
+      gasPrice: 100000000, // 0.1 gwei (optimal for Sepolia; basefee is ~21 wei)
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+      networkCheckTimeout: 120000
+    }
   },
 
   // Set default mocha options here, use special reporters, etc.

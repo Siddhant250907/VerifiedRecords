@@ -1,16 +1,15 @@
 // ==========================================================================
 // VERIFIEDRECORDS — AUTHENTICATION & NAVBAR CONTROLLER
-// Academic Blockchain Credential Verification System
+// Academic Credential Verification & Document Security Platform
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// 1. LIGHT THEME ENFORCEMENT (DARK MODE PERMANENTLY REMOVED)
+// 1. LIGHT THEME ENFORCEMENT (SAND & CYPRUS GREEN PALETTE)
 // --------------------------------------------------------------------------
 document.documentElement.setAttribute("data-theme", "light");
 try {
     localStorage.removeItem("vr_theme");
 } catch (e) {}
-
 
 // --------------------------------------------------------------------------
 // 2. FIREBASE INITIALIZATION
@@ -24,19 +23,60 @@ const firebaseConfig = {
     appId: "1:823611310124:web:8beb8902077e4a5eebd189"
 };
 
-// Initialize Firebase only once across all pages
 if (!firebase.apps || !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
 const auth = firebase.auth();
 
-
 // --------------------------------------------------------------------------
 // 3. AUTHENTICATION STATE MONITOR (SINGLE SOURCE OF TRUTH)
 // --------------------------------------------------------------------------
+function updateNavbarUserDisplay(name) {
+    const navUserName = document.getElementById("navUserName");
+    const welcomeUserNav = document.getElementById("welcomeUserNav");
+    if (navUserName && name) {
+        navUserName.textContent = name;
+    }
+    if (welcomeUserNav) {
+        welcomeUserNav.style.display = "inline-flex";
+    }
+}
+
+// Instant initialization from cache so the user name appears immediately without waiting
+function initCachedUserDisplay() {
+    try {
+        const cachedName = localStorage.getItem("vr_username");
+        if (cachedName) {
+            updateNavbarUserDisplay(cachedName);
+            const accBtn = document.getElementById("accountButton");
+            const authLoggedOut = document.getElementById("authLoggedOutNav");
+            const loginBtn = document.getElementById("loginButton");
+            const signupBtn = document.getElementById("signupButton");
+            if (accBtn) {
+                accBtn.style.display = "inline-flex";
+                accBtn.classList.remove("auth-hidden");
+            }
+            if (authLoggedOut) {
+                authLoggedOut.style.display = "none";
+                authLoggedOut.classList.add("auth-hidden");
+            }
+            if (loginBtn) loginBtn.classList.add("auth-hidden");
+            if (signupBtn) signupBtn.classList.add("auth-hidden");
+        }
+    } catch (e) {}
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initCachedUserDisplay);
+} else {
+    initCachedUserDisplay();
+}
+
 auth.onAuthStateChanged(function(user) {
+    const authLoggedOutNav = document.getElementById("authLoggedOutNav");
     const loginButton = document.getElementById("loginButton");
+    const signupButton = document.getElementById("signupButton");
     const accountButton = document.getElementById("accountButton");
     const accountEmail = document.getElementById("accountEmail");
     const accountMenu = document.getElementById("accountMenu");
@@ -52,17 +92,30 @@ auth.onAuthStateChanged(function(user) {
     if (user) {
         console.log("VerifiedRecords Auth: Signed in as", user.email);
 
-        // Hide Login / Sign Up button strictly (both display none and class)
+        // Hide Logged-Out navigation controls strictly
+        if (authLoggedOutNav) {
+            authLoggedOutNav.style.display = "none";
+            authLoggedOutNav.classList.add("auth-hidden");
+        }
         if (loginButton) {
             loginButton.style.display = "none";
             loginButton.classList.add("auth-hidden");
         }
+        if (signupButton) {
+            signupButton.style.display = "none";
+            signupButton.classList.add("auth-hidden");
+        }
 
         // Show Account button strictly
         if (accountButton) {
-            accountButton.style.display = "flex";
+            accountButton.style.display = "inline-flex";
             accountButton.classList.remove("auth-hidden");
         }
+
+        // Show Welcome, UserName on left side of the boxy logo
+        const storedUsername = localStorage.getItem("vr_username");
+        const initialDisplayName = storedUsername || user.displayName || (user.email ? user.email.split("@")[0] : "User");
+        updateNavbarUserDisplay(initialDisplayName);
 
         // Populate User Email in dropdown
         if (accountEmail) {
@@ -78,6 +131,9 @@ auth.onAuthStateChanged(function(user) {
         if (loadingScreen) {
             loadingScreen.style.display = "none";
         }
+
+        // Persist and sync user account details in MongoDB
+        syncUserAccountToMongo(user);
     }
 
     // ----------------------------------------------------------------------
@@ -86,16 +142,29 @@ auth.onAuthStateChanged(function(user) {
     else {
         console.log("VerifiedRecords Auth: No active session");
 
-        // Hide Account button strictly
+        // Hide welcome banner and account button strictly
+        const welcomeUserNav = document.getElementById("welcomeUserNav");
+        if (welcomeUserNav) {
+            welcomeUserNav.style.display = "none";
+        }
+
         if (accountButton) {
             accountButton.style.display = "none";
             accountButton.classList.add("auth-hidden");
         }
 
-        // Show Login / Sign Up button strictly
+        // Show Logged-Out navigation controls strictly
+        if (authLoggedOutNav) {
+            authLoggedOutNav.style.display = "inline-flex";
+            authLoggedOutNav.classList.remove("auth-hidden");
+        }
         if (loginButton) {
             loginButton.style.display = "inline-flex";
             loginButton.classList.remove("auth-hidden");
+        }
+        if (signupButton) {
+            signupButton.style.display = "inline-flex";
+            signupButton.classList.remove("auth-hidden");
         }
 
         // Clear email
@@ -116,7 +185,6 @@ auth.onAuthStateChanged(function(user) {
         }
     }
 });
-
 
 // --------------------------------------------------------------------------
 // 4. ACCOUNT DROPDOWN MENU
@@ -139,7 +207,6 @@ function toggleAccountMenu() {
     }
 }
 
-
 // --------------------------------------------------------------------------
 // 5. LOGOUT HANDLER
 // --------------------------------------------------------------------------
@@ -149,6 +216,11 @@ function logoutUser() {
         accountMenu.classList.remove("show");
         accountMenu.style.display = "none";
     }
+    try {
+        localStorage.removeItem("vr_username");
+        sessionStorage.removeItem("vr_admin_session");
+    } catch (e) {}
+
     auth.signOut()
         .then(function() {
             console.log("VerifiedRecords Auth: Signed out successfully");
@@ -160,9 +232,111 @@ function logoutUser() {
         });
 }
 
+// --------------------------------------------------------------------------
+// 6. USER ACCOUNT SYNC TO MONGODB
+// --------------------------------------------------------------------------
+function syncUserAccountToMongo(user, additionalProfile = {}) {
+    if (!user || !user.email) return Promise.resolve();
+
+    const payload = {
+        email: user.email,
+        uid: user.uid || null,
+        provider: user.providerData && user.providerData[0] ? user.providerData[0].providerId : "password",
+        firstName: additionalProfile.firstName || "",
+        lastName: additionalProfile.lastName || "",
+        username: additionalProfile.username || "",
+        dateOfBirth: additionalProfile.dateOfBirth || null,
+        phoneNumber: additionalProfile.phoneNumber || ""
+    };
+
+    return fetch("/api/auth/sync-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.success) {
+            console.log("VerifiedRecords: User account saved in MongoDB:", user.email);
+            if (data.user && data.user.username) {
+                localStorage.setItem("vr_username", data.user.username);
+                updateNavbarUserDisplay(data.user.username);
+            } else if (additionalProfile.username) {
+                localStorage.setItem("vr_username", additionalProfile.username);
+                updateNavbarUserDisplay(additionalProfile.username);
+            }
+        }
+        return data;
+    })
+    .catch(err => {
+        console.warn("VerifiedRecords: MongoDB user sync notice:", err.message);
+    });
+}
 
 // --------------------------------------------------------------------------
-// 6. DISMISS DROPDOWN ON OUTSIDE CLICK
+// 7. SOCIAL AUTHENTICATION (GOOGLE, APPLE)
+// --------------------------------------------------------------------------
+function handleSocialAuth(provider, providerName, alertElementId) {
+    const alertBox = alertElementId ? document.getElementById(alertElementId) : null;
+
+    if (alertBox) {
+        alertBox.style.display = "none";
+        alertBox.className = "auth-alert";
+    }
+
+    auth.signInWithPopup(provider)
+        .then(result => {
+            const user = result.user;
+            console.log(`VerifiedRecords: Signed in via ${providerName}:`, user.email);
+            return syncUserAccountToMongo(user).then(() => {
+                const redirect = new URLSearchParams(window.location.search).get("redirect") || "dashboard.html";
+                window.location.href = redirect;
+            });
+        })
+        .catch(error => {
+            console.warn(`${providerName} popup error:`, error.code, error.message);
+
+            let message = error.message;
+            if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+                if (providerName.toLowerCase() === "apple") {
+                    message = "Apple Sign-In requires OAuth configuration in the Firebase Console (Apple Services ID, Team ID, Key ID, and private key).";
+                } else {
+                    message = `${providerName} Sign-In is not enabled in Firebase Console.`;
+                }
+            } else if (error.code === "auth/popup-closed-by-user") {
+                message = "Sign-in popup was closed before completing.";
+            } else if (error.code === "auth/cancelled-popup-request") {
+                message = "Only one popup request allowed at a time.";
+            } else if (error.code === "auth/unauthorized-domain") {
+                message = "This domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+            }
+
+            if (alertBox) {
+                alertBox.textContent = message;
+                alertBox.style.display = "block";
+                alertBox.className = "auth-alert alert-error";
+            } else {
+                alert(message);
+            }
+        });
+}
+
+function loginWithGoogle(alertElementId = "message") {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope("profile");
+    provider.addScope("email");
+    handleSocialAuth(provider, "Google", alertElementId);
+}
+
+function loginWithApple(alertElementId = "message") {
+    const provider = new firebase.auth.OAuthProvider("apple.com");
+    provider.addScope("email");
+    provider.addScope("name");
+    handleSocialAuth(provider, "Apple", alertElementId);
+}
+
+// --------------------------------------------------------------------------
+// 8. DISMISS DROPDOWN ON OUTSIDE CLICK
 // --------------------------------------------------------------------------
 document.addEventListener("click", function(event) {
     const accountButton = document.getElementById("accountButton") || document.querySelector(".account-container");

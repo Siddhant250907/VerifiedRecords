@@ -6,24 +6,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>VerifiedRecords — Academic Certificate Verification Platform</title>
+    <title>Verified Records — Academic Certificate Verification & Secure Document Platform</title>
 
     <meta name="description"
-          content="VerifiedRecords is an official university certificate verification platform to validate student credentials, prevent alteration, and streamline record verification.">
+          content="Verified Records deliberately serves the public with advanced security, offering authentic academic credential verification and personal encrypted document vaults.">
 
     <!-- Fonts & Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <!-- Professional Editorial Typography: DM Serif Display & Manrope -->
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
 
-    <!-- Shared Design System -->
+    <!-- Shared Design System (Sand #F0EDE6 & Cyprus Green #004741) -->
     <link rel="stylesheet"
           href="assets/css/style.css">
 
@@ -32,15 +33,25 @@
 <body>
 
     <!-- =====================================================
+         0. FIRST-OPEN EDITORIAL BRAND INTRODUCTION OVERLAY
+    ====================================================== -->
+    <div id="heroIntroOverlay" class="hero-intro-overlay" aria-hidden="true">
+        <div class="hero-intro-backdrop" id="heroIntroBackdrop"></div>
+        <div class="hero-intro-center-stage">
+            <h1 id="introBrandTitle" class="intro-brand-title" aria-label="Verified Records"></h1>
+        </div>
+    </div>
+
+    <!-- =====================================================
          1. TOP NAVIGATION (NEUMORPHIC MASTHEAD)
     ====================================================== -->
     <nav class="top-navbar" aria-label="Main Navigation">
 
         <!-- LEFT SIDE -->
         <div class="nav-left">
-            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home" title="Click to replay Security Intro Animation" onclick="if(window.replaySecurityIntro){window.replaySecurityIntro();return false;}">
+            <a href="index.html" class="nav-brand" aria-label="Verified Records Home">
                 <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
-                <span class="nav-brand-text">VerifiedRecords</span>
+                <span class="nav-brand-text">Verified Records</span>
             </a>
 
             <div class="nav-links" role="navigation">
@@ -62,6 +73,12 @@
                     <span>Verify</span>
                 </a>
 
+                <!-- VAULT -->
+                <a href="documents.html" class="nav-item" id="navVault" title="Vault">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                    <span>Vault</span>
+                </a>
+
                 <!-- ABOUT -->
                 <a href="about.html" class="nav-item" id="navAbout" title="About">
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
@@ -70,26 +87,30 @@
             </div>
         </div>
 
-        <!-- RIGHT SIDE -->
+        <!-- RIGHT SIDE (DUAL LOGGED-OUT BUTTONS & LOGGED-IN ACCOUNT DROPDOWN) -->
         <div class="nav-right">
-            <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
-                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
-                <a href="login.html"
-                   id="loginButton"
-                   class="login-button"
-                   aria-label="Login or Sign Up">
-                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-                    <span>Login / Sign Up</span>
-                </a>
+                <!-- LOGGED-OUT CONTROLS -->
+                <div id="authLoggedOutNav" class="auth-nav-buttons">
+                    <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in to account">
+                        <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="signup.html" id="signupButton" class="btn-nav-signup" aria-label="Create a new account">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                    </a>
+                </div>
 
-                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
-                <div id="accountButton"
-                     class="account-container auth-hidden"
-                     style="display:none;">
+                <!-- LOGGED-IN CONTROLS -->
+                <div id="accountButton" class="account-container auth-hidden" style="display:none;">
+                    <div class="welcome-user-nav" id="welcomeUserNav">
+                        <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                    </div>
+
                     <button type="button"
                             id="accountMenuTrigger"
-                            class="account-button"
+                            class="account-button account-button-boxy"
                             onclick="toggleAccountMenu()"
                             aria-label="Account Menu"
                             aria-expanded="false"
@@ -101,12 +122,14 @@
                          class="account-menu"
                          role="menu"
                          aria-label="Account Options">
-                        <div id="accountEmail"
-                             class="account-email">
-                        </div>
-                        <a href="admin.html" role="menuitem">
+                        <div id="accountEmail" class="account-email"></div>
+                        <a href="dashboard.html" role="menuitem">
                             <i class="fa-solid fa-gauge" aria-hidden="true"></i>
                             <span>Dashboard</span>
+                        </a>
+                        <a href="documents.html" role="menuitem">
+                            <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                            <span>Your Vaults</span>
                         </a>
                         <button type="button" onclick="logoutUser()" role="menuitem">
                             <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
@@ -121,255 +144,735 @@
 
 
     <!-- =====================================================
-         2. HERO SECTION & INTERACTIVE CREDENTIAL LOOKUP
+         2. TWO-COLUMN HERO: LEFT TEXT & RIGHT 3D SHIELD
     ====================================================== -->
-    <main class="hero">
+    <main class="hero-minimal">
 
-        <!-- Subtle Ambient Background Layer (Restrained Depth) -->
-        <div class="hero-ambient-layer" aria-hidden="true">
-            <div class="ambient-orb ambient-orb-1"></div>
-            <div class="ambient-orb ambient-orb-2"></div>
-            <div class="ambient-grid-overlay"></div>
-        </div>
+        <!-- Subtle Floating Canvas Background with Cursor Repulsion -->
+        <canvas id="heroParticlesCanvas" class="hero-particles-canvas" aria-hidden="true"></canvas>
 
-        <div class="hero-container">
-            <div class="hero-content">
+        <!-- CONTINUOUS HASH-CHARACTER STREAM (HOMEPAGE LEFT MARGIN CONDUIT) -->
+        <aside class="hash-stream-rail" id="hashStreamRail" aria-hidden="true">
+            <div class="hash-portal hash-portal-source" id="hashPortalSource" title="Security Hash Stream Source">
+                <span class="portal-emitter-core"></span>
+                <span class="portal-emitter-pulse"></span>
+            </div>
+            <div class="hash-stream-track">
+                <div class="hash-char-column" id="hashCharColumn"></div>
+            </div>
+            <div class="hash-portal hash-portal-receiver" id="hashPortalReceiver" title="Security Hash Stream Receiver">
+                <span class="portal-receiver-core"></span>
+                <span class="portal-receiver-pulse"></span>
+            </div>
+        </aside>
 
-                <div class="portal-badge">
-                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                    Ease to Security
+        <div class="hero-minimal-content hero-two-col">
+
+            <!-- LEFT COLUMN: EDITORIAL BRAND HEADING, REFINED TAGLINE & 4 ACTION BUTTONS -->
+            <div class="hero-col-text">
+
+                <!-- EDITORIAL DISPLAY BRAND HEADING (DM SERIF DISPLAY — SINGLE LINE ON DESKTOP) -->
+                <h1 class="hero-brand-name" id="heroBrandName" aria-label="Verified Records">
+                    <span class="hero-heading-text">Verified Records</span>
+                </h1>
+
+                <!-- TAGLINE IN MANROPE - BALANCED LINE WRAPPING, NO BROKEN WORDS -->
+                <div class="hero-brand-tagline" id="heroBrandTagline">
+                    <span class="sr-only">Deliberately serving to the people with Advanced Security</span>
+                    <span id="visualTagline" aria-hidden="true">Deliberately serving to the people with Advanced Security</span>
                 </div>
 
-                <h1>Verify a University Certificate</h1>
-
-                <p class="hero-description">
-                    Instant, cryptographic credential authentication directly from the institutional registry.
-                </p>
-
-                <div class="home-actions">
-                    <a href="verify.html" class="primary-button hero-button">
-                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                        Verify a Certificate
-                    </a>
-
-                    <a href="admin.html" class="btn-outline">
-                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
-                        Registrar Portal
-                    </a>
-                </div>
-
-                <!-- INTERACTIVE CERTIFICATE LOOKUP COMPONENT (TACTILE NEUMORPHIC) -->
-                <div class="interactive-lookup-card">
-                    <div class="lookup-card-topbar">
-                        <div class="lookup-card-title">
-                            <i class="fa-solid fa-terminal" aria-hidden="true"></i>
-                            <span>Credential Query Console</span>
-                        </div>
-                        <div class="registry-status-pill">
-                            <span class="status-pulse-dot" aria-hidden="true"></span>
-                            <span>Registry Online</span>
-                        </div>
+                <!-- SERVICES SECTION WITH 4 INTERACTIVE PROCESS BUTTONS (LEFT ALIGNED) -->
+                <div class="hero-services-section" id="heroServicesSection">
+                    <div class="services-header-row">
+                        <h2 class="services-section-title">Services</h2>
                     </div>
+                    <div class="services-buttons-group">
+                        <div class="services-buttons-row services-row-primary">
+                            <!-- 1. ISSUE A CERTIFICATE -->
+                            <a href="admin.html" class="service-action-pill" id="btnServiceIssue" title="Issue a Certificate via Registrar Portal">
+                                <span class="service-pill-icon"><i class="fa-solid fa-award" aria-hidden="true"></i></span>
+                                <span class="service-pill-text">Issue a Certificate</span>
+                            </a>
 
-                    <form action="verify.html" method="GET" class="lookup-form" id="quickVerifyForm">
-                        <div class="lookup-input-wrap">
-                            <i class="fa-solid fa-id-card-clip lookup-field-icon" aria-hidden="true"></i>
-                            <input
-                                type="text"
-                                name="id"
-                                id="quickCertInput"
-                                class="lookup-input"
-                                placeholder="Enter Certificate ID (e.g. CERT_CSE001)"
-                                required
-                                autocomplete="off"
-                                aria-label="Certificate ID"
-                            >
-                            <button type="button" class="lookup-clear-btn" id="quickClearBtn" title="Clear input" aria-label="Clear Input" onclick="clearQuickInput()">
-                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <button type="submit" class="primary-button lookup-submit-btn">
-                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                            <span>Verify Record</span>
-                        </button>
-                    </form>
+                            <!-- 2. VERIFY A CERTIFICATE -->
+                            <a href="verify.html" class="service-action-pill" id="btnServiceVerify" title="Verify Certificate on Blockchain">
+                                <span class="service-pill-icon"><i class="fa-solid fa-certificate" aria-hidden="true"></i></span>
+                                <span class="service-pill-text">Verify a Certificate</span>
+                            </a>
 
-                    <div class="lookup-chips-row">
-                        <span class="lookup-chips-label">
-                            <i class="fa-solid fa-bolt" aria-hidden="true"></i>
-                            Sample IDs:
-                        </span>
-                        <div class="lookup-chips-list">
-                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE001')" title="Query CERT_CSE001">
-                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_CSE001</code>
-                            </button>
-                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_CSE002')" title="Query CERT_CSE002">
-                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_CSE002</code>
-                            </button>
-                            <button type="button" class="lookup-chip" onclick="setQuickId('CERT_567890')" title="Query CERT_567890">
-                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i> <code>CERT_567890</code>
-                            </button>
+                            <!-- 3. SAVE YOUR DOCUMENTS -->
+                            <a href="documents.html" class="service-action-pill" id="btnServiceSave" title="Save Documents into Encrypted Vault">
+                                <span class="service-pill-icon"><i class="fa-solid fa-vault" aria-hidden="true"></i></span>
+                                <span class="service-pill-text">Save your Documents</span>
+                            </a>
                         </div>
-                    </div>
 
-                    <div class="lookup-attributes-bar">
-                        <div class="attribute-pill">
-                            <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
-                            <span>Student Identity</span>
-                        </div>
-                        <div class="attribute-pill">
-                            <i class="fa-solid fa-award" aria-hidden="true"></i>
-                            <span>Degree Program</span>
-                        </div>
-                        <div class="attribute-pill">
-                            <i class="fa-solid fa-calendar-check" aria-hidden="true"></i>
-                            <span>Conferral Date</span>
-                        </div>
-                        <div class="attribute-pill">
-                            <i class="fa-solid fa-fingerprint" aria-hidden="true"></i>
-                            <span>Cryptographic Record</span>
+                        <div class="services-buttons-row services-row-secondary">
+                            <!-- 4. CREATE ORGANIZATION (UPCOMING FEATURE) -->
+                            <button type="button" class="service-action-pill service-pill-upcoming" id="btnServiceCreateOrg" title="Create Organization (Coming Soon)" onclick="openUpcomingOrgNotice(event)">
+                                <span class="service-pill-icon"><i class="fa-solid fa-building-columns" aria-hidden="true"></i></span>
+                                <span class="service-pill-text">Create Organization</span>
+                                <span class="upcoming-tag">Soon</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
             </div>
+
+            <!-- RIGHT COLUMN: INTERACTIVE 3D DOCUMENT EXPLOSION HERO -->
+            <div class="hero-col-graphic" id="heroGraphicCol">
+                <div class="doc-explosion-stage" id="docExplosionStage" role="region" tabindex="0" aria-label="Interactive 3D verified document showcase. Hover or press Enter to inspect secure document components." aria-expanded="false">
+                    
+                    <!-- ACCESSIBILITY STATUS ANNOUNCER FOR SCREEN READERS -->
+                    <div class="sr-only" id="docExplosionAnnounce" aria-live="polite">Showing default verified academic certificate.</div>
+
+                    <!-- TOUCH / MOBILE CLOSE CONTROLLER -->
+                    <button type="button" class="doc-explosion-close-btn" id="docExplosionCloseBtn" aria-label="Reassemble 3D document view" onclick="handleDocExplosionClose(event)">
+                        <i class="fa-solid fa-compress" aria-hidden="true"></i>
+                        <span>Reassemble Document</span>
+                    </button>
+
+                    <!-- 3D SCENE WRAPPER (ESTABLISHES 3D PERSPECTIVE) -->
+                    <div class="doc-3d-scene" id="doc3DScene">
+                        
+                        <!-- AMBIENT DEPTH BACKLIGHT -->
+                        <div class="doc-scene-ambient-glow" aria-hidden="true"></div>
+
+                        <!-- SUSPENDED HANGING THREAD ASSEMBLY (RESTING STATE) -->
+                        <div class="cert-hanging-assembly" id="certHangingAssembly" aria-hidden="true">
+                            <div class="cert-anchor-pin"></div>
+                            <div class="cert-hanging-cord"></div>
+                            <div class="cert-grommet-eyelet"></div>
+                        </div>
+
+                        <!-- 3D PIVOT CONTAINER (HANDLES RESTING FLOAT & HOVER TILT / DISPERSAL) -->
+                        <div class="doc-pivot-container" id="docPivotContainer">
+
+                            <!-- 1. FINAL REAR SECURITY SHIELD (HIDDEN IN DEFAULT STATE, EMERGES IN FINAL STAGE) -->
+                            <div class="doc-shield-layer" id="docShieldLayer" aria-hidden="true">
+                                <div class="doc-shield-graphic">
+                                    <svg class="exploded-shield-svg" viewBox="0 0 280 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <filter id="expShieldShadow" x="-30%" y="-20%" width="160%" height="155%">
+                                                <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#002421" flood-opacity="0.22"/>
+                                                <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#004741" flood-opacity="0.14"/>
+                                            </filter>
+                                            <linearGradient id="expGreenBase" x1="10%" y1="0%" x2="90%" y2="100%">
+                                                <stop offset="0%" stop-color="#065C53"/>
+                                                <stop offset="30%" stop-color="#004741"/>
+                                                <stop offset="70%" stop-color="#003530"/>
+                                                <stop offset="100%" stop-color="#00221F"/>
+                                            </linearGradient>
+                                            <linearGradient id="expIvoryBase" x1="5%" y1="0%" x2="85%" y2="100%">
+                                                <stop offset="0%" stop-color="#FFFFFF"/>
+                                                <stop offset="35%" stop-color="#FAF8F5"/>
+                                                <stop offset="75%" stop-color="#ECE6DC"/>
+                                                <stop offset="100%" stop-color="#D9D2C3"/>
+                                            </linearGradient>
+                                            <linearGradient id="expGreenChisel" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#086B61"/>
+                                                <stop offset="50%" stop-color="#004D46"/>
+                                                <stop offset="100%" stop-color="#002824"/>
+                                            </linearGradient>
+                                            <linearGradient id="expIvoryChisel" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#FFFFFF"/>
+                                                <stop offset="55%" stop-color="#F5F2EB"/>
+                                                <stop offset="100%" stop-color="#E2DCD0"/>
+                                            </linearGradient>
+                                            <linearGradient id="expRimGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+                                                <stop offset="25%" stop-color="#B6D2CD"/>
+                                                <stop offset="65%" stop-color="#739E98"/>
+                                                <stop offset="100%" stop-color="#004741"/>
+                                            </linearGradient>
+                                            <linearGradient id="expRidgeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+                                                <stop offset="30%" stop-color="#C5DFDA" stop-opacity="0.85"/>
+                                                <stop offset="75%" stop-color="#558680" stop-opacity="0.6"/>
+                                                <stop offset="100%" stop-color="#002E29" stop-opacity="0.3"/>
+                                            </linearGradient>
+                                            <linearGradient id="expGleam" x1="0%" y1="0%" x2="100%" y2="70%">
+                                                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+                                                <stop offset="40%" stop-color="#6BBBB1" stop-opacity="0.20"/>
+                                                <stop offset="100%" stop-color="#004741" stop-opacity="0"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <g filter="url(#expShieldShadow)">
+                                            <path d="M 140 24 C 140 24 98 18 44 40 C 38 95 42 175 74 255 C 92 289 122 316 140 328 L 140 24 Z" fill="url(#expGreenBase)"/>
+                                            <path d="M 140 24 C 140 24 182 18 236 40 C 242 95 238 175 206 255 C 188 289 158 316 140 328 L 140 24 Z" fill="url(#expIvoryBase)"/>
+                                            <path d="M 140 38 C 140 38 102 34 56 52 C 51 100 55 170 82 242 C 98 274 124 298 140 312 L 140 38 Z" fill="url(#expGreenChisel)"/>
+                                            <path d="M 140 38 C 140 38 178 34 224 52 C 229 100 225 170 198 242 C 182 274 156 298 140 312 L 140 38 Z" fill="url(#expIvoryChisel)"/>
+                                            <path d="M 140 26 C 140 26 100 20 46 42 C 40 85 43 140 60 195 C 72 135 102 70 140 26 Z" fill="url(#expGleam)"/>
+                                            <path d="M 140 24 C 140 24 98 18 44 40 C 38 95 42 175 74 255 C 92 289 122 316 140 328 C 158 316 188 289 206 255 C 238 175 242 95 236 40 C 182 18 140 24 140 24 Z" stroke="url(#expRimGrad)" stroke-width="2.5" fill="none"/>
+                                            <line x1="140" y1="24" x2="140" y2="328" stroke="url(#expRidgeGrad)" stroke-width="2.2" stroke-linecap="round"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                                <!-- EXACT SHIELD TEXT BADGE -->
+                                <div class="doc-shield-badge" id="docShieldBadge">
+                                    <span class="shield-badge-dot"></span>
+                                    <span class="shield-badge-text">Secured using Blockchain Technology</span>
+                                </div>
+                            </div>
+
+                            <!-- 2. DEFAULT FULL ASSEMBLED CERTIFICATE (SHOWN AT REST) -->
+                            <div class="doc-assembled-certificate" id="docAssembledCert" aria-hidden="false">
+                                <div class="cert-paper-surface">
+                                    <div class="cert-paper-inner-frame">
+                                        <div class="cert-formal-header">
+                                            <div class="cert-formal-crest"></div>
+                                            <div class="cert-header-rule"></div>
+                                        </div>
+                                        <div class="cert-title-bracket">
+                                            <span class="cert-title-text">Verified Records</span>
+                                            <span class="cert-title-bar-heavy"></span>
+                                        </div>
+                                        <div class="cert-body-abstract">
+                                            <span class="cert-abstract-line l1"></span>
+                                            <span class="cert-abstract-line l2"></span>
+                                            <span class="cert-abstract-line l3"></span>
+                                            <span class="cert-abstract-line l4"></span>
+                                            <span class="cert-abstract-line l5"></span>
+                                        </div>
+                                        <div class="cert-footer-elements">
+                                            <div class="cert-gold-ribbon-seal">
+                                                <span class="ribbon-tail left"></span>
+                                                <span class="ribbon-tail right"></span>
+                                            </div>
+                                            <div class="cert-signatures">
+                                                <span class="cert-sig-line"></span>
+                                                <span class="cert-sig-sub"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- RESTING VERIFIED SEAL (DEEP CYPRUS GREEN #004741) -->
+                                <div class="doc-verified-stamp" id="docVerifiedStamp" aria-hidden="true">
+                                    <svg class="verified-seal-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <filter id="stampShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                                <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#004741" flood-opacity="0.25"/>
+                                            </filter>
+                                            <path id="stampArcTop" d="M 20 50 A 30 30 0 0 1 80 50" fill="none"/>
+                                            <path id="stampArcBottom" d="M 80 50 A 30 30 0 0 1 20 50" fill="none"/>
+                                        </defs>
+                                        <g filter="url(#stampShadow)">
+                                            <circle cx="50" cy="50" r="45" stroke="#004741" stroke-width="2.4" fill="#FAF8F5" fill-opacity="0.96"/>
+                                            <circle cx="50" cy="50" r="40" stroke="#004741" stroke-width="1.2" stroke-dasharray="3 2" fill="none"/>
+                                            <circle cx="50" cy="50" r="29" stroke="#004741" stroke-width="1.2" fill="none"/>
+                                            <text font-family="'Manrope', sans-serif" font-size="6" font-weight="700" fill="#004741" letter-spacing="1.8">
+                                                <textPath href="#stampArcTop" startOffset="50%" text-anchor="middle">OFFICIAL RECORD</textPath>
+                                            </text>
+                                            <line x1="25" y1="44" x2="75" y2="44" stroke="#004741" stroke-width="0.8"/>
+                                            <text x="50" y="55" font-family="'Playfair Display', 'DM Serif Display', Georgia, serif" font-size="14.5" font-style="italic" font-weight="700" fill="#004741" text-anchor="middle">Verified</text>
+                                            <line x1="25" y1="60" x2="75" y2="60" stroke="#004741" stroke-width="0.8"/>
+                                            <text font-family="'Manrope', sans-serif" font-size="5.5" font-weight="700" fill="#004741" letter-spacing="1.5">
+                                                <textPath href="#stampArcBottom" startOffset="50%" text-anchor="middle">AUTHENTICATED</textPath>
+                                            </text>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- 3. EXPLODED 5 DOCUMENT SEGMENTS -->
+                            <!-- SEGMENT 1: CERTIFICATE -->
+                            <div class="doc-segment-card segment-certificate" id="segCardCertificate" data-segment="certificate" tabindex="0" role="button" aria-label="Certificate: Your academic qualification, ready to verify.">
+                                <div class="segment-card-surface cert-theme">
+                                    <div class="seg-card-header">
+                                        <span class="seg-header-tag"><i class="fa-solid fa-certificate"></i> Verified Records</span>
+                                        <span class="seg-header-seal"></span>
+                                    </div>
+                                    <div class="seg-cert-lines">
+                                        <span class="seg-bar-title"></span>
+                                        <span class="seg-bar-line l1"></span>
+                                        <span class="seg-bar-line l2"></span>
+                                        <span class="seg-bar-line l3"></span>
+                                    </div>
+                                    <div class="seg-card-footer">
+                                        <span class="seg-chip-sig"></span>
+                                        <span class="seg-chip-cert"><i class="fa-solid fa-stamp" aria-hidden="true"></i> Official Record</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEGMENT 2: AADHAAR CARD -->
+                            <div class="doc-segment-card segment-aadhaar" id="segCardAadhaar" data-segment="aadhaar" tabindex="0" role="button" aria-label="Aadhaar Card: Keep an important identity document organized and accessible.">
+                                <div class="segment-card-surface id-card">
+                                    <div class="seg-id-topbar">
+                                        <span class="seg-id-flag-strip"></span>
+                                        <span class="seg-id-gov-title">Aadhaar Card</span>
+                                    </div>
+                                    <div class="seg-id-body">
+                                        <div class="seg-id-photo-box" aria-label="Portrait photo slot">
+                                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="seg-id-fields">
+                                            <span class="seg-field-line w90"></span>
+                                            <span class="seg-field-line w70"></span>
+                                            <span class="seg-field-line w80"></span>
+                                            <div class="seg-id-aadhaar-blocks">
+                                                <span>••••</span><span>••••</span><span>••••</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="seg-id-footer">
+                                        <span class="seg-barcode-strip"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEGMENT 3: DRIVING LICENCE -->
+                            <div class="doc-segment-card segment-licence" id="segCardLicence" data-segment="licence" tabindex="0" role="button" aria-label="Driving Licence: Keep your driving document within reach.">
+                                <div class="segment-card-surface smart-card">
+                                    <div class="seg-dl-topbar">
+                                        <span class="seg-dl-tag">Driving Licence</span>
+                                        <span class="seg-dl-chip-icon"><i class="fa-solid fa-microchip"></i></span>
+                                    </div>
+                                    <div class="seg-dl-body">
+                                        <div class="seg-dl-photo-box">
+                                            <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="seg-dl-details">
+                                            <span class="seg-dl-num">DL-••••••••••••</span>
+                                            <span class="seg-dl-line w85"></span>
+                                            <span class="seg-dl-line w65"></span>
+                                            <div class="seg-dl-classes">
+                                                <span class="dl-badge">LMV</span>
+                                                <span class="dl-badge">MVWG</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEGMENT 4: PAN CARD -->
+                            <div class="doc-segment-card segment-pan" id="segCardPan" data-segment="pan" tabindex="0" role="button" aria-label="PAN Card: Keep your tax identity document organized.">
+                                <div class="segment-card-surface pan-card">
+                                    <div class="seg-pan-topbar">
+                                        <span class="seg-pan-emblem"><i class="fa-solid fa-landmark"></i></span>
+                                        <span class="seg-pan-title">PAN Card</span>
+                                    </div>
+                                    <div class="seg-pan-body">
+                                        <div class="seg-pan-photo-box">
+                                            <i class="fa-solid fa-user-check" aria-hidden="true"></i>
+                                        </div>
+                                        <div class="seg-pan-info">
+                                            <span class="seg-pan-line w80"></span>
+                                            <span class="seg-pan-line w60"></span>
+                                            <span class="seg-pan-number">•••••0000•</span>
+                                            <div class="seg-pan-sig-area">
+                                                <span class="seg-pan-sig-strip"></span>
+                                                <span class="seg-pan-sig-label">Signature</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEGMENT 5: OTHER DOCUMENTS -->
+                            <div class="doc-segment-card segment-vault" id="segCardVault" data-segment="vault" tabindex="0" role="button" aria-label="Other Documents: Store other important files in your personal vault.">
+                                <div class="segment-card-surface vault-card">
+                                    <div class="vault-stack-layer l2"></div>
+                                    <div class="vault-stack-layer l1">
+                                        <div class="seg-vault-topbar">
+                                            <span class="seg-vault-icon"><i class="fa-solid fa-folder-closed" aria-hidden="true"></i></span>
+                                            <span class="seg-vault-title">Other Documents</span>
+                                        </div>
+                                        <div class="seg-vault-items">
+                                            <div class="vault-file-row"><i class="fa-solid fa-file-shield"></i><span>Academic Marksheet</span></div>
+                                            <div class="vault-file-row"><i class="fa-solid fa-file-contract"></i><span>Identity Vault</span></div>
+                                            <div class="vault-file-row"><i class="fa-solid fa-file-lines"></i><span>Accreditation Record</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. SVG LEADER LINES & TECHNICAL CALLOUT LABELS -->
+                            <div class="doc-callouts-layer" id="docCalloutsLayer" aria-hidden="true">
+                                <svg class="callout-lines-svg" id="calloutLinesSvg" viewBox="0 0 920 540" preserveAspectRatio="none">
+                                    <!-- 1. Certificate -->
+                                    <path class="leader-line line-certificate" id="lineCert" d="M 255 75 L 225 45 L 210 45" />
+                                    <circle class="leader-dot dot-certificate" id="dotCert" cx="255" cy="75" r="3.5" />
+
+                                    <!-- 2. Aadhaar Card -->
+                                    <path class="leader-line line-aadhaar" id="lineAadhaar" d="M 675 115 L 695 85 L 710 85" />
+                                    <circle class="leader-dot dot-aadhaar" id="dotAadhaar" cx="675" cy="115" r="3.5" />
+
+                                    <!-- 3. Driving Licence -->
+                                    <path class="leader-line line-licence" id="lineLicence" d="M 245 255 L 225 235 L 210 235" />
+                                    <circle class="leader-dot dot-licence" id="dotLicence" cx="245" cy="255" r="3.5" />
+
+                                    <!-- 4. PAN Card -->
+                                    <path class="leader-line line-pan" id="linePan" d="M 670 290 L 695 265 L 710 265" />
+                                    <circle class="leader-dot dot-pan" id="dotPan" cx="670" cy="290" r="3.5" />
+
+                                    <!-- 5. Other Documents -->
+                                    <path class="leader-line line-vault" id="lineVault" d="M 320 435 L 245 420 L 210 420" />
+                                    <circle class="leader-dot dot-vault" id="dotVault" cx="320" cy="435" r="3.5" />
+                                </svg>
+
+                                <!-- CALLOUT LABELS -->
+                                <div class="doc-callout-tag tag-certificate" id="tagCert" data-target="certificate">
+                                    <span class="callout-tag-title">Certificate</span>
+                                    <span class="callout-tag-desc">Your academic qualification, ready to verify.</span>
+                                </div>
+
+                                <div class="doc-callout-tag tag-aadhaar" id="tagAadhaar" data-target="aadhaar">
+                                    <span class="callout-tag-title">Aadhaar Card</span>
+                                    <span class="callout-tag-desc">Keep an important identity document organized and accessible.</span>
+                                </div>
+
+                                <div class="doc-callout-tag tag-licence" id="tagLicence" data-target="licence">
+                                    <span class="callout-tag-title">Driving Licence</span>
+                                    <span class="callout-tag-desc">Keep your driving document within reach.</span>
+                                </div>
+
+                                <div class="doc-callout-tag tag-pan" id="tagPan" data-target="pan">
+                                    <span class="callout-tag-title">PAN Card</span>
+                                    <span class="callout-tag-desc">Keep your tax identity document organized.</span>
+                                </div>
+
+                                <div class="doc-callout-tag tag-vault" id="tagVault" data-target="vault">
+                                    <span class="callout-tag-title">Other Documents</span>
+                                    <span class="callout-tag-desc">Store other important files in your personal vault.</span>
+                                </div>
+                            </div>
+
+                        </div> <!-- /doc-pivot-container -->
+
+                    </div> <!-- /doc-3d-scene -->
+
+                </div> <!-- /doc-explosion-stage -->
+            </div>
+
         </div>
 
     </main>
 
 
     <!-- =====================================================
-         3. HOW THE SERVICE WORKS
+         3. THREE INTERACTIVE VIDEO PRESENTATION CARDS
     ====================================================== -->
-    <section class="home-section" aria-labelledby="workflowHeading">
+    <section class="video-guides-section" aria-labelledby="videoGuidesHeading">
 
-        <div class="container">
-
-            <div class="home-section-header">
-                <div class="section-tag">Verification Workflow</div>
-                <h2 id="workflowHeading">How the Service Works</h2>
-                <p>A simple three-step process connects university departments with public record verification.</p>
+        <div class="section-header-minimal">
+            <div class="section-tag-minimal">
+                <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
+                <span>Video Guides</span>
             </div>
-
-            <div class="steps-grid">
-
-                <div class="step-card">
-                    <div class="step-num">01</div>
-                    <h3>Certificate Issuance</h3>
-                    <p>Department administrators issue student credentials and unique identifiers via the registrar terminal.</p>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-num">02</div>
-                    <h3>Registry Record</h3>
-                    <p>Records are registered with official conferral timestamps, establishing a verifiable reference point.</p>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-num">03</div>
-                    <h3>Instant Verification</h3>
-                    <p>Anyone with the Certificate ID can query the registry to review degree details and confirm authenticity.</p>
-                </div>
-
-            </div>
-
+            <h2 class="section-title-minimal" id="videoGuidesHeading">Interactive Demonstrations</h2>
+            <p class="section-desc-minimal">
+                Explore step-by-step walkthroughs for credential verification, official issuance, and encrypted vault storage.
+            </p>
         </div>
 
-    </section>
+        <div class="video-cards-grid">
 
-
-    <!-- =====================================================
-         4. ACCESS PATHWAYS
-    ====================================================== -->
-    <section class="home-section" aria-labelledby="pathwaysHeading">
-
-        <div class="container">
-
-            <div class="home-section-header">
-                <div class="section-tag">Access Channels</div>
-                <h2 id="pathwaysHeading">Select Your Service Pathway</h2>
-                <p>Choose between the public verification portal and the authorized administrative terminal.</p>
-            </div>
-
-            <div class="roles-grid">
-
-                <div class="role-card">
-                    <div>
-                        <div class="role-card-header">
-                            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-                            <h3>For Employers & Public Verifiers</h3>
-                        </div>
-                        <p>Confirm the authenticity of candidate degrees and diplomas. No account registration or login is required.</p>
-                    </div>
-                    <a href="verify.html" class="primary-button" style="align-self: flex-start;">
-                        Open Verification Tool →
-                    </a>
-                </div>
-
-                <div class="role-card">
-                    <div>
-                        <div class="role-card-header">
-                            <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
-                            <h3>For Academic Administrators</h3>
-                        </div>
-                        <p>Authorized department staff can sign in to register newly conferred certificates and maintain university records.</p>
-                    </div>
-                    <a href="admin.html" class="btn-outline" style="align-self: flex-start;">
-                        Access Admin Portal →
-                    </a>
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- =====================================================
-         5. ACADEMIC FOOTER
-    ====================================================== -->
-    <footer class="site-footer">
-
-        <div class="footer-content">
-
-            <div class="footer-brand">
-                <h3>VerifiedRecords</h3>
-                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
-            </div>
-
-            <div class="footer-links">
-                <div class="footer-col">
-                    <h4>Navigation</h4>
-                    <a href="index.html">Home</a>
-                    <a href="verify.html">Verify Certificate</a>
-                    <a href="admin.html">Admin Dashboard</a>
-                    <a href="about.html">About the Project</a>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Account</h4>
-                    <a href="login.html">Sign In</a>
-                    <a href="signup.html">Create Account</a>
-                </div>
-
-                <div class="footer-col">
-                    <h4>System</h4>
-                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
-                        Registry Operational
+            <!-- CARD 1: ADMINISTRATIVE (LEFT) -->
+            <div class="video-card video-card-left" id="videoCardLeft" data-video="administrative" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Open Administrative Video Guide">
+                <div class="video-preview-wrapper">
+                    <span class="video-preview-badge">
+                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                        <span>Registrar Portal</span>
                     </span>
+                    <div class="video-play-overlay">
+                        <div class="video-play-icon">
+                            <i class="fa-solid fa-play" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-card-body">
+                    <h3 class="video-card-title">Administrative</h3>
+                    <p class="video-card-subtitle">
+                        Learn how authorized registrars issue and manage verified university credentials.
+                    </p>
+                    <div class="video-card-action">
+                        <span>Open Walkthrough</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 2: VERIFICATION (MIDDLE) -->
+            <div class="video-card video-card-middle" id="videoCardMiddle" data-video="verification" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Open Verification Video Guide">
+                <div class="video-preview-wrapper">
+                    <span class="video-preview-badge">
+                        <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                        <span>Verification</span>
+                    </span>
+                    <div class="video-play-overlay">
+                        <div class="video-play-icon">
+                            <i class="fa-solid fa-play" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-card-body">
+                    <h3 class="video-card-title">Verification</h3>
+                    <p class="video-card-subtitle">
+                        Instantly check the authenticity and conferral details of any issued credential.
+                    </p>
+                    <div class="video-card-action">
+                        <span>Open Walkthrough</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD 3: DOCUMENT UPLOADS (RIGHT) -->
+            <div class="video-card video-card-right" id="videoCardRight" data-video="documents" tabindex="0" role="button" aria-haspopup="dialog" aria-label="Open Document Uploads Video Guide">
+                <div class="video-preview-wrapper">
+                    <span class="video-preview-badge">
+                        <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                        <span>Encrypted Vault</span>
+                    </span>
+                    <div class="video-play-overlay">
+                        <div class="video-play-icon">
+                            <i class="fa-solid fa-play" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-card-body">
+                    <h3 class="video-card-title">Document Uploads</h3>
+                    <p class="video-card-subtitle">
+                        Safeguard personal academic and identity documents in your encrypted vault.
+                    </p>
+                    <div class="video-card-action">
+                        <span>Open Walkthrough</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </div>
                 </div>
             </div>
 
         </div>
 
-        <div class="footer-bottom">
-            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
-            <div>Developed by Siddhant Asati</div>
+    </section>
+
+
+    <!-- =====================================================
+         4. REAL LIVE WEBSITE STATISTICS SECTION
+    ====================================================== -->
+    <section class="stats-section-minimal" id="liveStatsSection" aria-labelledby="statsHeading">
+
+        <div class="section-header-minimal">
+            <div class="section-tag-minimal">
+                <i class="fa-solid fa-chart-simple" aria-hidden="true"></i>
+                <span>System Activity</span>
+            </div>
+            <div class="stats-title-row">
+                <h2 class="section-title-minimal" id="statsHeading">Platform Statistics</h2>
+                <div class="stats-live-badge" id="statsLiveBadge" title="Real-time live sync connected">
+                    <span class="live-pulse-dot" aria-hidden="true"></span>
+                    <span>Live Real-Time Feed</span>
+                </div>
+            </div>
+            <p class="section-desc-minimal">
+                Real-time operational records maintained securely across our verified academic registry.
+            </p>
+        </div>
+
+        <div class="stats-grid-minimal">
+
+            <!-- STAT 1: USERS -->
+            <div class="stat-card-minimal" id="statUsersCard">
+                <div class="stat-icon-minimal">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i>
+                </div>
+                <div class="stat-number-minimal" id="statUsers">0</div>
+                <div class="stat-label-minimal">Users</div>
+            </div>
+
+            <!-- STAT 2: ORGANIZATIONS -->
+            <div class="stat-card-minimal" id="statOrgsCard">
+                <div class="stat-icon-minimal">
+                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                </div>
+                <div class="stat-number-minimal" id="statOrgs">0</div>
+                <div class="stat-label-minimal">Organizations</div>
+            </div>
+
+            <!-- STAT 3: VERIFICATIONS -->
+            <div class="stat-card-minimal" id="statVerificationsCard">
+                <div class="stat-icon-minimal">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                </div>
+                <div class="stat-number-minimal" id="statVerifications">0</div>
+                <div class="stat-label-minimal">Verifications</div>
+            </div>
+
+            <!-- STAT 4: DOCUMENT VAULTS -->
+            <div class="stat-card-minimal" id="statVaultsCard">
+                <div class="stat-icon-minimal">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                </div>
+                <div class="stat-number-minimal" id="statVaults">0</div>
+                <div class="stat-label-minimal">Document Vaults</div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         5. ENLARGED VIDEO MODAL WITH STEP-BY-STEP INSTRUCTIONS
+    ====================================================== -->
+    <div id="videoModalBackdrop"
+         class="video-modal-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="videoModalTitle"
+         aria-hidden="true"
+         onclick="if(event.target === this) closeVideoModal();">
+
+        <div class="video-modal-card">
+
+            <div class="video-modal-header">
+                <h3 class="video-modal-title" id="videoModalTitle">Guide</h3>
+                <button type="button"
+                        class="video-modal-close-btn"
+                        id="videoModalCloseBtn"
+                        onclick="closeVideoModal()"
+                        aria-label="Close tutorial modal">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- ENLARGED VIDEO OR DYNAMIC LIVE DEMONSTRATION -->
+            <div class="video-modal-media-wrap" id="videoModalMedia">
+                <!-- Video or Canvas inserted by home.js -->
+            </div>
+
+            <!-- NUMBERED INSTRUCTIONS -->
+            <div class="video-modal-instructions">
+                <div class="video-modal-instructions-title">
+                    <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                    <span>Step-by-Step Instructions</span>
+                </div>
+                <div id="videoModalInstructionsList">
+                    <!-- Steps inserted by home.js -->
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         6. MINIMAL BALANCED FOOTER (50/50 SPLIT — COMPACT PROPORTIONS)
+    ====================================================== -->
+    <footer class="footer-minimal">
+
+        <div class="footer-minimal-container">
+
+            <div class="footer-minimal-main">
+
+                <!-- LEFT HALF (50%): BRAND, PURPOSE, COMPANY DETAILS & SECURITY -->
+                <div class="footer-minimal-brand-col">
+                    <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                    <p class="footer-purpose-statement">
+                        To provide Advance Security and to provide decentralized platform for every user using Blockchain Technology
+                    </p>
+                    <p class="footer-company-desc">
+                        Verified Records is an institutional-grade decentralized academic credential registry and encrypted personal storage network. Built on Ethereum blockchain smart contracts, it bridges educational institutions, students, and employers through cryptographically verifiable trust.
+                    </p>
+                    <div class="footer-security-chips">
+                        <span class="footer-chip"><i class="fa-brands fa-ethereum" aria-hidden="true"></i> Ethereum Smart Contracts</span>
+                        <span class="footer-chip"><i class="fa-solid fa-lock" aria-hidden="true"></i> AES-256 Encrypted Vaults</span>
+                        <span class="footer-chip"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> 100% Tamper Proof</span>
+                    </div>
+                </div>
+
+                <!-- RIGHT HALF (50%): NAVIGATION, ACCOUNT & SERVICE STATUS -->
+                <div class="footer-minimal-nav-groups">
+
+                    <div class="footer-minimal-col">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="verify.html">Verify Certificate</a>
+                        <a href="documents.html">Save Your Document</a>
+                        <a href="admin.html">Registrar Portal</a>
+                        <a href="about.html">About the Project</a>
+                    </div>
+
+                    <div class="footer-minimal-col">
+                        <h4>Account</h4>
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Create Account</a>
+                        <a href="documents.html">Your Vaults</a>
+                        <a href="verify.html">Public Explorer</a>
+                    </div>
+
+                    <div class="footer-minimal-col">
+                        <h4>Service Status</h4>
+                        <div class="footer-minimal-status">
+                            <span class="status-dot-pulse" aria-hidden="true"></span>
+                            <span id="registryStatusText">Registry Operational</span>
+                        </div>
+                        <div class="footer-network-status">
+                            <i class="fa-solid fa-circle-nodes" aria-hidden="true"></i>
+                            <span>Smart Contract: Sepolia Active</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="footer-minimal-bottom">
+                <div>&copy; Verified Records — Academic Credential Registry. All rights reserved.</div>
+                <div>Developed by Siddhant Asati</div>
+            </div>
+
         </div>
 
     </footer>
+
+
+    <!-- =====================================================
+         7. UPCOMING FEATURE PREVIEW MODAL (CREATE ORGANIZATION)
+    ====================================================== -->
+    <div id="upcomingOrgModal"
+         class="upcoming-modal-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="upcomingOrgTitle"
+         aria-hidden="true"
+         style="display:none;"
+         onclick="if(event.target === this) closeUpcomingOrgModal();">
+
+        <div class="upcoming-modal-card">
+            <div class="upcoming-modal-header">
+                <div class="upcoming-badge-pill">
+                    <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+                    <span>Upcoming Feature</span>
+                </div>
+                <button type="button"
+                        class="upcoming-modal-close"
+                        onclick="closeUpcomingOrgModal()"
+                        aria-label="Close modal">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <div class="upcoming-modal-icon-wrap">
+                <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+            </div>
+
+            <h3 class="upcoming-modal-title" id="upcomingOrgTitle">Create Organization</h3>
+
+            <p class="upcoming-modal-desc">
+                Institutional registration and decentralized Registrar DAO onboarding is currently under active development. This feature will empower universities, academic boards, and accredited institutions to register their verifiable on-chain identity.
+            </p>
+
+            <button type="button" class="btn-upcoming-confirm" onclick="closeUpcomingOrgModal()">
+                <span>Got it, thank you</span>
+            </button>
+        </div>
+
+    </div>
 
 
     <!-- Firebase SDKs -->
@@ -379,41 +882,8 @@
     <!-- Shared Auth Controller -->
     <script src="assets/js/auth.js"></script>
 
-    <!-- Interactive Lookup Component Script -->
-    <script>
-        function setQuickId(certId) {
-            const input = document.getElementById("quickCertInput");
-            const clearBtn = document.getElementById("quickClearBtn");
-            if (input) {
-                input.value = certId;
-                input.focus();
-                if (clearBtn) clearBtn.style.display = "inline-flex";
-            }
-        }
-
-        function clearQuickInput() {
-            const input = document.getElementById("quickCertInput");
-            const clearBtn = document.getElementById("quickClearBtn");
-            if (input) {
-                input.value = "";
-                input.focus();
-                if (clearBtn) clearBtn.style.display = "none";
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const input = document.getElementById("quickCertInput");
-            const clearBtn = document.getElementById("quickClearBtn");
-            if (input && clearBtn) {
-                input.addEventListener("input", function() {
-                    clearBtn.style.display = input.value.trim() ? "inline-flex" : "none";
-                });
-            }
-        });
-    </script>
-
-    <!-- Security Intro Animation -->
-    <script src="assets/js/intro.js"></script>
+    <!-- Homepage Controller (Animations, Videos, Live Stats) -->
+    <script src="assets/js/home.js"></script>
 
     <!-- App Utilities -->
     <script src="assets/js/app.js"></script>

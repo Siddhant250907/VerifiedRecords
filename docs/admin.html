@@ -20,7 +20,7 @@
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
 
     <!-- Shared CSS Design System -->
@@ -30,6 +30,8 @@
 </head>
 
 <body>
+
+    <canvas id="bgParticlesCanvas" class="bg-particles-canvas" aria-hidden="true"></canvas>
 
     <!-- =====================================================
          LOADING SCREEN (Checking authentication session)
@@ -48,7 +50,7 @@
         <div class="nav-left">
             <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
                 <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
-                <span class="nav-brand-text">VerifiedRecords</span>
+                <span class="nav-brand-text">Verified Records</span>
             </a>
 
             <div class="nav-links" role="navigation">
@@ -70,6 +72,12 @@
                     <span>Verify</span>
                 </a>
 
+                <!-- VAULT -->
+                <a href="documents.html" class="nav-item" id="navVault" title="Vault">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                    <span>Vault</span>
+                </a>
+
                 <!-- ABOUT -->
                 <a href="about.html" class="nav-item" id="navAbout" title="About">
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
@@ -83,21 +91,28 @@
             <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
                 <!-- LOGGED-OUT: LOGIN / SIGN UP -->
-                <a href="login.html"
-                   id="loginButton"
-                   class="login-button"
-                   aria-label="Login or Sign Up">
-                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-                    <span>Login / Sign Up</span>
-                </a>
+                <div id="authLoggedOutNav" class="auth-nav-buttons">
+                    <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in">
+                        <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="signup.html" id="signupButton" class="btn-nav-signup" aria-label="Sign Up">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                    </a>
+                </div>
 
                 <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
                 <div id="accountButton"
                      class="account-container auth-hidden"
                      style="display:none;">
+                    <div class="welcome-user-nav" id="welcomeUserNav">
+                        <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                    </div>
+
                     <button type="button"
                             id="accountMenuTrigger"
-                            class="account-button"
+                            class="account-button account-button-boxy"
                             onclick="toggleAccountMenu()"
                             aria-label="Account Menu"
                             aria-expanded="false"
@@ -112,9 +127,13 @@
                         <div id="accountEmail"
                              class="account-email">
                         </div>
-                        <a href="admin.html" role="menuitem">
+                        <a href="dashboard.html" role="menuitem">
                             <i class="fa-solid fa-gauge" aria-hidden="true"></i>
                             <span>Dashboard</span>
+                        </a>
+                        <a href="documents.html" role="menuitem">
+                            <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                            <span>Your Vaults</span>
                         </a>
                         <button type="button" onclick="logoutUser()" role="menuitem">
                             <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
@@ -163,19 +182,233 @@
                     <span id="userEmail"></span>
                 </div>
 
-                <!-- MetaMask status badge -->
+                <!-- Option to view MetaMask Account details (Only available AFTER successful authentication) -->
+                <div class="admin-wallet-toggle-wrap" id="adminWalletToggleWrap" style="display:none; margin-top: 8px;">
+                    <button type="button" class="admin-wallet-toggle-btn" id="toggleWalletDetailsBtn" title="Toggle MetaMask Details">
+                        <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+                        <span id="toggleWalletText">View MetaMask Details</span>
+                        <i class="fa-solid fa-chevron-down" id="toggleWalletChevron" aria-hidden="true" style="font-size: 0.75rem; margin-left: 4px;"></i>
+                    </button>
+                </div>
+
+                <!-- MetaMask status badge (Hidden by default, shown only when authenticated user opts in) -->
                 <div class="admin-user-badge" id="adminWalletBadge" style="display:none; margin-top: 8px;">
                     <i class="fa-solid fa-wallet" aria-hidden="true"></i>
                     <span>MetaMask Issuer:</span>
                     <span id="adminWalletAccount" class="mono">Not Connected</span>
                 </div>
+
+                <!-- Active Admin USER ID Badge -->
+                <div class="admin-user-badge admin-id-badge" id="adminIdBadge" style="display:none; margin-top: 8px;">
+                    <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
+                    <span>Admin USER ID:</span>
+                    <strong id="activeAdminUserId"></strong>
+                    <button type="button" class="admin-badge-lock-btn" id="lockAdminBtn" title="Lock admin terminal / Switch account" aria-label="Lock Admin Session">
+                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                        <span>Lock</span>
+                    </button>
+                </div>
             </header>
+
+
+            <!-- ==========================================
+                 ADMIN SECURITY GATE (AUTHENTICATE OR CREATE ADMIN)
+            =========================================== -->
+            <div class="admin-gate-card card" id="adminGateCard">
+                <div class="admin-gate-header">
+                    <div class="admin-gate-icon-orb" aria-hidden="true">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div class="admin-gate-title-wrap">
+                        <h2 class="admin-gate-title">Administrative Terminal Access</h2>
+                    </div>
+                    <p class="admin-gate-subtitle">
+                        Please sign in with your <strong>Admin USER ID</strong> & <strong>Password (PWD)</strong>, or create an administrator account to issue academic credentials.
+                    </p>
+                </div>
+
+                <!-- Tab Switcher: [Already an Admin? (Sign In)] vs [Create Admin Account] -->
+                <div class="admin-gate-tabs" role="tablist">
+                    <button type="button" class="admin-gate-tab active" id="tabAdminLogin" role="tab" aria-selected="true">
+                        <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                        <span>Already an Admin? (Sign In)</span>
+                    </button>
+                    <button type="button" class="admin-gate-tab" id="tabAdminRegister" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Create Admin Account</span>
+                    </button>
+                </div>
+
+                <!-- Gate Alert Messages -->
+                <div id="adminGateAlert" class="admin-gate-alert" style="display:none;" role="alert"></div>
+
+                <!-- PANEL 1: ADMIN LOGIN FORM -->
+                <form id="adminLoginForm" class="admin-gate-form">
+                    <div class="admin-form-group">
+                        <label for="adminAuthUserId" class="admin-label">
+                            <span>Admin USER ID<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Registered admin username</span>
+                        </label>
+                        <div class="admin-input-group" id="groupAdminAuthUserId">
+                            <span class="admin-input-icon" aria-hidden="true">
+                                <i class="fa-solid fa-id-badge"></i>
+                            </span>
+                            <input
+                                type="text"
+                                id="adminAuthUserId"
+                                class="admin-input mono"
+                                placeholder="Admin USER ID"
+                                autocomplete="username"
+                                spellcheck="false"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="adminAuthPassword" class="admin-label">
+                            <span>Admin Password (PWD)<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group" id="groupAdminAuthPassword">
+                            <span class="admin-input-icon" aria-hidden="true">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                id="adminAuthPassword"
+                                class="admin-input"
+                                placeholder="Enter your admin password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="cert-combobox-action-btn"
+                                id="toggleAuthPwdBtn"
+                                title="Toggle password visibility"
+                                aria-label="Toggle password visibility"
+                            >
+                                <i class="fa-regular fa-eye" id="toggleAuthPwdIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="admin-submit-btn" id="adminLoginBtn">
+                        <span class="btn-icon-wrap">
+                            <i class="fa-solid fa-unlock-keyhole" id="adminLoginBtnIcon"></i>
+                        </span>
+                        <span id="adminLoginBtnText">Authenticate & Unlock Terminal</span>
+                    </button>
+
+                    <div class="admin-gate-footer-hint">
+                        <span>New administrator? </span>
+                        <button type="button" class="admin-gate-link-btn" id="switchToRegisterBtn">
+                            Create an Admin Account
+                        </button>
+                    </div>
+                </form>
+
+                <!-- PANEL 2: ADMIN REGISTRATION FORM -->
+                <form id="adminRegisterForm" class="admin-gate-form" style="display:none;">
+                    <div class="admin-form-group">
+                        <label for="adminCreateUserId" class="admin-label">
+                            <span>Choose Admin USER ID<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Saved securely in MongoDB</span>
+                        </label>
+                        <div class="admin-input-group" id="groupAdminCreateUserId">
+                            <span class="admin-input-icon" aria-hidden="true">
+                                <i class="fa-solid fa-id-badge"></i>
+                            </span>
+                            <input
+                                type="text"
+                                id="adminCreateUserId"
+                                class="admin-input mono"
+                                placeholder="Admin USER ID"
+                                autocomplete="username"
+                                spellcheck="false"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="adminCreatePassword" class="admin-label">
+                            <span>Admin Password (PWD)<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Minimum 6 characters</span>
+                        </label>
+                        <div class="admin-input-group" id="groupAdminCreatePassword">
+                            <span class="admin-input-icon" aria-hidden="true">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                id="adminCreatePassword"
+                                class="admin-input"
+                                placeholder="Create a strong admin password"
+                                autocomplete="new-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="cert-combobox-action-btn"
+                                id="toggleCreatePwdBtn"
+                                title="Toggle password visibility"
+                                aria-label="Toggle password visibility"
+                            >
+                                <i class="fa-regular fa-eye" id="toggleCreatePwdIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="adminCreateConfirmPassword" class="admin-label">
+                            <span>Confirm Password (PWD)<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group" id="groupAdminCreateConfirmPassword">
+                            <span class="admin-input-icon" aria-hidden="true">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </span>
+                            <input
+                                type="password"
+                                id="adminCreateConfirmPassword"
+                                class="admin-input"
+                                placeholder="Re-enter admin password to confirm"
+                                autocomplete="new-password"
+                                required
+                            >
+                            <button
+                                type="button"
+                                class="cert-combobox-action-btn"
+                                id="toggleConfirmPwdBtn"
+                                title="Toggle password visibility"
+                                aria-label="Toggle password visibility"
+                            >
+                                <i class="fa-regular fa-eye" id="toggleConfirmPwdIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="admin-submit-btn" id="adminRegisterBtn">
+                        <span class="btn-icon-wrap">
+                            <i class="fa-solid fa-user-plus" id="adminRegisterBtnIcon"></i>
+                        </span>
+                        <span id="adminRegisterBtnText">Create Admin Account & Unlock</span>
+                    </button>
+
+                    <div class="admin-gate-footer-hint">
+                        <span>Already have an admin account? </span>
+                        <button type="button" class="admin-gate-link-btn" id="switchToLoginBtn">
+                            Sign In with Admin USER ID
+                        </button>
+                    </div>
+                </form>
+            </div>
 
 
             <!-- ==========================================
                  ADMINISTRATIVE CERTIFICATE FORM (GLASSMORPHIC)
             =========================================== -->
-            <div class="admin-form-card">
+            <div class="admin-form-card" id="adminFormCard" style="display:none;">
 
                 <form id="certificateForm" novalidate>
 
@@ -201,7 +434,7 @@
                                         id="studentName"
                                         name="studentName"
                                         class="admin-input"
-                                        placeholder="e.g. Eleanor Vance"
+                                        placeholder="Student Full Name"
                                         autocomplete="off"
                                         required
                                     >
@@ -222,7 +455,7 @@
                                         id="rollNumber"
                                         name="rollNumber"
                                         class="admin-input mono"
-                                        placeholder="e.g. 25BCE1633"
+                                        placeholder="Roll / Enrollment Number"
                                         autocomplete="off"
                                         required
                                     >
@@ -254,10 +487,103 @@
                                         id="course"
                                         name="course"
                                         class="admin-input"
-                                        placeholder="e.g. Computer Science and Engineering"
+                                        placeholder="Degree Program / Discipline"
                                         autocomplete="off"
                                         required
                                     >
+                                </div>
+                            </div>
+
+                            <!-- Field of Certification / Credential Type [Search, Options, Other] -->
+                            <div class="admin-form-group full-width" id="groupCertTypeContainer">
+                                <label for="certTypeSearchInput" class="admin-label">
+                                    <span>Field of Certification / Credential Type<span class="required-star">*</span></span>
+                                    <span class="admin-label-hint">Search, choose from list, or specify 'Other'</span>
+                                </label>
+
+                                <div class="cert-combobox-wrapper" id="certComboboxWrapper">
+                                    <div class="admin-input-group cert-combobox-trigger" id="groupCertType">
+                                        <span class="admin-input-icon" aria-hidden="true">
+                                            <i class="fa-solid fa-award" id="certTypeDisplayIcon"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            id="certTypeSearchInput"
+                                            class="admin-input cert-type-input"
+                                            placeholder="Field of Certification"
+                                            autocomplete="off"
+                                            spellcheck="false"
+                                            required
+                                        >
+                                        <div class="cert-combobox-controls">
+                                            <button
+                                                type="button"
+                                                id="clearCertTypeBtn"
+                                                class="cert-combobox-action-btn"
+                                                title="Clear selection"
+                                                aria-label="Clear selection"
+                                                style="display: none;"
+                                            >
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                id="toggleCertDropdownBtn"
+                                                class="cert-combobox-action-btn"
+                                                title="Toggle options list"
+                                                aria-label="Toggle options list"
+                                                tabindex="-1"
+                                            >
+                                                <i class="fa-solid fa-chevron-down cert-dropdown-chevron" id="certDropdownChevron"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden Input to store the active certification type value -->
+                                    <input type="hidden" id="certificateType" name="certificateType" value="">
+
+                                    <!-- Dropdown Options Menu -->
+                                    <div class="cert-options-dropdown" id="certOptionsDropdown" role="listbox" style="display: none;">
+                                        <div class="cert-dropdown-meta-bar">
+                                            <span class="cert-dropdown-meta-title"><i class="fa-solid fa-layer-group"></i> Certification Fields</span>
+                                            <span class="cert-dropdown-count-badge" id="certDropdownBadge">14 options</span>
+                                        </div>
+
+                                        <div class="cert-options-scrollable" id="certOptionsScrollable">
+                                            <!-- Dynamically populated with options & badges -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom "Other" Input Box (Revealed smoothly when 'Other' is picked) -->
+                                <div class="custom-cert-type-box" id="customCertTypeBox" style="display: none;">
+                                    <label for="customCertificateType" class="admin-label custom-type-label">
+                                        <span><i class="fa-solid fa-pen-nib"></i> Specify Custom Certification Field / Type<span class="required-star">*</span></span>
+                                        <span class="admin-label-hint">Enter your specific certificate title</span>
+                                    </label>
+                                    <div class="admin-input-group" id="groupCustomCertType">
+                                        <span class="admin-input-icon" aria-hidden="true">
+                                            <i class="fa-solid fa-file-pen"></i>
+                                        </span>
+                                        <input
+                                            type="text"
+                                            id="customCertificateType"
+                                            name="customCertificateType"
+                                            class="admin-input"
+                                            placeholder="Specify certification field"
+                                            autocomplete="off"
+                                        >
+                                        <button
+                                            type="button"
+                                            id="clearCustomCertTypeBtn"
+                                            class="cert-combobox-action-btn"
+                                            title="Clear custom type"
+                                            aria-label="Clear custom type"
+                                            style="display: none; margin-right: 8px;"
+                                        >
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -275,7 +601,7 @@
                                         id="certificateId"
                                         name="certificateId"
                                         class="admin-input mono"
-                                        placeholder="e.g. CERT_CSE005"
+                                        placeholder="Certificate ID"
                                         autocomplete="off"
                                         spellcheck="false"
                                         required
@@ -305,6 +631,109 @@
                     </div>
 
 
+                    <!-- SECTION 3: BLOCKCHAIN NETWORK SELECTION -->
+                    <div class="network-selector-card" id="networkSelectorCard">
+                        <div class="network-selector-header">
+                            <div class="network-selector-title-wrap">
+                                <span class="network-selector-icon-orb" aria-hidden="true">
+                                    <i class="fa-solid fa-network-wired"></i>
+                                </span>
+                                <div>
+                                    <span class="network-selector-label">Blockchain Network</span>
+                                    <span class="network-selector-subtitle">Explicitly choose which blockchain to use for this certificate transaction</span>
+                                </div>
+                            </div>
+
+                            <div class="network-selector-pills" role="radiogroup" aria-label="Blockchain Network Selection">
+                                <button
+                                    type="button"
+                                    class="network-pill-btn active"
+                                    id="btnNetSepolia"
+                                    data-network="sepolia"
+                                    role="radio"
+                                    aria-checked="true"
+                                    tabindex="0"
+                                >
+                                    <i class="fa-brands fa-ethereum" aria-hidden="true"></i>
+                                    <span>Ethereum Sepolia</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    class="network-pill-btn"
+                                    id="btnNetGanache"
+                                    data-network="ganache"
+                                    role="radio"
+                                    aria-checked="false"
+                                    tabindex="0"
+                                >
+                                    <i class="fa-solid fa-server" aria-hidden="true"></i>
+                                    <span>Ganache Local</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Active Network Info Panel -->
+                        <div class="network-info-panel" id="networkInfoPanel">
+                            <div class="network-info-grid">
+                                <div class="network-info-item">
+                                    <span class="network-info-label">Active Network</span>
+                                    <span class="network-info-value" id="netActiveName">Ethereum Sepolia</span>
+                                </div>
+                                <div class="network-info-item">
+                                    <span class="network-info-label">Chain ID</span>
+                                    <span class="network-info-value mono" id="netActiveChainId">11155111 (0xaa36a7)</span>
+                                </div>
+                                <div class="network-info-item">
+                                    <span class="network-info-label">Contract Address</span>
+                                    <span class="network-info-value mono contract-inspect-wrap" id="netActiveContractWrap">
+                                        <span id="netActiveContract" class="contract-address-compact">0xDd4DF9A618683a407f3B195e651271DC0E97f5bE</span>
+                                        <button type="button" id="copyContractBtn" class="network-copy-btn" title="Copy contract address" aria-label="Copy contract address">
+                                            <i class="fa-regular fa-copy" id="copyContractIcon"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                                <div class="network-info-item">
+                                    <span class="network-info-label">Readiness Status</span>
+                                    <span class="network-status-badge ready" id="netActiveStatus">
+                                        <span class="network-status-dot"></span>
+                                        <span id="netActiveStatusText">Ready for Transactions</span>
+                                    </span>
+                                </div>
+                                <div class="network-info-item full-width-account" id="netAccountItem">
+                                    <span class="network-info-label" id="netAccountLabel">Connected MetaMask Account</span>
+                                    <span class="network-info-value account-inspect-wrap" id="netAccountWrap">
+                                        <span id="netAccountName" class="account-name-badge">Not Connected</span>
+                                        <span id="netAccountAddr" class="mono account-addr-compact">Not Connected</span>
+                                        <button type="button" id="switchMetaMaskAccountBtn" class="network-switch-acc-btn" title="Change account in MetaMask" aria-label="Change account in MetaMask">
+                                            <i class="fa-solid fa-arrow-right-arrow-left"></i> <span id="switchMetaMaskAccountBtnText">Change account in MetaMask</span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Hosted Environment Notice (Shown if on Render or Ganache unavailable) -->
+                            <div class="network-notice-box" id="networkHostedNotice" style="display: none;">
+                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                                <span id="networkHostedNoticeText">Ganache Local requires the local development server and cannot be reached from hosted environments.</span>
+                            </div>
+
+                            <!-- Insufficient Sepolia ETH Fallback Prompt (Requirement 6 & 8) -->
+                            <div class="network-insufficient-funds-banner" id="netInsufficientFundsBanner" style="display: none;">
+                                <div class="banner-msg-wrap">
+                                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                                    <div>
+                                        <strong>Not enough Sepolia test ETH.</strong>
+                                        <p>You can switch to Ganache Local to issue a separate local test transaction.</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="network-switch-fallback-btn" id="btnSwitchToGanacheFallback">
+                                    <i class="fa-solid fa-server"></i> Switch to Ganache Local
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
                     <!-- FORM ACTIONS -->
                     <div class="admin-form-actions">
                         <button
@@ -317,12 +746,23 @@
                         </button>
 
                         <button
+                            type="button"
+                            class="admin-registrar-btn"
+                            id="registrarIssueBtn"
+                            title="Direct on-chain issuance signed by the Institutional Registrar node on Sepolia"
+                        >
+                            <i class="fa-solid fa-bolt" id="registrarBtnIcon" aria-hidden="true"></i>
+                            <span id="registrarBtnText">Direct Registrar Issuance (Fast)</span>
+                        </button>
+
+                        <button
                             type="submit"
                             class="primary-button admin-submit-btn"
                             id="issueButton"
+                            title="Sign and broadcast transaction using your connected MetaMask wallet"
                         >
                             <i class="fa-solid fa-stamp" id="issueBtnIcon" aria-hidden="true"></i>
-                            <span id="issueBtnText">Issue & Register Certificate</span>
+                            <span id="issueBtnText">Issue via MetaMask</span>
                         </button>
                     </div>
 
@@ -369,6 +809,11 @@
                         </div>
 
                         <div class="issuance-summary-item">
+                            <span class="issuance-summary-label">Field / Type of Certification</span>
+                            <span class="issuance-summary-val" id="confirmCertType">—</span>
+                        </div>
+
+                        <div class="issuance-summary-item">
                             <span class="issuance-summary-label">Conferral Date</span>
                             <span class="issuance-summary-val" id="confirmIssueDate">—</span>
                         </div>
@@ -399,39 +844,38 @@
 
 
     <!-- =====================================================
-         ACADEMIC FOOTER
+         MINIMAL FOOTER
     ====================================================== -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>VerifiedRecords</h3>
-                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+    <footer class="footer-minimal">
+        <div class="footer-minimal-container">
+            <div class="footer-minimal-main">
+                <div class="footer-minimal-brand-col">
+                    <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                    <p class="footer-minimal-tagline">
+                        Deliberately serving to the people with Advanced Security.
+                    </p>
+                </div>
+                <div class="footer-minimal-nav-groups">
+                    <div class="footer-minimal-col">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="verify.html">Verify Certificate</a>
+                        <a href="documents.html">Save Your Document</a>
+                        <a href="admin.html">Registrar Portal</a>
+                        <a href="about.html">About the Project</a>
+                    </div>
+                    <div class="footer-minimal-col">
+                        <h4>Account</h4>
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Create Account</a>
+                        <a href="documents.html">Your Vaults</a>
+                    </div>
+                </div>
             </div>
-            <div class="footer-links">
-                <div class="footer-col">
-                    <h4>Navigation</h4>
-                    <a href="index.html">Home</a>
-                    <a href="verify.html">Verify Certificate</a>
-                    <a href="admin.html">Admin Dashboard</a>
-                    <a href="about.html">About the Project</a>
-                </div>
-                <div class="footer-col">
-                    <h4>Account</h4>
-                    <a href="login.html">Sign In</a>
-                    <a href="signup.html">Create Account</a>
-                </div>
-                <div class="footer-col">
-                    <h4>System</h4>
-                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
-                        Registry Operational
-                    </span>
-                </div>
+            <div class="footer-minimal-bottom">
+                <div>&copy; Verified Records — Academic Credential Registry</div>
+                <div>Developed by Siddhant Asati</div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
-            <div>Developed by Siddhant Asati</div>
         </div>
     </footer>
 

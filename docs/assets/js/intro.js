@@ -59,10 +59,6 @@
                 </div>
 
                 <div class="intro-text-cluster" id="introTextCluster">
-                    <div class="intro-badge-pill">
-                        <span class="intro-status-dot"></span>
-                        <span>Ease to Security</span>
-                    </div>
                     <h2 class="intro-brand-title">VerifiedRecords</h2>
                     <p class="intro-brand-subtitle">Cryptographic Credential Node • Initialized</p>
                 </div>

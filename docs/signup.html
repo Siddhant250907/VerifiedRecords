@@ -6,63 +6,462 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Create Account - VerifiedRecords</title>
+    <title>Create Account — Verified Records</title>
 
     <meta name="description"
-          content="Create an account on VerifiedRecords to access academic certificate registry services.">
+          content="Create your Verified Records account to securely issue, verify, and store academic credentials.">
 
     <!-- Fonts & Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
+    <link rel="stylesheet"
+          href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600,700,800&display=swap">
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
 
     <!-- Shared Design System -->
     <link rel="stylesheet"
           href="assets/css/style.css">
 
+    <style>
+        .signup-container-minimal {
+            max-width: 580px;
+            margin: 40px auto 80px;
+            padding: 38px 36px;
+            background: #FAF8F5;
+            border: 1px solid rgba(0, 71, 65, 0.16);
+            border-radius: 24px;
+            box-shadow: 8px 8px 24px rgba(189, 182, 171, 0.35), -8px -8px 24px #FFFFFF;
+        }
+        .signup-title {
+            font-family: var(--font-brand);
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: #004741;
+            margin: 0 0 8px 0;
+            text-align: center;
+        }
+        .signup-subtitle {
+            font-size: 0.92rem;
+            color: #536460;
+            text-align: center;
+            margin: 0 0 26px 0;
+            line-height: 1.5;
+        }
+        .signup-grid-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .signup-input-group {
+            margin-bottom: 18px;
+        }
+        .signup-input-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #004741;
+            margin-bottom: 6px;
+        }
+        .signup-control-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .signup-field-input,
+        input.signup-field-input,
+        input[type="text"].signup-field-input,
+        input[type="date"].signup-field-input,
+        input[type="email"].signup-field-input,
+        input[type="tel"].signup-field-input,
+        input[type="password"].signup-field-input {
+            width: 100%;
+            height: 48px;
+            background: #FAF8F5 !important;
+            border: 1.5px solid rgba(0, 71, 65, 0.22) !important;
+            border-radius: 12px !important;
+            padding: 0 14px 0 48px !important;
+            font-family: inherit;
+            font-size: 0.94rem;
+            color: #004741 !important;
+            outline: none;
+            transition: all 0.2s ease;
+            box-shadow: inset 1px 1px 3px rgba(0, 71, 65, 0.05) !important;
+        }
+        .signup-field-input:focus,
+        input.signup-field-input:focus {
+            border-color: #004741 !important;
+            background: #FFFFFF !important;
+            box-shadow: 0 0 0 3px rgba(0, 71, 65, 0.18) !important;
+        }
+        .signup-field-input::placeholder {
+            color: #7A8B87 !important;
+            font-size: 0.88rem;
+        }
+        .signup-field-icon {
+            position: absolute;
+            left: 14px;
+            width: 22px;
+            text-align: center;
+            color: #536460 !important;
+            font-size: 0.95rem;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .signup-toggle-pwd {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #536460;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.9rem;
+        }
+        .username-status-badge {
+            position: absolute;
+            right: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: none;
+        }
+        .username-status-badge.available {
+            color: #059669;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .username-status-badge.taken {
+            color: #DC2626;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-signup-submit {
+            width: 100%;
+            background: #004741;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-family: var(--font-brand);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px -4px rgba(0, 71, 65, 0.35);
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+        .btn-signup-submit:hover {
+            background: #003833;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px -4px rgba(0, 71, 65, 0.45);
+        }
+        .signup-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0 18px;
+            color: #536460;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .signup-divider::before,
+        .signup-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 71, 65, 0.15);
+        }
+        .signup-divider span {
+            padding: 0 12px;
+        }
+        .social-buttons-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .social-btn-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #FFFFFF;
+            border: 1.5px solid rgba(0, 71, 65, 0.18);
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-family: var(--font-brand);
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #2C423E;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 8px rgba(189, 182, 171, 0.25);
+        }
+        .social-btn-item:hover {
+            background: #FAF8F5;
+            border-color: rgba(0, 71, 65, 0.35);
+            transform: translateY(-1px);
+        }
+        .social-btn-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+        .signup-footer-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 0.9rem;
+            color: #536460;
+        }
+        .signup-footer-link a {
+            color: #004741;
+            font-weight: 700;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+        .signup-footer-link a:hover {
+            text-decoration: underline;
+        }
+        .signup-message-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 18px;
+            display: none;
+            line-height: 1.45;
+        }
+        .signup-message-box.error {
+            background: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            color: #991B1B;
+            display: block;
+        }
+        .signup-message-box.info {
+            background: #E0F2FE;
+            border: 1px solid #BAE6FD;
+            color: #075985;
+            display: block;
+        }
+        .signup-message-box.success {
+            background: #DCFCE7;
+            border: 1px solid #86EFAC;
+            color: #166534;
+            display: block;
+        }
+
+        /* OTP Verification Modal & Simulated SMS Notification */
+        .otp-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 30, 28, 0.70);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .otp-modal-backdrop.active {
+            display: flex;
+        }
+        .otp-modal-card {
+            width: 100%;
+            max-width: 440px;
+            background: #FAF8F5;
+            border: 1.5px solid rgba(0, 71, 65, 0.22);
+            border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(0, 30, 28, 0.25);
+            padding: 28px 24px;
+            text-align: center;
+            position: relative;
+            animation: modalFadeIn 0.25s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .otp-modal-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: rgba(0, 71, 65, 0.08);
+            border: 1.5px solid rgba(0, 71, 65, 0.22);
+            color: #004741;
+            font-size: 1.6rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+        .otp-modal-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #004741;
+            margin: 0 0 8px 0;
+        }
+        .otp-modal-desc {
+            font-size: 0.9rem;
+            color: #536460;
+            line-height: 1.45;
+            margin: 0 0 16px 0;
+        }
+        .otp-sent-notice {
+            background: rgba(0, 71, 65, 0.06);
+            border: 1px solid rgba(0, 71, 65, 0.18);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            color: #004741;
+            margin-bottom: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .otp-sent-notice strong {
+            font-weight: 800;
+            color: #004741;
+            letter-spacing: 0.5px;
+        }
+        .otp-input-label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #004741;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .otp-digits-input {
+            width: 100%;
+            height: 52px;
+            letter-spacing: 8px;
+            font-size: 1.45rem;
+            font-weight: 800;
+            text-align: center;
+            font-family: monospace;
+            background: #FFFFFF !important;
+            border: 2px solid rgba(0, 71, 65, 0.25) !important;
+            border-radius: 12px !important;
+            color: #004741 !important;
+            outline: none;
+            margin-bottom: 16px;
+            box-shadow: inset 1px 1px 3px rgba(0, 71, 65, 0.05);
+        }
+        .otp-digits-input:focus {
+            border-color: #004741 !important;
+            box-shadow: 0 0 0 3.5px rgba(0, 71, 65, 0.18) !important;
+        }
+        .otp-actions-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn-verify-otp {
+            width: 100%;
+            height: 48px;
+            background: #004741;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.96rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-verify-otp:hover {
+            background: #00332E;
+            box-shadow: 0 4px 12px rgba(0, 71, 65, 0.25);
+        }
+        .otp-secondary-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .btn-resend-otp {
+            background: none;
+            border: none;
+            color: #004741;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+        }
+        .btn-resend-otp:disabled {
+            color: #9CA3AF;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        .btn-cancel-otp {
+            background: none;
+            border: none;
+            color: #536460;
+            cursor: pointer;
+            padding: 0;
+        }
+        .btn-cancel-otp:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .signup-container-minimal {
+                padding: 26px 20px;
+                margin: 20px auto 60px;
+            }
+            .signup-grid-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
 
-    <!-- =====================================================
-         TOP NAVIGATION (NEUMORPHIC MASTHEAD)
-    ====================================================== -->
-    <nav class="top-navbar" aria-label="Main Navigation">
+    <canvas id="bgParticlesCanvas" class="bg-particles-canvas" aria-hidden="true"></canvas>
 
-        <!-- LEFT SIDE -->
+    <!-- TOP NAVIGATION -->
+    <nav class="top-navbar" aria-label="Main Navigation">
         <div class="nav-left">
-            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+            <a href="index.html" class="nav-brand" aria-label="Verified Records Home">
                 <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
-                <span class="nav-brand-text">VerifiedRecords</span>
+                <span class="nav-brand-text">Verified Records</span>
             </a>
 
             <div class="nav-links" role="navigation">
-                <!-- HOME -->
                 <a href="index.html" class="nav-item" id="navHome" title="Home">
                     <i class="fa-solid fa-house" aria-hidden="true"></i>
                     <span>Home</span>
                 </a>
-
-                <!-- ADMIN / DASHBOARD -->
                 <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
                     <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
                     <span>Admin</span>
                 </a>
-
-                <!-- VERIFY -->
                 <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
                     <i class="fa-solid fa-certificate" aria-hidden="true"></i>
                     <span>Verify</span>
                 </a>
-
-                <!-- ABOUT -->
+                <a href="documents.html" class="nav-item" id="navVault" title="Vault">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                    <span>Vault</span>
+                </a>
                 <a href="about.html" class="nav-item" id="navAbout" title="About">
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                     <span>About</span>
@@ -70,43 +469,41 @@
             </div>
         </div>
 
-        <!-- RIGHT SIDE -->
         <div class="nav-right">
-            <!-- AUTHENTICATION AREA -->
             <div class="auth-area">
-                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
-                <a href="login.html"
-                   id="loginButton"
-                   class="login-button"
-                   aria-label="Login or Sign Up">
-                    <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-                    <span>Login / Sign Up</span>
-                </a>
+                <div id="authLoggedOutNav" class="auth-nav-buttons">
+                    <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in">
+                        <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="signup.html" id="signupButton" class="btn-nav-signup active" aria-label="Sign Up">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                    </a>
+                </div>
 
-                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
-                <div id="accountButton"
-                     class="account-container auth-hidden"
-                     style="display:none;">
+                <div id="accountButton" class="account-container auth-hidden" style="display:none;">
+                    <div class="welcome-user-nav" id="welcomeUserNav">
+                        <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                    </div>
                     <button type="button"
                             id="accountMenuTrigger"
-                            class="account-button"
+                            class="account-button account-button-boxy"
                             onclick="toggleAccountMenu()"
                             aria-label="Account Menu"
                             aria-expanded="false"
                             title="Account Settings">
                         <i class="fa-solid fa-user" aria-hidden="true"></i>
                     </button>
-
-                    <div id="accountMenu"
-                         class="account-menu"
-                         role="menu"
-                         aria-label="Account Options">
-                        <div id="accountEmail"
-                             class="account-email">
-                        </div>
-                        <a href="admin.html" role="menuitem">
+                    <div id="accountMenu" class="account-menu" role="menu" aria-label="Account Options">
+                        <div id="accountEmail" class="account-email"></div>
+                        <a href="dashboard.html" role="menuitem">
                             <i class="fa-solid fa-gauge" aria-hidden="true"></i>
                             <span>Dashboard</span>
+                        </a>
+                        <a href="documents.html" role="menuitem">
+                            <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                            <span>Your Vaults</span>
                         </a>
                         <button type="button" onclick="logoutUser()" role="menuitem">
                             <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
@@ -116,203 +513,296 @@
                 </div>
             </div>
         </div>
-
     </nav>
 
 
-    <!-- =====================================================
-         SIGNUP PAGE CONTENT (GLASSMORPHIC PANEL)
-    ====================================================== -->
-    <main class="login-page">
+    <!-- MAIN SIGNUP CARD -->
+    <main style="padding: 40px 20px;">
 
-        <!-- Subtle Ambient Background Layer -->
-        <div class="auth-ambient-bg" aria-hidden="true">
-            <div class="auth-orb auth-orb-1"></div>
-            <div class="auth-orb auth-orb-2"></div>
-        </div>
+        <div class="signup-container-minimal">
 
-        <div class="signup-container card">
+            <h1 class="signup-title">Create Account</h1>
+            <p class="signup-subtitle">Join Verified Records to manage verified academic credentials and secure vaults</p>
 
-            <div class="auth-header">
-                <div class="auth-brand-badge">
-                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                    <span>Institutional Registry</span>
+            <div id="signupAlert" class="signup-message-box" role="alert"></div>
+
+            <!-- SIGNUP FORM (ALL 8 FIELDS WITH ZERO PREFILLED EXAMPLES) -->
+            <form id="signupForm" novalidate onsubmit="event.preventDefault(); submitSignup();">
+
+                <!-- ROW 1: FIRST NAME & LAST NAME -->
+                <div class="signup-grid-row">
+                    <div class="signup-input-group">
+                        <label for="firstName" class="signup-input-label">First Name</label>
+                        <div class="signup-control-wrap">
+                            <i class="fa-solid fa-user signup-field-icon" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                id="firstName"
+                                class="signup-field-input"
+                                placeholder="First Name"
+                                autocomplete="given-name"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div class="signup-input-group">
+                        <label for="lastName" class="signup-input-label">Last Name</label>
+                        <div class="signup-control-wrap">
+                            <i class="fa-solid fa-user signup-field-icon" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                id="lastName"
+                                class="signup-field-input"
+                                placeholder="Last Name"
+                                autocomplete="family-name"
+                                required
+                            >
+                        </div>
+                    </div>
                 </div>
-                <h1>Create Account</h1>
-                <p class="subtitle">Register an administrative account for credential issuance</p>
-            </div>
 
-            <!-- FEEDBACK MESSAGE BANNER -->
-            <div id="message" class="auth-alert" role="status" aria-live="polite" style="display: none;"></div>
+                <!-- ROW 2: DATE OF BIRTH & USERNAME -->
+                <div class="signup-grid-row">
+                    <div class="signup-input-group">
+                        <label for="dateOfBirth" class="signup-input-label">Date of Birth</label>
+                        <div class="signup-control-wrap">
+                            <i class="fa-solid fa-calendar signup-field-icon" aria-hidden="true"></i>
+                            <input
+                                type="date"
+                                id="dateOfBirth"
+                                class="signup-field-input"
+                                required
+                            >
+                        </div>
+                    </div>
 
-            <!-- =====================================
-                 SIGNUP FORM
-            ====================================== -->
-            <form id="signupForm" novalidate onsubmit="event.preventDefault(); createAccount();">
+                    <div class="signup-input-group">
+                        <label for="username" class="signup-input-label">Username</label>
+                        <div class="signup-control-wrap">
+                            <i class="fa-solid fa-at signup-field-icon" aria-hidden="true"></i>
+                            <input
+                                type="text"
+                                id="username"
+                                class="signup-field-input"
+                                placeholder="Username"
+                                autocomplete="username"
+                                required
+                            >
+                            <span id="usernameBadge" class="username-status-badge"></span>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- EMAIL -->
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <div class="auth-input-wrapper" id="emailWrapper">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <i class="fa-solid fa-envelope"></i>
-                        </span>
+                <!-- ROW 3: EMAIL ADDRESS -->
+                <div class="signup-input-group">
+                    <label for="email" class="signup-input-label">Email Address</label>
+                    <div class="signup-control-wrap">
+                        <i class="fa-solid fa-envelope signup-field-icon" aria-hidden="true"></i>
                         <input
                             type="email"
                             id="email"
-                            placeholder="e.g. registrar@university.edu"
+                            class="signup-field-input"
+                            placeholder="Email Address"
                             autocomplete="email"
-                            spellcheck="false"
                             required
                         >
-                        <button
-                            type="button"
-                            class="auth-clear-btn"
-                            id="emailClearBtn"
-                            title="Clear email"
-                            aria-label="Clear email"
-                            style="display: none;"
-                        >
-                            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                        </button>
                     </div>
                 </div>
 
-                <!-- PASSWORD -->
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="auth-input-wrapper" id="passwordWrapper">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <i class="fa-solid fa-lock"></i>
-                        </span>
+                <!-- ROW 4: PHONE NUMBER -->
+                <div class="signup-input-group">
+                    <label for="phoneNumber" class="signup-input-label">Phone Number</label>
+                    <div class="signup-control-wrap">
+                        <i class="fa-solid fa-phone signup-field-icon" aria-hidden="true"></i>
+                        <input
+                            type="tel"
+                            id="phoneNumber"
+                            class="signup-field-input"
+                            placeholder="Phone Number"
+                            autocomplete="tel"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- ROW 5: PASSWORD -->
+                <div class="signup-input-group">
+                    <label for="password" class="signup-input-label">Password</label>
+                    <div class="signup-control-wrap">
+                        <i class="fa-solid fa-lock signup-field-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             id="password"
-                            placeholder="Minimum 6 characters"
+                            class="signup-field-input"
+                            placeholder="Password"
                             autocomplete="new-password"
+                            minlength="6"
                             required
                         >
                         <button
                             type="button"
-                            class="password-toggle-btn"
-                            id="pwdToggleBtn"
-                            onclick="togglePasswordVisibility('password', 'pwdToggleIcon')"
+                            class="signup-toggle-pwd"
+                            onclick="togglePasswordVisibility('password', 'pwdIcon')"
                             aria-label="Toggle password visibility"
-                            title="Show or hide password"
                         >
-                            <i id="pwdToggleIcon" class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i id="pwdIcon" class="fa-regular fa-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- CONFIRM PASSWORD -->
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <div class="auth-input-wrapper" id="confirmPasswordWrapper">
-                        <span class="auth-input-icon" aria-hidden="true">
-                            <i class="fa-solid fa-shield-check"></i>
-                        </span>
+                <!-- ROW 6: CONFIRM PASSWORD -->
+                <div class="signup-input-group">
+                    <label for="confirmPassword" class="signup-input-label">Confirm Password</label>
+                    <div class="signup-control-wrap">
+                        <i class="fa-solid fa-shield-check signup-field-icon" aria-hidden="true"></i>
                         <input
                             type="password"
                             id="confirmPassword"
-                            placeholder="Re-enter password"
+                            class="signup-field-input"
+                            placeholder="Confirm Password"
                             autocomplete="new-password"
+                            minlength="6"
                             required
                         >
                         <button
                             type="button"
-                            class="password-toggle-btn"
-                            id="confirmPwdToggleBtn"
-                            onclick="togglePasswordVisibility('confirmPassword', 'confirmPwdToggleIcon')"
+                            class="signup-toggle-pwd"
+                            onclick="togglePasswordVisibility('confirmPassword', 'confirmPwdIcon')"
                             aria-label="Toggle password visibility"
-                            title="Show or hide password"
                         >
-                            <i id="confirmPwdToggleIcon" class="fa-regular fa-eye" aria-hidden="true"></i>
+                            <i id="confirmPwdIcon" class="fa-regular fa-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- SUBMIT BUTTON -->
-                <button
-                    type="submit"
-                    id="signupSubmitBtn"
-                    class="primary-button auth-submit-btn"
-                >
-                    <i class="fa-solid fa-user-plus" id="signupBtnIcon" aria-hidden="true"></i>
-                    <span id="signupBtnText">Create Account</span>
+                <button type="submit" class="btn-signup-submit" id="btnSignupSubmit">
+                    <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                    <span>Create Account</span>
                 </button>
 
             </form>
 
-            <!-- DIVIDER -->
-            <div class="divider">
+            <!-- SOCIAL SIGNUP DIVIDER -->
+            <div class="signup-divider">
                 <span>Or Continue With</span>
             </div>
 
-            <!-- GOOGLE SIGNUP -->
-            <button
-                type="button"
-                id="googleSignupBtn"
-                class="google-btn"
-                onclick="googleSignup()"
-            >
-                <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <span>Continue with Google</span>
-            </button>
+            <!-- SOCIAL PROVIDERS -->
+            <div class="social-buttons-stack">
+                <button type="button" class="social-btn-item" onclick="loginWithGoogle('signupAlert')">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    <span>Continue with Google</span>
+                </button>
 
-            <!-- SWITCH TO LOGIN -->
-            <div class="auth-switch-prompt">
-                <span>Already registered?</span>
-                <a href="login.html" id="backToLoginBtn" class="auth-switch-link" onclick="goToLogin(); return false;">
-                    <span>Sign In</span>
-                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                </a>
+                <button type="button" class="social-btn-item" onclick="loginWithApple('signupAlert')">
+                    <svg viewBox="0 0 170 170" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.07-7.64-7.85-11.83-14.34-5.76-8.91-10.28-18.77-13.56-29.58-3.27-10.8-4.91-21.35-4.91-31.63 0-14.36 3.69-26.4 11.07-36.14 7.38-9.74 16.66-14.71 27.84-14.92 5.01 0 10.42 1.34 16.23 4.02 5.8 2.68 9.53 4.07 11.19 4.17 1.8 0 5.76-1.42 11.89-4.27 6.13-2.85 11.63-4.14 16.5-3.87 12.63.63 22.84 5.37 30.63 14.22-10.97 6.64-16.35 15.62-16.14 26.93.21 8.87 3.59 16.42 10.14 22.65 6.56 6.23 14.38 9.87 23.47 10.92-2.11 6.54-4.8 13.06-8.07 19.56zM119.22 31.84c0-7.72 2.76-14.98 8.28-21.78 5.53-6.8 12.44-10.06 20.75-9.78.21 1.05.32 2.05.32 3 0 7.49-2.82 14.67-8.47 21.54-5.65 6.87-12.63 10.29-20.94 10.25-.1-.85-.15-1.74-.15-2.65l.21-.58z"/>
+                    </svg>
+                    <span>Continue with Apple</span>
+                </button>
             </div>
 
+            <div class="signup-footer-link">
+                <span>Already have an account?</span>
+                <a href="login.html">Sign In</a>
+            </div>
+
+        </div>
+
+        <!-- Firebase reCAPTCHA Invisible Container -->
+        <div id="recaptchaContainer"></div>
+
+        <!-- PHONE OTP VERIFICATION MODAL -->
+        <div id="otpModalBackdrop" class="otp-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="otpModalTitle">
+            <div class="otp-modal-card">
+                <div class="otp-modal-icon">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <h2 class="otp-modal-title" id="otpModalTitle">Phone Verification</h2>
+                <p class="otp-modal-desc">
+                    Enter the verification code sent to your phone.
+                </p>
+
+                <!-- REAL SMS CONFIRMATION NOTICE WITH MASKED NUMBER -->
+                <div id="otpSentNotice" class="otp-sent-notice">
+                    Verification code sent to <strong id="otpTargetPhone">+91 ******0947</strong>.
+                </div>
+
+                <div id="otpAlert" class="signup-message-box" style="display:none; margin-bottom: 14px;" role="alert"></div>
+
+                <div class="otp-input-wrap">
+                    <label for="otpInput" class="otp-input-label">6-Digit Verification Code</label>
+                    <input
+                        type="text"
+                        id="otpInput"
+                        class="otp-digits-input"
+                        placeholder="••••••"
+                        maxlength="6"
+                        pattern="\d{6}"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                    >
+                </div>
+
+                <div class="otp-actions-stack">
+                    <button type="button" class="btn-verify-otp" id="btnVerifyOtp" onclick="confirmOtpAndCreateUser()">
+                        <i class="fa-solid fa-shield-check"></i>
+                        <span>Verify & Complete Registration</span>
+                    </button>
+
+                    <div class="otp-secondary-row">
+                        <button type="button" class="btn-resend-otp" id="btnResendOtp" onclick="resendPhoneOtp()">
+                            Resend Code (<span id="resendTimerSpan">60s</span>)
+                        </button>
+                        <button type="button" class="btn-cancel-otp" onclick="closeOtpModal()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </main>
 
 
-    <!-- =====================================================
-         ACADEMIC FOOTER
-    ====================================================== -->
-    <footer class="site-footer">
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>VerifiedRecords</h3>
-                <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
-            </div>
-            <div class="footer-links">
-                <div class="footer-col">
-                    <h4>Navigation</h4>
-                    <a href="index.html">Home</a>
-                    <a href="verify.html">Verify Certificate</a>
-                    <a href="admin.html">Admin Dashboard</a>
-                    <a href="about.html">About the Project</a>
+    <!-- FOOTER -->
+    <footer class="footer-minimal">
+        <div class="footer-minimal-container">
+            <div class="footer-minimal-main">
+                <div class="footer-minimal-brand-col">
+                    <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                    <p class="footer-minimal-tagline">
+                        Deliberately serving to the people with Advanced Security.
+                    </p>
                 </div>
-                <div class="footer-col">
-                    <h4>Account</h4>
-                    <a href="login.html">Sign In</a>
-                    <a href="signup.html">Create Account</a>
-                </div>
-                <div class="footer-col">
-                    <h4>System</h4>
-                    <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
-                        Registry Operational
-                    </span>
+                <div class="footer-minimal-nav-groups">
+                    <div class="footer-minimal-col">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="verify.html">Verify Certificate</a>
+                        <a href="documents.html">Save Your Document</a>
+                        <a href="admin.html">Registrar Portal</a>
+                        <a href="about.html">About the Project</a>
+                    </div>
+                    <div class="footer-minimal-col">
+                        <h4>Account</h4>
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Create Account</a>
+                        <a href="documents.html">Your Vaults</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
-            <div>Developed by Siddhant Asati</div>
+            <div class="footer-minimal-bottom">
+                <div>&copy; Verified Records — Academic Credential Registry</div>
+                <div>Developed by Siddhant Asati</div>
+            </div>
         </div>
     </footer>
 
@@ -323,9 +813,18 @@
 
     <!-- Shared Auth Controller -->
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/app.js"></script>
 
-    <!-- Signup Logic -->
     <script>
+        // Set maximum date for Date of Birth to today
+        document.addEventListener("DOMContentLoaded", () => {
+            const dobInput = document.getElementById("dateOfBirth");
+            if (dobInput) {
+                const today = new Date().toISOString().split("T")[0];
+                dobInput.setAttribute("max", today);
+            }
+        });
+
         function togglePasswordVisibility(fieldId, iconId) {
             const field = document.getElementById(fieldId);
             const icon = document.getElementById(iconId);
@@ -340,156 +839,454 @@
             }
         }
 
-        function showMessage(message, isSuccess = false) {
-            const element = document.getElementById("message");
-            if (!element) return;
+        // Real-time debounced username availability check
+        let usernameTimer = null;
+        let isUsernameAvailable = false;
+        const usernameInput = document.getElementById("username");
+        const usernameBadge = document.getElementById("usernameBadge");
 
-            if (!message) {
-                element.style.display = "none";
-                element.innerHTML = "";
-                return;
-            }
+        if (usernameInput) {
+            usernameInput.addEventListener("input", () => {
+                const username = usernameInput.value.trim();
+                clearTimeout(usernameTimer);
 
-            element.style.display = "flex";
-            element.className = "auth-alert " + (isSuccess ? "success" : "error");
-            const icon = isSuccess ? "fa-circle-check" : "fa-circle-exclamation";
-            element.innerHTML = '<i class="fa-solid ' + icon + '" aria-hidden="true"></i><span>' + message + '</span>';
-        }
-
-        function setFormLoading(isLoading, buttonText = "Create Account") {
-            const submitBtn = document.getElementById("signupSubmitBtn");
-            const btnIcon = document.getElementById("signupBtnIcon");
-            const btnText = document.getElementById("signupBtnText");
-            const googleBtn = document.getElementById("googleSignupBtn");
-            const emailInput = document.getElementById("email");
-            const passwordInput = document.getElementById("password");
-            const confirmInput = document.getElementById("confirmPassword");
-            const emailClearBtn = document.getElementById("emailClearBtn");
-
-            if (submitBtn) {
-                submitBtn.disabled = isLoading;
-                if (isLoading) {
-                    submitBtn.classList.add("loading");
-                    if (btnIcon) btnIcon.className = "fa-solid fa-circle-notch fa-spin";
-                    if (btnText) btnText.textContent = "Creating account...";
-                } else {
-                    submitBtn.classList.remove("loading");
-                    if (btnIcon) btnIcon.className = "fa-solid fa-user-plus";
-                    if (btnText) btnText.textContent = buttonText;
+                if (username.length < 3) {
+                    if (usernameBadge) {
+                        usernameBadge.style.display = "none";
+                        usernameBadge.className = "username-status-badge";
+                    }
+                    isUsernameAvailable = false;
+                    return;
                 }
-            }
 
-            if (googleBtn) googleBtn.disabled = isLoading;
-            if (emailInput) emailInput.disabled = isLoading;
-            if (passwordInput) passwordInput.disabled = isLoading;
-            if (confirmInput) confirmInput.disabled = isLoading;
-            if (emailClearBtn) emailClearBtn.disabled = isLoading;
-        }
-
-        function getFriendlyErrorMessage(error) {
-            if (!error) return "An unexpected error occurred. Please try again.";
-            switch (error.code) {
-                case "auth/email-already-in-use":
-                    return "This email is already registered. Please sign in instead.";
-                case "auth/invalid-email":
-                    return "Please enter a valid email address.";
-                case "auth/weak-password":
-                    return "Password is too weak. Please use at least 6 characters.";
-                case "auth/network-request-failed":
-                    return "Network error. Please check your internet connection.";
-                case "auth/popup-closed-by-user":
-                    return "Google sign-in was cancelled.";
-                case "auth/popup-blocked":
-                    return "Popup was blocked by your browser. Please allow popups.";
-                default:
-                    return error.message || "Failed to create account. Please try again.";
-            }
-        }
-
-        // Email Clear Button Listener
-        const emailInput = document.getElementById("email");
-        const emailClearBtn = document.getElementById("emailClearBtn");
-        if (emailInput && emailClearBtn) {
-            emailInput.addEventListener("input", function() {
-                emailClearBtn.style.display = this.value.trim() ? "inline-flex" : "none";
-            });
-            emailClearBtn.addEventListener("click", function() {
-                emailInput.value = "";
-                emailClearBtn.style.display = "none";
-                emailInput.focus();
+                usernameTimer = setTimeout(() => {
+                    fetch(`/api/auth/check-username?username=${encodeURIComponent(username)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (usernameBadge) {
+                                if (data.available) {
+                                    usernameBadge.textContent = "✓ Available";
+                                    usernameBadge.className = "username-status-badge available";
+                                    usernameBadge.style.display = "inline-flex";
+                                    isUsernameAvailable = true;
+                                } else {
+                                    usernameBadge.textContent = "✗ Taken";
+                                    usernameBadge.className = "username-status-badge taken";
+                                    usernameBadge.style.display = "inline-flex";
+                                    isUsernameAvailable = false;
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            isUsernameAvailable = true;
+                        });
+                }, 350);
             });
         }
 
-        function goToLogin() {
-            window.location.href = "login.html";
+        let pendingSignupData = null;
+        let resendCountdown = 60;
+        let resendTimerInterval = null;
+
+        // Phone normalization and formatting to E.164
+        function formatToE164(phone) {
+            let raw = String(phone).trim();
+            if (raw.startsWith("+")) {
+                const digits = raw.slice(1).replace(/\D/g, "");
+                return "+" + digits;
+            }
+            const digits = raw.replace(/\D/g, "");
+            if (digits.length === 10) {
+                return "+91" + digits; // Standard 10-digit Indian number
+            }
+            if (digits.length === 11 && digits.startsWith("0")) {
+                return "+91" + digits.slice(1);
+            }
+            if (digits.length === 12 && digits.startsWith("91")) {
+                return "+" + digits;
+            }
+            return "+" + digits;
         }
 
-        async function createAccount() {
+        // Mask phone number for display (+91 ******0947)
+        function maskPhoneNumber(phone) {
+            const e164 = formatToE164(phone);
+            if (e164.length <= 6) return e164;
+            const prefix = e164.slice(0, 3);
+            const suffix = e164.slice(-4);
+            const maskedCount = Math.max(4, e164.length - 7);
+            const maskedMiddle = "*".repeat(maskedCount);
+            return `${prefix} ${maskedMiddle}${suffix}`;
+        }
+
+        // Firebase RecaptchaVerifier manager
+        function getRecaptchaVerifier() {
+            if (window.recaptchaVerifier) {
+                return window.recaptchaVerifier;
+            }
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptchaContainer", {
+                size: "invisible",
+                callback: () => {
+                    console.log("[Auth] reCAPTCHA solved for SMS verification.");
+                },
+                "expired-callback": () => {
+                    console.warn("[Auth] reCAPTCHA expired. Resetting...");
+                    resetRecaptchaVerifier();
+                }
+            });
+            return window.recaptchaVerifier;
+        }
+
+        function resetRecaptchaVerifier() {
+            try {
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                }
+            } catch (e) {
+                window.recaptchaVerifier = null;
+            }
+            const container = document.getElementById("recaptchaContainer");
+            if (container) container.innerHTML = "";
+        }
+
+        async function submitSignup() {
+            const firstName = document.getElementById("firstName").value.trim();
+            const lastName = document.getElementById("lastName").value.trim();
+            const dateOfBirth = document.getElementById("dateOfBirth").value;
+            const username = document.getElementById("username").value.trim();
             const email = document.getElementById("email").value.trim();
+            const phoneNumber = document.getElementById("phoneNumber").value.trim();
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirmPassword").value;
+            const submitBtn = document.getElementById("btnSignupSubmit");
 
-            if (!email || !password || !confirmPassword) {
-                showMessage("Please fill in all required fields.");
+            // Client-side validations
+            if (!firstName || !lastName || !dateOfBirth || !username || !email || !phoneNumber || !password || !confirmPassword) {
+                showAlert("Please fill in all requested fields.", "error");
                 return;
             }
 
+            // Date validation (not in the future)
+            const dobDate = new Date(dateOfBirth);
+            const today = new Date();
+            if (isNaN(dobDate.getTime()) || dobDate > today) {
+                showAlert("Please enter a valid date of birth not in the future.", "error");
+                return;
+            }
+
+            // Username validation
+            if (username.length < 3) {
+                showAlert("Username must be at least 3 characters long.", "error");
+                return;
+            }
+            if (!isUsernameAvailable) {
+                showAlert("The chosen username is already taken. Please pick another.", "error");
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showAlert("Please enter a valid email address.", "error");
+                return;
+            }
+
+            // Phone validation & normalization to E.164
+            const phoneDigits = phoneNumber.replace(/\D/g, "");
+            if (phoneDigits.length < 7) {
+                showAlert("Please enter a valid phone number with area/country code.", "error");
+                return;
+            }
+            const formattedPhone = formatToE164(phoneNumber);
+
+            // Password length & match
             if (password.length < 6) {
-                showMessage("Password must be at least 6 characters long.");
+                showAlert("Password must be at least 6 characters long.", "error");
                 return;
             }
-
             if (password !== confirmPassword) {
-                showMessage("Passwords do not match. Please re-enter.");
+                showAlert("Passwords do not match.", "error");
                 return;
             }
 
-            setFormLoading(true);
-            showMessage("Creating your account...", true);
+            // Check if email already has a finalized profile in MongoDB
+            try {
+                const checkRes = await fetch(`/api/auth/resolve-identifier?identifier=${encodeURIComponent(email)}`);
+                const checkData = await checkRes.json();
+                if (checkData.exists) {
+                    showAlert("An account with this email address already exists. Please sign in instead.", "error");
+                    return;
+                }
+            } catch (cErr) {}
+
+            // Save pending registration fields
+            pendingSignupData = {
+                firstName,
+                lastName,
+                dateOfBirth,
+                username,
+                email,
+                phoneNumber: formattedPhone,
+                password
+            };
+
+            showAlert("Sending genuine verification SMS to your phone...", "info");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Sending SMS...</span>';
 
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(
-                    email,
-                    password
-                );
+                // 1. Create or get Firebase Email/Password User
+                let user = auth.currentUser;
+                if (!user || user.email.toLowerCase() !== email.toLowerCase()) {
+                    try {
+                        const cred = await auth.createUserWithEmailAndPassword(email, password);
+                        user = cred.user;
+                    } catch (createErr) {
+                        if (createErr.code === "auth/email-already-in-use") {
+                            // Account created previously but phone not linked; sign in to complete registration
+                            try {
+                                const signInCred = await auth.signInWithEmailAndPassword(email, password);
+                                user = signInCred.user;
+                            } catch (signInErr) {
+                                throw new Error("This email is already registered in Firebase. Please sign in or use another email.");
+                            }
+                        } else {
+                            throw createErr;
+                        }
+                    }
+                }
 
-                console.log("VerifiedRecords Auth: Account created", userCredential.user.email);
-                showMessage("Account created successfully! Redirecting...", true);
+                // 2. Request genuine Firebase SMS phone linking
+                const appVerifier = getRecaptchaVerifier();
+                const confirmationResult = await user.linkWithPhoneNumber(formattedPhone, appVerifier);
 
-                setTimeout(function() {
-                    window.location.href = "admin.html";
-                }, 900);
+                // Store confirmationResult in session
+                window.phoneConfirmationResult = confirmationResult;
+                window.pendingSignupPhone = formattedPhone;
 
-            } catch (error) {
-                console.error("Signup error:", error);
-                setFormLoading(false);
-                showMessage(getFriendlyErrorMessage(error));
+                // 3. Reveal clean verification UI
+                openOtpModal(formattedPhone);
+                showAlert("Verification code dispatched via SMS.", "info");
+
+            } catch (err) {
+                console.error("[Phone Auth Error]", err);
+                resetRecaptchaVerifier();
+                let msg = err.message;
+                if (err.code === "auth/invalid-phone-number") {
+                    msg = "Invalid phone number format. Please check your number.";
+                } else if (err.code === "auth/credential-already-in-use" || err.code === "auth/provider-already-linked") {
+                    msg = "This phone number is already linked to another Verified Records account.";
+                } else if (err.code === "auth/too-many-requests" || err.code === "auth/quota-exceeded") {
+                    msg = "SMS rate limit exceeded for this phone number or IP. Please wait before retrying.";
+                } else if (err.code === "auth/unauthorized-domain") {
+                    msg = "This domain is not authorized for Firebase Phone Authentication. Please add it in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+                } else if (err.code === "auth/captcha-check-failed") {
+                    msg = "reCAPTCHA verification failed. Please try again.";
+                }
+                showAlert(msg, "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> <span>Create Account</span>';
             }
         }
 
-        async function googleSignup() {
-            setFormLoading(true, "Create Account");
-            showMessage("Connecting to Google...", true);
+        function openOtpModal(formattedPhone) {
+            const modal = document.getElementById("otpModalBackdrop");
+            const targetPhone = document.getElementById("otpTargetPhone");
+            const otpInput = document.getElementById("otpInput");
+            const alertBox = document.getElementById("otpAlert");
 
-            const provider = new firebase.auth.GoogleAuthProvider();
+            if (targetPhone) {
+                targetPhone.textContent = maskPhoneNumber(formattedPhone);
+            }
+            if (alertBox) {
+                alertBox.style.display = "none";
+                alertBox.textContent = "";
+            }
+            if (otpInput) {
+                otpInput.value = "";
+                setTimeout(() => otpInput.focus(), 250);
+            }
+
+            if (modal) {
+                modal.classList.add("active");
+                modal.style.display = "flex";
+            }
+
+            startResendCountdown();
+        }
+
+        function closeOtpModal() {
+            const modal = document.getElementById("otpModalBackdrop");
+            if (modal) {
+                modal.classList.remove("active");
+                modal.style.display = "none";
+            }
+            clearInterval(resendTimerInterval);
+        }
+
+        function startResendCountdown() {
+            clearInterval(resendTimerInterval);
+            resendCountdown = 60;
+            const resendBtn = document.getElementById("btnResendOtp");
+            const timerSpan = document.getElementById("resendTimerSpan");
+
+            if (resendBtn) resendBtn.disabled = true;
+            if (timerSpan) timerSpan.textContent = `${resendCountdown}s`;
+
+            resendTimerInterval = setInterval(() => {
+                resendCountdown--;
+                if (timerSpan) timerSpan.textContent = `${resendCountdown}s`;
+                if (resendCountdown <= 0) {
+                    clearInterval(resendTimerInterval);
+                    if (resendBtn) {
+                        resendBtn.disabled = false;
+                        resendBtn.textContent = "Resend Code";
+                    }
+                }
+            }, 1000);
+        }
+
+        async function resendPhoneOtp() {
+            if (!window.pendingSignupPhone || !auth.currentUser) return;
+            const resendBtn = document.getElementById("btnResendOtp");
+            if (resendBtn) resendBtn.disabled = true;
+
+            showOtpAlert("Requesting new verification code via SMS...", "info");
 
             try {
-                await auth.signInWithPopup(provider);
-
-                showMessage("Google account connected! Redirecting...", true);
-
-                setTimeout(function() {
-                    window.location.href = "admin.html";
-                }, 700);
-
-            } catch (error) {
-                console.error("Google signup error:", error);
-                setFormLoading(false);
-                showMessage(getFriendlyErrorMessage(error));
+                resetRecaptchaVerifier();
+                const appVerifier = getRecaptchaVerifier();
+                const confirmationResult = await auth.currentUser.linkWithPhoneNumber(window.pendingSignupPhone, appVerifier);
+                window.phoneConfirmationResult = confirmationResult;
+                showOtpAlert("A new SMS verification code has been dispatched to your phone.", "success");
+                startResendCountdown();
+            } catch (err) {
+                console.error("[Resend Error]", err);
+                resetRecaptchaVerifier();
+                let msg = err.message;
+                if (err.code === "auth/too-many-requests" || err.code === "auth/quota-exceeded") {
+                    msg = "Too many SMS requests. Please wait a few minutes before trying again.";
+                }
+                showOtpAlert(msg, "error");
+                if (resendBtn) resendBtn.disabled = false;
             }
+        }
+
+        async function confirmOtpAndCreateUser() {
+            const otpInput = document.getElementById("otpInput");
+            const verifyBtn = document.getElementById("btnVerifyOtp");
+            const code = (otpInput ? otpInput.value : "").trim();
+
+            if (!code || !/^\d{6}$/.test(code)) {
+                showOtpAlert("Please enter the genuine 6-digit verification code received via SMS.", "error");
+                return;
+            }
+
+            if (!window.phoneConfirmationResult) {
+                showOtpAlert("Verification session expired. Please request a new code.", "error");
+                return;
+            }
+
+            if (!pendingSignupData) {
+                showOtpAlert("Registration session timed out. Please refresh and fill the signup form again.", "error");
+                return;
+            }
+
+            if (verifyBtn) {
+                verifyBtn.disabled = true;
+                verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying Code with Firebase...</span>';
+            }
+
+            try {
+                // 1. Submit entered SMS code to Firebase's actual confirmation method
+                const userCred = await window.phoneConfirmationResult.confirm(code);
+                const user = userCred.user || auth.currentUser;
+
+                showOtpAlert("Phone number verified successfully! Finalizing your profile...", "success");
+
+                // 2. Obtain fresh Firebase ID Token containing verified phone credential
+                const idToken = await user.getIdToken(true);
+
+                // 3. Finalize registration profile in MongoDB
+                const profilePayload = {
+                    email: pendingSignupData.email,
+                    uid: user.uid,
+                    firstName: pendingSignupData.firstName,
+                    lastName: pendingSignupData.lastName,
+                    username: pendingSignupData.username,
+                    dateOfBirth: pendingSignupData.dateOfBirth,
+                    phoneNumber: window.pendingSignupPhone,
+                    provider: "password"
+                };
+
+                const syncRes = await fetch("/api/auth/sync-user", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify(profilePayload)
+                });
+
+                const syncData = await syncRes.json();
+                if (!syncRes.ok || !syncData.success) {
+                    throw new Error(syncData.message || "Failed to finalize database profile.");
+                }
+
+                // 4. Update local session cache
+                localStorage.setItem("vr_username", pendingSignupData.username);
+                localStorage.setItem("vr_last_user_created", Date.now().toString());
+
+                // Broadcast live creation event across open browser tabs
+                try {
+                    const bc = new BroadcastChannel("vr_live_sync");
+                    bc.postMessage({
+                        type: "NEW_USER_CREATED",
+                        username: pendingSignupData.username,
+                        timestamp: Date.now()
+                    });
+                } catch (bcErr) {}
+
+                closeOtpModal();
+                showAlert("Phone verified and account created successfully! Redirecting to dashboard...", "success");
+
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 800);
+
+            } catch (err) {
+                console.error("[OTP Verification Error]", err);
+                let msg = err.message;
+                if (err.code === "auth/invalid-verification-code") {
+                    msg = "Incorrect verification code. Please check your SMS and try again.";
+                } else if (err.code === "auth/code-expired") {
+                    msg = "The verification code has expired. Please click Resend Code.";
+                }
+                showOtpAlert(msg, "error");
+                if (verifyBtn) {
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> <span>Verify & Complete Registration</span>';
+                }
+            }
+        }
+
+        function showOtpAlert(msg, type) {
+            const alertBox = document.getElementById("otpAlert");
+            if (!alertBox) return;
+            alertBox.textContent = msg;
+            alertBox.className = `signup-message-box ${type}`;
+            alertBox.style.display = "block";
+        }
+
+        function showAlert(msg, type) {
+            const box = document.getElementById("signupAlert");
+            if (!box) return;
+            box.textContent = msg;
+            box.className = `signup-message-box ${type}`;
         }
     </script>
-    <script src="assets/js/app.js"></script>
 
 </body>
 

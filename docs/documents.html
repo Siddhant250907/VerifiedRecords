@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Secure Document Vault - VerifiedRecords</title>
+
+    <meta name="description"
+          content="VerifiedRecords Secure Document Vault — Client-side AES-256-GCM encrypted document storage powered by Cloudinary and Firebase.">
+
+    <!-- Fonts & FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet"
+          href="assets/css/style.css">
+</head>
+
+<body>
+
+    <canvas id="bgParticlesCanvas" class="bg-particles-canvas" aria-hidden="true"></canvas>
+
+    <!-- =====================================================
+         1. TOP NAVIGATION (NEUMORPHIC MASTHEAD)
+    ====================================================== -->
+    <nav class="top-navbar" aria-label="Main Navigation">
+
+        <!-- LEFT SIDE -->
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+                <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                <span class="nav-brand-text">Verified Records</span>
+            </a>
+
+            <div class="nav-links" role="navigation">
+                <!-- HOME -->
+                <a href="index.html" class="nav-item" id="navHome" title="Home">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
+
+                <!-- ADMIN / DASHBOARD -->
+                <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </a>
+
+                <!-- VERIFY -->
+                <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <span>Verify</span>
+                </a>
+
+                <!-- VAULT (ACTIVE) -->
+                <a href="documents.html" class="nav-item active" id="navVault" title="Vault" aria-current="page">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                    <span>Vault</span>
+                </a>
+
+                <!-- ABOUT -->
+                <a href="about.html" class="nav-item" id="navAbout" title="About">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="nav-right">
+            <div class="auth-area">
+                <!-- LOGGED-OUT: LOGIN / SIGN UP -->
+                <div id="authLoggedOutNav" class="auth-nav-buttons">
+                    <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in">
+                        <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="signup.html" id="signupButton" class="btn-nav-signup" aria-label="Sign Up">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                    </a>
+                </div>
+
+                <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
+                <div id="accountButton"
+                     class="account-container auth-hidden"
+                     style="display:none;">
+                    <div class="welcome-user-nav" id="welcomeUserNav">
+                        <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                    </div>
+
+                    <button type="button"
+                            id="accountMenuTrigger"
+                            class="account-button account-button-boxy"
+                            onclick="toggleAccountMenu()"
+                            aria-label="Account Menu"
+                            aria-expanded="false"
+                            title="Account Settings">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="accountMenu"
+                         class="account-menu"
+                         role="menu"
+                         aria-label="Account Options">
+                        <div id="accountEmail"
+                             class="account-email">
+                        </div>
+                        <a href="dashboard.html" role="menuitem">
+                            <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="documents.html" role="menuitem">
+                            <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                            <span>Your Vaults</span>
+                        </a>
+                        <button type="button" onclick="logoutUser()" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================================
+         2. MAIN DOCUMENT VAULT CONTENT
+    ====================================================== -->
+    <main class="vault-page-wrapper">
+
+        <!-- Ambient Orbs -->
+        <div class="page-ambient-layer" aria-hidden="true">
+            <div class="ambient-orb ambient-orb-1"></div>
+            <div class="ambient-orb ambient-orb-2"></div>
+        </div>
+
+        <div class="vault-container">
+
+            <!-- HEADER / HERO -->
+            <header class="vault-header">
+                <h1 class="vault-title">
+                    Save Your <span>Documents</span> Here
+                </h1>
+                <p class="vault-subtitle">
+                    Providing the best security for your important documents.
+                </p>
+            </header>
+
+            <!-- CATEGORY FILTER TABS -->
+            <nav class="vault-category-nav" role="tablist" aria-label="Document Categories">
+                <button type="button" class="vault-category-pill active" data-category="all" role="tab" aria-selected="true">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span>Your Docs</span>
+                </button>
+                <button type="button" class="vault-category-pill" data-category="aadhaar" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    <span>E-Aadhaar</span>
+                </button>
+                <button type="button" class="vault-category-pill" data-category="pan" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-address-card"></i>
+                    <span>PAN ID</span>
+                </button>
+                <button type="button" class="vault-category-pill" data-category="dl" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <span>Driving Licence</span>
+                </button>
+                <button type="button" class="vault-category-pill" data-category="marksheets" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Marksheets</span>
+                </button>
+                <button type="button" class="vault-category-pill" data-category="apaar" role="tab" aria-selected="false">
+                    <i class="fa-solid fa-award"></i>
+                    <span>APAAR ID</span>
+                </button>
+            </nav>
+
+            <!-- NOTIFICATION / STATUS MESSAGE BANNER -->
+            <div id="vaultAlert" style="display: none; width: 100%; border-radius: 14px; padding: 12px 18px; font-size: 0.9rem; font-weight: 500;"></div>
+
+            <!-- STATE 1: NOT AUTHENTICATED -->
+            <div id="vaultAuthPrompt" class="vault-gate-card" style="display: none;">
+                <div class="vault-gate-icon">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <h2>Authentication Required</h2>
+                <p>Please log in or create an account with Firebase to access your personal Secure Document Vault.</p>
+                <a href="login.html" class="vault-btn-primary" style="text-decoration: none;">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Login / Sign Up</span>
+                </a>
+            </div>
+
+            <!-- STATE 2A: FIRST TIME USER — CREATE YOUR VAULT -->
+            <div id="vaultFirstTimeCard" class="vault-gate-card" style="display: none;">
+                <div class="vault-gate-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h2>Create Your Vault</h2>
+                <p>Setup your personal secure vault to protect and manage your verified credentials.</p>
+
+                <form id="vaultFirstTimeForm" class="vault-password-form" novalidate>
+                    <div class="vault-input-group">
+                        <span class="vault-input-icon"><i class="fa-solid fa-folder-plus"></i></span>
+                        <input
+                            type="text"
+                            id="firstTimeVaultNameInput"
+                            class="vault-input"
+                            placeholder="Vault Name (e.g. Primary Vault)"
+                            value="Primary Vault"
+                            required
+                        >
+                    </div>
+
+                    <div class="vault-input-group">
+                        <span class="vault-input-icon"><i class="fa-solid fa-key"></i></span>
+                        <input
+                            type="password"
+                            id="firstTimeVaultPasswordInput"
+                            class="vault-input"
+                            placeholder="Password Key"
+                            autocomplete="new-password"
+                            minlength="6"
+                            required
+                        >
+                        <button type="button" id="toggleFirstTimePwdBtn" class="vault-password-toggle" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" id="btnCreateFirstTimeVault" class="vault-btn-primary">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Create & Unlock Vault</span>
+                    </button>
+                </form>
+
+                <div class="vault-gate-security-note">
+                    <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
+                    <span>Zero-Knowledge: Your password is never sent to the server or saved to cookies/localStorage.</span>
+                </div>
+            </div>
+
+            <!-- STATE 2B: RETURNING USER — UNLOCK SECURE VAULT -->
+            <div id="vaultLockedCard" class="vault-gate-card" style="display: none;">
+                <div class="vault-gate-icon">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2>Unlock Secure Vault</h2>
+                <p>Your documents can't be accessed until your authentication.</p>
+
+                <form id="vaultUnlockForm" class="vault-password-form" novalidate>
+                    <div class="vault-input-group">
+                        <span class="vault-input-icon"><i class="fa-solid fa-key"></i></span>
+                        <input
+                            type="password"
+                            id="vaultPasswordInput"
+                            class="vault-input"
+                            placeholder="Enter Vault Password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button type="button" id="toggleVaultPasswordBtn" class="vault-password-toggle" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" id="unlockVaultBtn" class="vault-btn-primary">
+                        <i class="fa-solid fa-lock-open"></i>
+                        <span>Unlock Vault</span>
+                    </button>
+                </form>
+
+                <div class="vault-gate-security-note">
+                    <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
+                    <span>Zero-Knowledge: Your password is never sent to the server or saved to cookies/localStorage.</span>
+                </div>
+            </div>
+
+            <!-- STATE 3: VAULT UNLOCKED (ACTIVE) -->
+            <div id="vaultUnlockedView" style="display: none; display: flex; flex-direction: column; gap: 24px;">
+
+                <!-- MULTI-VAULT SWITCHER & CONTROLS -->
+                <div class="vault-switcher-container" id="vaultSwitcherContainer">
+                    <div class="vault-selector-label">
+                        <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                        <span>Active Vault:</span>
+                        <select id="vaultSelectDropdown" class="vault-dropdown-select" aria-label="Select Active Vault">
+                            <option value="default">Primary Vault</option>
+                        </select>
+                    </div>
+                    <div class="vault-controls-right">
+                        <button type="button" class="btn-create-vault-trigger" id="btnOpenCreateVaultModal" aria-label="Create a new vault">
+                            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                            <span>New Vault</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ACTION BAR -->
+                <div class="vault-action-bar">
+                    <div class="vault-status-indicator">
+                        <span class="vault-status-dot"></span>
+                        <span>Vault Unlocked (AES-256-GCM Active)</span>
+                        <span id="vaultCloudBadge" style="display: none; margin-left: 6px; font-family: var(--font-mono, monospace); font-size: 0.74rem; background: #FAF8F5; color: #004741; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(0, 71, 65, 0.22);">
+                            <i class="fa-solid fa-cloud"></i> Cloud: <span id="vaultCloudNameText">...</span>
+                        </span>
+                    </div>
+
+                    <div class="vault-actions-right">
+                        <div class="vault-search-wrapper">
+                            <i class="fa-solid fa-magnifying-glass vault-search-icon"></i>
+                            <input
+                                type="text"
+                                id="vaultSearchInput"
+                                class="vault-search-input"
+                                placeholder="Search documents..."
+                                autocomplete="off"
+                            >
+                        </div>
+
+                        <button type="button" id="openUploadModalBtn" class="vault-btn-upload">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span>Upload Document</span>
+                        </button>
+
+                        <button type="button" id="openDraftModalBtn" class="vault-btn-draft">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>New Draft</span>
+                        </button>
+
+                        <button type="button" id="lockVaultBtn" class="vault-btn-lock" title="Lock Vault & Clear Memory Key">
+                            <i class="fa-solid fa-lock"></i>
+                            <span>Lock</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DRAFTS SECTION (VISIBLE IF DRAFTS EXIST) -->
+                <div id="vaultDraftsContainer" class="vault-drafts-wrapper" style="display: none;">
+                    <div class="vault-drafts-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-file-pen" style="color: var(--color-brand-primary);"></i>
+                            <span>Encrypted Drafts</span>
+                        </div>
+                        <span class="vault-draft-pill"><i class="fa-solid fa-clock-rotate-left"></i> Autosaved</span>
+                    </div>
+                    <div id="vaultDraftsGrid" class="vault-drafts-grid"></div>
+                </div>
+
+                <!-- DOCUMENTS GRID -->
+                <div id="vaultDocumentsGrid" class="vault-grid">
+                    <!-- Cards will be populated by documents.js -->
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div id="vaultEmptyState" class="vault-empty-state" style="display: none;">
+                    <div class="vault-empty-icon">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3>No Documents Found</h3>
+                    <p>There are no encrypted documents in this category. Click <strong>Upload Document</strong> to securely store your first credential.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         3. UPLOAD & EDIT DRAFT MODAL
+    ====================================================== -->
+    <div id="uploadModal" class="vault-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="vault-modal-card">
+            <div class="vault-modal-header">
+                <h3 id="modalTitle">Upload Encrypted Document</h3>
+                <button type="button" class="vault-modal-close" id="closeUploadModalBtn" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="vaultUploadForm" novalidate style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="hidden" id="modalDraftId" value="">
+                <input type="hidden" id="modalExistingDocId" value="">
+
+                <!-- DOCUMENT TITLE -->
+                <div>
+                    <label for="docTitleInput" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px;">
+                        Document Title *
+                    </label>
+                    <input
+                        type="text"
+                        id="docTitleInput"
+                        class="vault-input"
+                        placeholder="Document Title"
+                        required
+                        style="height: 44px;"
+                    >
+                </div>
+
+                <!-- CATEGORY -->
+                <div>
+                    <label for="docCategorySelect" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px;">
+                        Category *
+                    </label>
+                    <select id="docCategorySelect" class="vault-input" style="height: 44px; padding: 0 16px; cursor: pointer;">
+                        <option value="all">Your Docs (General)</option>
+                        <option value="aadhaar">E-Aadhaar</option>
+                        <option value="pan">PAN ID</option>
+                        <option value="dl">Driving Licence</option>
+                        <option value="marksheets">Marksheets</option>
+                        <option value="apaar">APAAR ID</option>
+                    </select>
+                </div>
+
+                <!-- DROPZONE FILE PICKER -->
+                <div id="fileUploadContainer">
+                    <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px;">
+                        Document File (Max 15MB: PDF, PNG, JPG, WEBP, TXT, DOC, DOCX)
+                    </label>
+                    <div id="vaultDropzone" class="vault-dropzone">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <p><strong>Click to choose file</strong> or drag & drop here</p>
+                        <span>Encrypted with AES-256-GCM before upload</span>
+                        <input type="file" id="docFileInput" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.doc,.docx">
+                    </div>
+                    <div id="vaultSelectedFile" class="vault-dropzone-selected" style="display: none; margin-top: 8px;">
+                        <span id="selectedFileName" style="font-family: var(--font-mono, monospace); font-size: 0.85rem;"></span>
+                        <button type="button" id="removeSelectedFileBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NOTES -->
+                <div>
+                    <label for="docNotesInput" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px;">
+                        Encrypted Notes (Optional)
+                    </label>
+                    <textarea
+                        id="docNotesInput"
+                        class="vault-input"
+                        placeholder="Add personal notes (encrypted with your vault key)..."
+                        rows="3"
+                        style="height: 80px; padding: 10px 14px; border-radius: 12px; resize: vertical;"
+                    ></textarea>
+                </div>
+
+                <div id="modalAlert" style="display: none; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem;"></div>
+
+                <!-- SAVE OPTIONS CONTAINER -->
+                <div style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(203, 213, 225, 0.7); border-radius: 12px; padding: 14px; margin-top: 4px;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-sliders" style="color: var(--color-brand-primary);"></i>
+                            <span>Select Security & Save Option:</span>
+                        </div>
+                        <div id="vaultDocNetPills" style="display: inline-flex; background: #e2e8f0; border-radius: 8px; padding: 2px; gap: 2px; font-size: 0.72rem;" role="radiogroup" aria-label="Document Proof Network">
+                            <button type="button" id="vaultNetGanacheBtn" class="vault-net-btn active" style="border: none; background: #ffffff; color: #1e293b; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
+                                <i class="fa-solid fa-server"></i> Ganache Local
+                            </button>
+                            <button type="button" id="vaultNetSepoliaBtn" class="vault-net-btn" style="border: none; background: transparent; color: #64748b; font-weight: 600; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
+                                <i class="fa-brands fa-ethereum"></i> Sepolia
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- REQUIRED METAMASK ACCOUNT ROW -->
+                    <div id="vaultAccountRequiredRow" style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.75rem; flex-wrap: wrap; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-wallet" style="color: #6366f1;"></i>
+                            <span style="color: #64748b;">Required Wallet:</span>
+                            <strong id="vaultAccountRequiredName" style="color: #0f172a;">Siddhant Personal account</strong>
+                            <span id="vaultAccountRequiredAddr" style="font-family: var(--font-mono, monospace); font-size: 0.7rem; color: #64748b; background: #f1f5f9; padding: 1px 6px; border-radius: 4px;">0x9317...2931</span>
+                        </div>
+                        <button type="button" id="vaultSwitchMetaMaskAccountBtn" style="border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i> Switch in MetaMask
+                        </button>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <!-- OPTION A: Save Normally (Free, Cloudinary Storage) -->
+                        <button type="button" id="submitNormalUploadBtn" class="vault-btn-standard" style="flex: 1; min-width: 170px; height: 42px; padding: 0 14px; background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 600; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.2s ease;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="color: #0284c7;"></i>
+                            <span>Save Normally</span>
+                        </button>
+
+                        <!-- OPTION B: Advance Security (Blockchain Proof) -->
+                        <button type="button" id="submitAdvanceUploadBtn" class="vault-btn-advance" style="flex: 1.2; min-width: 210px; height: 42px; padding: 0 16px; background: #004741; color: #ffffff; border: none; border-radius: 10px; font-weight: 600; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 3px 10px rgba(0, 71, 65, 0.22); transition: all 0.2s ease;">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span id="advanceBtnText">Advance Security (Ganache Local)</span>
+                        </button>
+                    </div>
+                    <div id="vaultDocNetHint" style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--color-text-muted); margin-top: 6px; padding: 0 4px; flex-wrap: wrap; gap: 4px;">
+                        <span>Save Normally: Free, no gas fees</span>
+                        <span id="vaultDocProofStatusText">Advance Security: Anchors proof on Ganache Local (Contract 0xbBd0...45Db)</span>
+                    </div>
+                </div>
+
+                <!-- REAL-TIME MULTI-STAGE UPLOAD PROGRESS -->
+                <div id="uploadProgressContainer" style="display: none; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.18); border-radius: 12px; padding: 14px 16px; margin-top: 4px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 0.84rem; font-weight: 700; color: #004741; display: flex; align-items: center; gap: 7px;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="color: #004741;"></i>
+                            <span id="uploadProgressTitle">Uploading Encrypted Document</span>
+                        </span>
+                        <span id="uploadProgressPercent" style="font-family: var(--font-mono, monospace); font-size: 0.82rem; font-weight: 700; color: #004741; background: #FAF8F5; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(0, 71, 65, 0.22);">
+                            0%
+                        </span>
+                    </div>
+
+                    <!-- PROGRESS BAR TRACK -->
+                    <div style="width: 100%; height: 8px; background: rgba(0, 71, 65, 0.10); border-radius: 999px; overflow: hidden; position: relative; margin-bottom: 8px;">
+                        <div id="uploadProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #004741, #086B61, #10b981); border-radius: 999px; transition: width 0.25s ease;"></div>
+                    </div>
+
+                    <!-- LIVE STATUS & TRANSFER STATS -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; color: #64748b; margin-bottom: 8px;">
+                        <span id="uploadProgressStatus">Preparing encryption...</span>
+                        <span id="uploadTransferStats" style="font-family: var(--font-mono, monospace);">0 KB / 0 KB</span>
+                    </div>
+
+                    <!-- STAGE INDICATORS -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px dashed #e2e8f0; font-size: 0.78rem;">
+                        <div id="stageItemEncryption" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                            <i id="stageIconEncryption" class="fa-regular fa-circle"></i>
+                            <span>1. Client AES-256-GCM Encryption</span>
+                            <span id="stageTimeEncryption" style="margin-left: auto; font-family: var(--font-mono, monospace); font-size: 0.72rem;"></span>
+                        </div>
+                        <div id="stageItemAuth" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                            <i id="stageIconAuth" class="fa-regular fa-circle"></i>
+                            <span>2. Secure Cloud Upload Authorization</span>
+                            <span id="stageTimeAuth" style="margin-left: auto; font-family: var(--font-mono, monospace); font-size: 0.72rem;"></span>
+                        </div>
+                        <div id="stageItemUpload" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                            <i id="stageIconUpload" class="fa-regular fa-circle"></i>
+                            <span>3. Direct Encrypted Cloudinary Stream</span>
+                            <span id="stageTimeUpload" style="margin-left: auto; font-family: var(--font-mono, monospace); font-size: 0.72rem;"></span>
+                        </div>
+                        <div id="stageItemBlockchain" style="display: none; align-items: center; gap: 8px; color: #64748b;">
+                            <i id="stageIconBlockchain" class="fa-regular fa-circle"></i>
+                            <span>4. Ethereum Sepolia Proof Anchoring</span>
+                            <span id="stageTimeBlockchain" style="margin-left: auto; font-family: var(--font-mono, monospace); font-size: 0.72rem;"></span>
+                        </div>
+                        <div id="stageItemPersistence" style="display: flex; align-items: center; gap: 8px; color: #64748b;">
+                            <i id="stageIconPersistence" class="fa-regular fa-circle"></i>
+                            <span>5. Secure MongoDB Metadata Persistence</span>
+                            <span id="stageTimePersistence" style="margin-left: auto; font-family: var(--font-mono, monospace); font-size: 0.72rem;"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL FOOTER DRAFT BUTTON -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px;">
+                    <button type="button" id="saveDraftBtn" class="vault-btn-draft" style="height: 38px; font-size: 0.82rem;">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Save as Draft</span>
+                    </button>
+                    <span style="font-size: 0.72rem; color: #059669; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-lock"></i> AES-256-GCM Encrypted
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         4. DECRYPT & PREVIEW MODAL
+    ====================================================== -->
+    <div id="previewModal" class="vault-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
+        <div class="vault-modal-card" style="width: min(800px, 100%);">
+            <div class="vault-modal-header">
+                <div>
+                    <h3 id="previewModalTitle">Decrypted Document Preview</h3>
+                    <span id="previewMetaSubtitle" style="font-size: 0.82rem; color: var(--color-text-muted); font-family: var(--font-mono, monospace);"></span>
+                </div>
+                <button type="button" class="vault-modal-close" id="closePreviewModalBtn" aria-label="Close preview">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="previewBody" class="vault-preview-body">
+                <!-- Injected preview (image, iframe, or text) -->
+            </div>
+
+            <div id="previewNotesBox" style="display: none; background: var(--color-surface-2); padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; color: var(--color-text-secondary);">
+                <strong>Notes:</strong> <span id="previewNotesText"></span>
+            </div>
+
+            <!-- ADVANCE SECURITY BLOCKCHAIN PROOF DETAILS -->
+            <div id="previewBlockchainProofBox" style="display: none; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.22); padding: 12px 14px; border-radius: 10px; font-size: 0.82rem; color: #004741;">
+                <div style="font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-shield-halved" style="color: #004741;"></i> Ethereum Sepolia Blockchain Proof</span>
+                    <span id="previewProofBadge" style="background: #004741; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 6px; font-weight: 700;">Anchored On-Chain</span>
+                </div>
+                <div style="font-family: var(--font-mono, monospace); font-size: 0.78rem; word-break: break-all;">
+                    <div><strong>Tx Hash:</strong> <a id="previewTxLink" href="#" target="_blank" rel="noopener noreferrer" style="color: #004741; text-decoration: underline;"></a></div>
+                    <div style="margin-top: 3px;"><strong>Block:</strong> <span id="previewBlockNumber"></span> &bull; <strong>Contract:</strong> <span id="previewContractAddress"></span></div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 0.78rem; color: #059669; font-weight: 600; display: flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <span>Decrypted safely in browser memory (AES-256-GCM)</span>
+                </div>
+                <button type="button" id="previewDownloadBtn" class="vault-btn-upload" style="height: 40px;">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Original File</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         5. CREATE NEW VAULT MODAL
+    ====================================================== -->
+    <div id="createVaultModal" class="vault-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="createVaultModalTitle" aria-hidden="true">
+        <div class="vault-modal-card" style="max-width: 440px;">
+            <div class="vault-modal-header">
+                <h3 id="createVaultModalTitle">Create New Vault</h3>
+                <button type="button" class="vault-modal-close" id="closeCreateVaultModalBtn" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="createVaultForm" novalidate style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <label for="newVaultNameInput" style="display: block; font-size: 0.85rem; font-weight: 600; color: #004741; margin-bottom: 6px;">
+                        Vault Name *
+                    </label>
+                    <input
+                        type="text"
+                        id="newVaultNameInput"
+                        class="vault-input"
+                        placeholder="Vault Name"
+                        required
+                        style="height: 44px;"
+                    >
+                </div>
+                <button type="submit" id="btnSubmitNewVault" class="vault-btn-primary" style="height: 44px; justify-content: center;">
+                    <i class="fa-solid fa-vault"></i>
+                    <span>Create Vault</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         MINIMAL FOOTER
+    ====================================================== -->
+    <footer class="footer-minimal" style="margin-top: 60px;">
+        <div class="footer-minimal-container">
+            <div class="footer-minimal-main">
+                <div class="footer-minimal-brand-col">
+                    <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                    <p class="footer-minimal-tagline">
+                        Deliberately serving to the people with Advanced Security.
+                    </p>
+                </div>
+                <div class="footer-minimal-nav-groups">
+                    <div class="footer-minimal-col">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="verify.html">Verify Certificate</a>
+                        <a href="documents.html">Save Your Document</a>
+                        <a href="admin.html">Registrar Portal</a>
+                        <a href="about.html">About the Project</a>
+                    </div>
+                    <div class="footer-minimal-col">
+                        <h4>Account</h4>
+                        <a href="login.html">Sign In</a>
+                        <a href="signup.html">Create Account</a>
+                        <a href="documents.html">Your Vaults</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-minimal-bottom">
+                <div>&copy; Verified Records — Academic Credential Registry</div>
+                <div>Developed by Siddhant Asati</div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+    <!-- App Scripts -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/vault-crypto.js"></script>
+    <script src="assets/js/documents.js"></script>
+    <script src="assets/js/app.js"></script>
+
+</body>
+
+</html>

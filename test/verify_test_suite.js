@@ -11,7 +11,7 @@ const web3 = new Web3(GANACHE_RPC_URL);
 
 const artifactPath = path.join(__dirname, "..", "build", "contracts", "Certificate.json");
 const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf-8"));
-const contractAddress = process.env.CONTRACT_ADDRESS || artifact.networks["5777"].address;
+const contractAddress = process.env.GANACHE_CONTRACT_ADDRESS || (artifact.networks["5777"] && artifact.networks["5777"].address);
 const certificateContract = new web3.eth.Contract(artifact.abi, contractAddress);
 
 const CertificateModel = require("../server/models/certificates");
@@ -42,7 +42,7 @@ async function runAllTestCases() {
     const prep1Res = await fetch("http://localhost:3000/api/certificate/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(test1Data)
+        body: JSON.stringify({ ...test1Data, network: "ganache" })
     });
     const prep1 = await prep1Res.json();
     console.log("  [1a] Computed Deterministic Hash:", prep1.certificateHash);
@@ -61,7 +61,8 @@ async function runAllTestCases() {
         body: JSON.stringify({
             ...test1Data,
             transactionHash: txReceipt1.transactionHash,
-            blockchainIssuer: adminAccount
+            blockchainIssuer: adminAccount,
+            network: "ganache"
         })
     });
     const save1 = await save1Res.json();
@@ -133,7 +134,7 @@ async function runAllTestCases() {
     const prep3Res = await fetch("http://localhost:3000/api/certificate/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(test3Data)
+        body: JSON.stringify({ ...test3Data, network: "ganache" })
     });
     const prep3 = await prep3Res.json();
 
@@ -150,7 +151,8 @@ async function runAllTestCases() {
         body: JSON.stringify({
             ...test3Data,
             transactionHash: txReceipt3.transactionHash,
-            blockchainIssuer: adminAccount
+            blockchainIssuer: adminAccount,
+            network: "ganache"
         })
     });
 
@@ -195,7 +197,9 @@ async function runAllTestCases() {
         certificateHash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         transactionHash: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
         contractAddress: contractAddress,
-        blockchainIssuer: adminAccount
+        blockchainIssuer: adminAccount,
+        blockchainNetwork: "ganache",
+        chainId: 1337
     });
     await unanchoredCert.save();
 

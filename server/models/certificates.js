@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { getLocalDateTime } = require("../dateHelper");
 
 const certificateSchema = new mongoose.Schema({
     studentName: {
@@ -27,9 +28,21 @@ const certificateSchema = new mongoose.Schema({
         required: true
     },
 
+    certificateType: {
+        type: String,
+        required: false,
+        default: "Certificate of Excellence"
+    },
+
+    fieldOfCertification: {
+        type: String,
+        required: false,
+        default: null
+    },
+
     issuedAt: {
         type: Date,
-        default: Date.now
+        default: getLocalDateTime
     },
 
     certificateHash: {
@@ -59,6 +72,24 @@ const certificateSchema = new mongoose.Schema({
 
     blockNumber: {
         type: Number,
+        default: null
+    },
+
+    adminUserId: {
+        type: String,
+        required: false,
+        default: null
+    },
+
+    blockchainNetwork: {
+        type: String,
+        required: false,
+        default: null
+    },
+
+    chainId: {
+        type: Number,
+        required: false,
         default: null
     }
 });

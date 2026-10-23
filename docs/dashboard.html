@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>User Dashboard - VerifiedRecords</title>
+
+    <meta name="description"
+          content="VerifiedRecords Personal Citizen Dashboard — View your profile details, secure vaults created, certificates verified, and institutional organizations joined.">
+
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
+
+    <!-- Shared Design System -->
+    <link rel="stylesheet"
+          href="assets/css/style.css">
+
+    <style>
+        .dashboard-page-wrapper {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dashboard-header-hero {
+            margin-bottom: 32px;
+        }
+
+        .dashboard-header-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: #FAF8F5;
+            border: 1px solid rgba(0, 71, 65, 0.22);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #004741;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0, 71, 65, 0.05);
+        }
+
+        .dashboard-header-title {
+            font-family: var(--font-serif, "DM Serif Display", serif);
+            font-size: clamp(2rem, 3.5vw, 2.75rem);
+            color: #00332E;
+            margin: 0 0 8px 0;
+            line-height: 1.15;
+        }
+
+        .dashboard-header-subtitle {
+            font-size: 1rem;
+            color: #536460;
+            margin: 0;
+            max-width: 680px;
+            line-height: 1.5;
+        }
+
+        /* 4-Stat Metric Grid */
+        .dashboard-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 36px;
+        }
+
+        .dashboard-stat-card {
+            background: #FAF8F5;
+            border: 1.5px solid rgba(0, 71, 65, 0.18);
+            border-radius: 18px;
+            padding: 22px 24px;
+            box-shadow: 0 4px 16px rgba(0, 71, 65, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: all 0.25s ease;
+        }
+
+        .dashboard-stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #004741;
+            box-shadow: 0 8px 24px rgba(0, 71, 65, 0.08);
+            background: #FFFFFF;
+        }
+
+        .stat-icon-wrap {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(0, 71, 65, 0.08);
+            border: 1px solid rgba(0, 71, 65, 0.18);
+            color: #004741;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #00332E;
+            line-height: 1.1;
+            font-family: var(--font-brand);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #61736F;
+            margin-top: 3px;
+        }
+
+        /* Main Grid: User Profile & Quick Actions */
+        .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 28px;
+            margin-bottom: 36px;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dashboard-card {
+            background: #FAF8F5;
+            border: 1.5px solid rgba(0, 71, 65, 0.18);
+            border-radius: 20px;
+            padding: 30px 28px;
+            box-shadow: 0 4px 20px rgba(0, 71, 65, 0.04);
+        }
+
+        .card-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 71, 65, 0.10);
+            padding-bottom: 16px;
+            margin-bottom: 22px;
+        }
+
+        .card-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title-icon {
+            font-size: 1.2rem;
+            color: #004741;
+        }
+
+        .card-title-text {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #00332E;
+            margin: 0;
+        }
+
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 26px;
+        }
+
+        .user-avatar-badge {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #004741 0%, #00685E 100%);
+            color: #FFFFFF;
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 71, 65, 0.25);
+            border: 2px solid #FAF8F5;
+        }
+
+        .user-names-group h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #00332E;
+            margin: 0 0 4px 0;
+        }
+
+        .user-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            background: rgba(5, 150, 105, 0.12);
+            color: #047857;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .profile-details-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .detail-item-box {
+            background: #FFFFFF;
+            border: 1px solid rgba(0, 71, 65, 0.12);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #7A8B87;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-value {
+            font-size: 0.96rem;
+            font-weight: 700;
+            color: #00332E;
+            word-break: break-word;
+        }
+
+        /* Action Buttons Side */
+        .actions-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .btn-dash-action {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 18px;
+            background: #FFFFFF;
+            border: 1.5px solid rgba(0, 71, 65, 0.18);
+            border-radius: 16px;
+            color: #00332E;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.22s ease;
+        }
+
+        .btn-dash-action:hover {
+            border-color: #004741;
+            background: #FAF8F5;
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px rgba(0, 71, 65, 0.08);
+        }
+
+        .action-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(0, 71, 65, 0.08);
+            color: #004741;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+        }
+
+        .btn-dash-primary {
+            background: #004741 !important;
+            color: #FFFFFF !important;
+            border-color: #004741 !important;
+        }
+
+        .btn-dash-primary:hover {
+            background: #00332E !important;
+            color: #FFFFFF !important;
+        }
+
+        .btn-dash-primary .action-icon {
+            background: rgba(255, 255, 255, 0.2);
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="bgParticlesCanvas" class="bg-particles-canvas" aria-hidden="true"></canvas>
+
+    <!-- TOP NAVIGATION -->
+    <nav class="top-navbar" aria-label="Main Navigation">
+        <div class="nav-left">
+            <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
+                <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                <span class="nav-brand-text">Verified Records</span>
+            </a>
+
+            <div class="nav-links" role="navigation">
+                <a href="index.html" class="nav-item" id="navHome" title="Home">
+                    <i class="fa-solid fa-house" aria-hidden="true"></i>
+                    <span>Home</span>
+                </a>
+                <a href="admin.html" class="nav-item" id="navAdmin" title="Admin">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <span>Admin</span>
+                </a>
+                <a href="verify.html" class="nav-item" id="navVerify" title="Verify">
+                    <i class="fa-solid fa-certificate" aria-hidden="true"></i>
+                    <span>Verify</span>
+                </a>
+                <a href="documents.html" class="nav-item" id="navVault" title="Vault">
+                    <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                    <span>Vault</span>
+                </a>
+                <a href="about.html" class="nav-item" id="navAbout" title="About">
+                    <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <div class="auth-area">
+                <div id="authLoggedOutNav" class="auth-nav-buttons" style="display:none;">
+                    <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in">
+                        <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                        <span>Log In</span>
+                    </a>
+                    <a href="signup.html" id="signupButton" class="btn-nav-signup" aria-label="Sign Up">
+                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                        <span>Sign Up</span>
+                    </a>
+                </div>
+
+                <div id="accountButton" class="account-container auth-hidden" style="display:inline-flex;">
+                    <div class="welcome-user-nav" id="welcomeUserNav">
+                        <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                    </div>
+
+                    <button type="button"
+                            id="accountMenuTrigger"
+                            class="account-button account-button-boxy"
+                            onclick="toggleAccountMenu()"
+                            aria-label="Account Menu"
+                            aria-expanded="false"
+                            title="Account Settings">
+                        <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    </button>
+
+                    <div id="accountMenu" class="account-menu" role="menu" aria-label="Account Options">
+                        <div id="accountEmail" class="account-email"></div>
+                        <a href="dashboard.html" role="menuitem">
+                            <i class="fa-solid fa-gauge" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="documents.html" role="menuitem">
+                            <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                            <span>Your Vaults</span>
+                        </a>
+                        <button type="button" onclick="logoutUser()" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- DASHBOARD PAGE CONTENT -->
+    <main class="dashboard-page-wrapper">
+
+        <!-- HEADER HERO -->
+        <header class="dashboard-header-hero">
+            <h1 class="dashboard-header-title">
+                Welcome, <span id="dashHeroName">Citizen</span>
+            </h1>
+            <p class="dashboard-header-subtitle">
+                Manage your verified personal records, encrypted document vaults, verified academic credentials, and institutional alliance network.
+            </p>
+        </header>
+
+        <!-- 4-METRIC STATS GRID -->
+        <section class="dashboard-stats-grid" aria-label="Account Statistics">
+            <!-- 1. Vaults Created -->
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrap">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statVaultsCount">1</span>
+                    <span class="stat-label">Vaults Created</span>
+                </div>
+            </div>
+
+            <!-- 2. Certificates Verified -->
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrap">
+                    <i class="fa-solid fa-certificate"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statVerifiedCount">2</span>
+                    <span class="stat-label">Certificates Verified</span>
+                </div>
+            </div>
+
+            <!-- 3. Issued Certificates Count -->
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrap">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statIssuedCount">0</span>
+                    <span class="stat-label">Issued Credentials Count</span>
+                </div>
+            </div>
+
+            <!-- 4. Organization Joined -->
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrap">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number" id="statOrgsCount">1</span>
+                    <span class="stat-label">Organization Joined</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- MAIN SECTION: PROFILE CARD & ACTIONS -->
+        <div class="dashboard-main-grid">
+
+            <!-- LEFT: USER PROFILE DETAILS -->
+            <div class="dashboard-card">
+                <div class="card-header-bar">
+                    <div class="card-title-group">
+                        <i class="fa-solid fa-id-card card-title-icon"></i>
+                        <h2 class="card-title-text">Personal Profile Details</h2>
+                    </div>
+                    <span class="user-badge-pill" id="userRoleBadge">
+                        <i class="fa-solid fa-circle-check"></i> Verified Citizen
+                    </span>
+                </div>
+
+                <div class="user-profile-header">
+                    <div class="user-avatar-badge" id="userAvatarBadge">VR</div>
+                    <div class="user-names-group">
+                        <h3 id="userFullName">Verified User</h3>
+                        <div style="font-size: 0.9rem; color: #536460;" id="userUsernameTag">@username</div>
+                    </div>
+                </div>
+
+                <div class="profile-details-list">
+                    <!-- Email -->
+                    <div class="detail-item-box">
+                        <span class="detail-label"><i class="fa-solid fa-envelope"></i> Email Address</span>
+                        <span class="detail-value" id="profileEmail">Loading...</span>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="detail-item-box">
+                        <span class="detail-label"><i class="fa-solid fa-phone"></i> Phone Number</span>
+                        <span class="detail-value" id="profilePhone">Loading...</span>
+                    </div>
+
+                    <!-- Date of Birth -->
+                    <div class="detail-item-box">
+                        <span class="detail-label"><i class="fa-solid fa-calendar"></i> Date of Birth</span>
+                        <span class="detail-value" id="profileDob">Loading...</span>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="detail-item-box">
+                        <span class="detail-label"><i class="fa-solid fa-at"></i> Username</span>
+                        <span class="detail-value" id="profileUsername">Loading...</span>
+                    </div>
+
+                    <!-- Organization -->
+                    <div class="detail-item-box" style="grid-column: 1 / -1;">
+                        <span class="detail-label"><i class="fa-solid fa-landmark"></i> Institutional Organization Joined</span>
+                        <span class="detail-value" id="profileOrg">VerifiedRecords Academic Alliance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: QUICK ACCESS & VAULT LINKS -->
+            <div class="dashboard-card">
+                <div class="card-header-bar">
+                    <div class="card-title-group">
+                        <i class="fa-solid fa-compass card-title-icon"></i>
+                        <h2 class="card-title-text">Quick Actions</h2>
+                    </div>
+                </div>
+
+                <div class="actions-stack">
+                    <a href="documents.html" class="btn-dash-action btn-dash-primary">
+                        <div class="action-left">
+                            <span class="action-icon"><i class="fa-solid fa-vault"></i></span>
+                            <span>Open Secure Vault</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    <a href="verify.html" class="btn-dash-action">
+                        <div class="action-left">
+                            <span class="action-icon"><i class="fa-solid fa-certificate"></i></span>
+                            <span>Verify Academic Certificate</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    <a href="admin.html" class="btn-dash-action">
+                        <div class="action-left">
+                            <span class="action-icon"><i class="fa-solid fa-user-shield"></i></span>
+                            <span>Registrar Terminal Access</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+
+                    <a href="about.html" class="btn-dash-action">
+                        <div class="action-left">
+                            <span class="action-icon"><i class="fa-solid fa-circle-info"></i></span>
+                            <span>About Cryptographic Records</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer-minimal">
+        <div class="footer-minimal-container">
+            <div class="footer-minimal-main">
+                <div class="footer-minimal-brand-col">
+                    <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                    <p class="footer-minimal-tagline">
+                        Deliberately serving to the people with Advanced Security.
+                    </p>
+                </div>
+                <div class="footer-minimal-nav-groups">
+                    <div class="footer-minimal-col">
+                        <h4>Navigation</h4>
+                        <a href="index.html">Home</a>
+                        <a href="verify.html">Verify Certificate</a>
+                        <a href="documents.html">Save Your Document</a>
+                        <a href="admin.html">Registrar Portal</a>
+                        <a href="about.html">About the Project</a>
+                    </div>
+                    <div class="footer-minimal-col">
+                        <h4>Security</h4>
+                        <a href="verify.html">Smart Contract</a>
+                        <a href="documents.html">Client Encryption</a>
+                        <a href="about.html">Architecture</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-minimal-bottom">
+                <p>&copy; 2026 Verified Records. Built with integrity on Ethereum blockchain.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+
+    <!-- Shared App Scripts -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/auth.js"></script>
+
+    <!-- Dashboard Logic Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Check auth state
+            firebase.auth().onAuthStateChanged(async (user) => {
+                let userEmail = "";
+                let userUid = "";
+
+                if (user) {
+                    userEmail = user.email || "";
+                    userUid = user.uid || "";
+                } else {
+                    const rawSocial = localStorage.getItem("vr_social_user");
+                    if (rawSocial) {
+                        try {
+                            const parsed = JSON.parse(rawSocial);
+                            userEmail = parsed.email || "";
+                            userUid = parsed.uid || "";
+                        } catch (e) {}
+                    }
+                }
+
+                loadUserProfileData(userEmail, userUid);
+            });
+        });
+
+        async function loadUserProfileData(email, uid) {
+            try {
+                const storedUsername = localStorage.getItem("vr_username") || "";
+                const url = `/api/user/profile?email=${encodeURIComponent(email || "")}&uid=${encodeURIComponent(uid || "")}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data && data.success && data.profile) {
+                    const p = data.profile;
+                    const finalFullName = p.fullName || (p.firstName ? `${p.firstName} ${p.lastName || ""}` : (storedUsername || "Verified Citizen"));
+                    const finalUsername = p.username || storedUsername || "citizen";
+
+                    document.getElementById("dashHeroName").textContent = finalFullName;
+                    document.getElementById("userFullName").textContent = finalFullName;
+                    document.getElementById("userUsernameTag").textContent = `@${finalUsername}`;
+                    document.getElementById("profileEmail").textContent = p.email || email || "Not specified";
+                    document.getElementById("profilePhone").textContent = p.phoneNumber || "Not registered";
+                    document.getElementById("profileDob").textContent = p.dateOfBirth || "Not specified";
+                    document.getElementById("profileUsername").textContent = finalUsername;
+                    document.getElementById("profileOrg").textContent = (p.stats && p.stats.organizationJoined) || "VerifiedRecords Academic Alliance";
+
+                    // Stats
+                    if (p.stats) {
+                        document.getElementById("statVaultsCount").textContent = p.stats.vaultsCreated || "1";
+                        document.getElementById("statVerifiedCount").textContent = p.stats.certificatesVerified || "2";
+                        document.getElementById("statIssuedCount").textContent = p.stats.issuedCertificatesCount || "0";
+                        document.getElementById("statOrgsCount").textContent = "1";
+                    }
+
+                    // Avatar initials
+                    const initials = finalFullName.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase() || "VR";
+                    document.getElementById("userAvatarBadge").textContent = initials;
+                }
+            } catch (err) {
+                console.warn("Notice loading profile data:", err);
+            }
+        }
+    </script>
+</body>
+</html>

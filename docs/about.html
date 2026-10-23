@@ -20,7 +20,7 @@
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
           crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet">
 
     <!-- Main Shared CSS -->
@@ -31,6 +31,8 @@
 
 <body>
 
+<canvas id="bgParticlesCanvas" class="bg-particles-canvas" aria-hidden="true"></canvas>
+
 <!-- ==================================================
      TOP NAVIGATION (NEUMORPHIC MASTHEAD)
 ================================================== -->
@@ -40,7 +42,7 @@
     <div class="nav-left">
         <a href="index.html" class="nav-brand" aria-label="VerifiedRecords Home">
             <span class="nav-brand-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
-            <span class="nav-brand-text">VerifiedRecords</span>
+            <span class="nav-brand-text">Verified Records</span>
         </a>
 
         <div class="nav-links" role="navigation">
@@ -62,6 +64,12 @@
                 <span>Verify</span>
             </a>
 
+            <!-- VAULT -->
+            <a href="documents.html" class="nav-item" id="navVault" title="Vault">
+                <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                <span>Vault</span>
+            </a>
+
             <!-- ABOUT (ACTIVE) -->
             <a href="about.html" class="nav-item active" id="navAbout" title="About" aria-current="page">
                 <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
@@ -75,21 +83,28 @@
         <!-- AUTHENTICATION AREA -->
         <div class="auth-area">
             <!-- LOGGED-OUT: LOGIN / SIGN UP -->
-            <a href="login.html"
-               id="loginButton"
-               class="login-button"
-               aria-label="Login or Sign Up">
-                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-                <span>Login / Sign Up</span>
-            </a>
+            <div id="authLoggedOutNav" class="auth-nav-buttons">
+                <a href="login.html" id="loginButton" class="btn-nav-login" aria-label="Log in">
+                    <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+                    <span>Log In</span>
+                </a>
+                <a href="signup.html" id="signupButton" class="btn-nav-signup" aria-label="Sign Up">
+                    <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                    <span>Sign Up</span>
+                </a>
+            </div>
 
             <!-- LOGGED-IN: ACCOUNT BUTTON & MENU -->
             <div id="accountButton"
                  class="account-container auth-hidden"
                  style="display:none;">
+                <div class="welcome-user-nav" id="welcomeUserNav">
+                    <span class="welcome-user-text">Welcome, <strong id="navUserName">User</strong></span>
+                </div>
+
                 <button type="button"
                         id="accountMenuTrigger"
-                        class="account-button"
+                        class="account-button account-button-boxy"
                         onclick="toggleAccountMenu()"
                         aria-label="Account Menu"
                         aria-expanded="false"
@@ -104,9 +119,13 @@
                     <div id="accountEmail"
                          class="account-email">
                     </div>
-                    <a href="admin.html" role="menuitem">
+                    <a href="dashboard.html" role="menuitem">
                         <i class="fa-solid fa-gauge" aria-hidden="true"></i>
                         <span>Dashboard</span>
+                    </a>
+                    <a href="documents.html" role="menuitem">
+                        <i class="fa-solid fa-vault" aria-hidden="true"></i>
+                        <span>Your Vaults</span>
                     </a>
                     <button type="button" onclick="logoutUser()" role="menuitem">
                         <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
@@ -132,10 +151,6 @@
     </div>
 
     <div class="about-container">
-
-        <div class="about-label">
-            College Project Overview
-        </div>
 
         <h1 class="about-title">
             About <span>VerifiedRecords</span>
@@ -260,37 +275,39 @@
 <!-- ==================================================
      SITE FOOTER
 ================================================== -->
-<footer class="site-footer">
-    <div class="footer-content">
-        <div class="footer-brand">
-            <h3>VerifiedRecords</h3>
-            <p>A university certificate verification platform developed as an academic college project by Siddhant Asati to explore trustworthy credential management.</p>
+<!-- ==================================================
+     MINIMAL FOOTER
+================================================== -->
+<footer class="footer-minimal">
+    <div class="footer-minimal-container">
+        <div class="footer-minimal-main">
+            <div class="footer-minimal-brand-col">
+                <h3 class="footer-minimal-brand-name">Verified Records</h3>
+                <p class="footer-minimal-tagline">
+                    Deliberately serving to the people with Advanced Security.
+                </p>
+            </div>
+            <div class="footer-minimal-nav-groups">
+                <div class="footer-minimal-col">
+                    <h4>Navigation</h4>
+                    <a href="index.html">Home</a>
+                    <a href="verify.html">Verify Certificate</a>
+                    <a href="documents.html">Save Your Document</a>
+                    <a href="admin.html">Registrar Portal</a>
+                    <a href="about.html">About the Project</a>
+                </div>
+                <div class="footer-minimal-col">
+                    <h4>Account</h4>
+                    <a href="login.html">Sign In</a>
+                    <a href="signup.html">Create Account</a>
+                    <a href="documents.html">Your Vaults</a>
+                </div>
+            </div>
         </div>
-        <div class="footer-links">
-            <div class="footer-col">
-                <h4>Navigation</h4>
-                <a href="index.html">Home</a>
-                <a href="verify.html">Verify Certificate</a>
-                <a href="admin.html">Admin Dashboard</a>
-                <a href="about.html">About the Project</a>
-            </div>
-            <div class="footer-col">
-                <h4>Account</h4>
-                <a href="login.html">Sign In</a>
-                <a href="signup.html">Create Account</a>
-            </div>
-            <div class="footer-col">
-                <h4>System</h4>
-                <span style="font-size: var(--font-size-xs); color: var(--color-verified-text); display: inline-flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-circle" style="font-size: 8px;"></i>
-                    Registry Operational
-                </span>
-            </div>
+        <div class="footer-minimal-bottom">
+            <div>&copy; Verified Records — Academic Credential Registry</div>
+            <div>Developed by Siddhant Asati</div>
         </div>
-    </div>
-    <div class="footer-bottom">
-        <div>&copy; VerifiedRecords — Academic Credential Registry Project</div>
-        <div>Developed by Siddhant Asati</div>
     </div>
 </footer>
 
