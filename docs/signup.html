@@ -887,6 +887,136 @@
         let pendingSignupData = null;
         let resendCountdown = 60;
         let resendTimerInterval = null;
+        let isSmsInFlight = false;
+        let isResendingOtp = false;
+        let isVerifyingOtp = false;
+
+        // RecaptchaVerifier singleton & lifecycle state
+        const RECAPTCHA_CONTAINER_ID = "recaptchaContainer";
+        let activeRecaptchaVerifier = null;
+        let recaptchaInitPromise = null;
+
+        /**
+         * Ensures a clean DOM container for reCAPTCHA.
+         * If replaceExisting is true, replaces the container with a brand-new DOM node
+         * to guarantee Google reCAPTCHA's internal registry doesn't retain old bindings.
+         */
+        function getOrCreateRecaptchaContainer(replaceExisting = false) {
+            let container = document.getElementById(RECAPTCHA_CONTAINER_ID);
+            if (!container) {
+                container = document.createElement("div");
+                container.id = RECAPTCHA_CONTAINER_ID;
+                document.body.appendChild(container);
+                return container;
+            }
+            if (replaceExisting && container.parentNode) {
+                const freshContainer = document.createElement("div");
+                freshContainer.id = RECAPTCHA_CONTAINER_ID;
+                container.parentNode.replaceChild(freshContainer, container);
+                return freshContainer;
+            }
+            return container;
+        }
+
+        /**
+         * Returns the existing RecaptchaVerifier or creates a single stable instance.
+         * Prevents concurrent initialization and repeated instantiations.
+         */
+        async function getOrCreateRecaptchaVerifier() {
+            if (activeRecaptchaVerifier) {
+                return activeRecaptchaVerifier;
+            }
+
+            if (recaptchaInitPromise) {
+                return recaptchaInitPromise;
+            }
+
+            recaptchaInitPromise = (async () => {
+                try {
+                    getOrCreateRecaptchaContainer(false);
+
+                    activeRecaptchaVerifier = new firebase.auth.RecaptchaVerifier(RECAPTCHA_CONTAINER_ID, {
+                        size: "invisible",
+                        callback: () => {
+                            console.log("[Auth] reCAPTCHA verified for phone authentication.");
+                        },
+                        "expired-callback": async () => {
+                            console.warn("[Auth] reCAPTCHA expired. Resetting widget state...");
+                            await resetRecaptchaWidget();
+                        }
+                    });
+
+                    // Keep window.recaptchaVerifier synced for compatibility
+                    window.recaptchaVerifier = activeRecaptchaVerifier;
+
+                    // Ensure widget is initialized
+                    await activeRecaptchaVerifier.render();
+                    return activeRecaptchaVerifier;
+                } catch (initErr) {
+                    console.error("[Auth] RecaptchaVerifier initialization error:", initErr);
+                    // If element had a stale widget or initialization failed, perform full teardown
+                    await teardownAndClearVerifier();
+                    throw initErr;
+                } finally {
+                    recaptchaInitPromise = null;
+                }
+            })();
+
+            return recaptchaInitPromise;
+        }
+
+        /**
+         * Resets the reCAPTCHA token using Google reCAPTCHA's official reset() API.
+         * Reuses the existing widget so "reCAPTCHA has already been rendered" never occurs.
+         */
+        async function resetRecaptchaWidget() {
+            try {
+                if (activeRecaptchaVerifier) {
+                    const widgetId = await activeRecaptchaVerifier.render();
+                    if (typeof widgetId === "number" && window.grecaptcha && typeof window.grecaptcha.reset === "function") {
+                        window.grecaptcha.reset(widgetId);
+                        console.log("[Auth] reCAPTCHA widget reset successfully for widget ID:", widgetId);
+                        return;
+                    }
+                }
+            } catch (resetErr) {
+                console.warn("[Auth] Soft widget reset failed, tearing down verifier:", resetErr);
+            }
+            await teardownAndClearVerifier();
+        }
+
+        /**
+         * Complete teardown of active verifier when replacement is genuinely required.
+         * Calls supported clear() method, nulls references, and mounts a fresh DOM container.
+         */
+        async function teardownAndClearVerifier() {
+            if (activeRecaptchaVerifier) {
+                try {
+                    if (typeof activeRecaptchaVerifier.clear === "function") {
+                        activeRecaptchaVerifier.clear();
+                    }
+                } catch (clearErr) {
+                    console.warn("[Auth] Verifier clear note:", clearErr);
+                }
+                activeRecaptchaVerifier = null;
+            }
+            window.recaptchaVerifier = null;
+            recaptchaInitPromise = null;
+
+            // Mount a fresh, unbound DOM element
+            getOrCreateRecaptchaContainer(true);
+        }
+
+        // Cleanup on page unload (only when not actively in-flight)
+        window.addEventListener("beforeunload", () => {
+            if (!isSmsInFlight && !isVerifyingOtp && activeRecaptchaVerifier) {
+                try {
+                    if (typeof activeRecaptchaVerifier.clear === "function") {
+                        activeRecaptchaVerifier.clear();
+                    }
+                } catch (e) {}
+            }
+        });
 
         // Phone normalization and formatting to E.164
         function formatToE164(phone) {
@@ -919,38 +1049,49 @@
             return `${prefix} ${maskedMiddle}${suffix}`;
         }
 
-        // Firebase RecaptchaVerifier manager
-        function getRecaptchaVerifier() {
-            if (window.recaptchaVerifier) {
-                return window.recaptchaVerifier;
+        // Map Firebase error codes to clear user-facing messages
+        function mapAuthError(err, defaultMsg = "Authentication failed. Please try again.") {
+            if (!err) return defaultMsg;
+            const code = err.code || "";
+            switch (code) {
+                case "auth/invalid-phone-number":
+                    return "Invalid phone number format. Please provide a valid phone number with country code.";
+                case "auth/credential-already-in-use":
+                case "auth/provider-already-linked":
+                    return "This phone number is already linked to another Verified Records account.";
+                case "auth/email-already-in-use":
+                    return "This email address is already registered. Please sign in or use another email.";
+                case "auth/too-many-requests":
+                    return "SMS rate limit exceeded for this number or IP. Please wait a few minutes before retrying.";
+                case "auth/quota-exceeded":
+                case "auth/sms-quota-exceeded":
+                    return "SMS quota exceeded for Firebase project. Please try again later.";
+                case "auth/unauthorized-domain":
+                    return "This domain is not authorized for Firebase Phone Authentication. Please add it to Authorized Domains in Firebase Console.";
+                case "auth/captcha-check-failed":
+                    return "reCAPTCHA verification failed. Please try again.";
+                case "auth/invalid-app-credential":
+                    return "App verification failed. Please verify Firebase configuration.";
+                case "auth/network-request-failed":
+                    return "Network connection error. Please verify your internet connection and try again.";
+                case "auth/invalid-verification-code":
+                    return "Incorrect verification code. Please check your SMS and try again.";
+                case "auth/code-expired":
+                    return "The verification code has expired. Please click Resend Code.";
+                case "auth/session-expired":
+                    return "The verification session has expired. Please request a new code.";
+                case "auth/weak-password":
+                    return "Password is too weak. Please use at least 6 characters.";
+                case "auth/operation-not-allowed":
+                    return "Phone Authentication is not enabled in Firebase Console. Please enable Phone provider.";
+                default:
+                    return err.message || defaultMsg;
             }
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier("recaptchaContainer", {
-                size: "invisible",
-                callback: () => {
-                    console.log("[Auth] reCAPTCHA solved for SMS verification.");
-                },
-                "expired-callback": () => {
-                    console.warn("[Auth] reCAPTCHA expired. Resetting...");
-                    resetRecaptchaVerifier();
-                }
-            });
-            return window.recaptchaVerifier;
-        }
-
-        function resetRecaptchaVerifier() {
-            try {
-                if (window.recaptchaVerifier) {
-                    window.recaptchaVerifier.clear();
-                    window.recaptchaVerifier = null;
-                }
-            } catch (e) {
-                window.recaptchaVerifier = null;
-            }
-            const container = document.getElementById("recaptchaContainer");
-            if (container) container.innerHTML = "";
         }
 
         async function submitSignup() {
+            if (isSmsInFlight) return;
+
             const firstName = document.getElementById("firstName").value.trim();
             const lastName = document.getElementById("lastName").value.trim();
             const dateOfBirth = document.getElementById("dateOfBirth").value;
@@ -981,8 +1122,16 @@
                 return;
             }
             if (!isUsernameAvailable) {
-                showAlert("The chosen username is already taken. Please pick another.", "error");
-                return;
+                try {
+                    const uCheck = await fetch(`/api/auth/check-username?username=${encodeURIComponent(username)}`).then(r => r.json());
+                    if (!uCheck.available) {
+                        showAlert("The chosen username is already taken. Please pick another.", "error");
+                        return;
+                    }
+                    isUsernameAvailable = true;
+                } catch (e) {
+                    isUsernameAvailable = true;
+                }
             }
 
             // Email validation
@@ -1010,12 +1159,20 @@
                 return;
             }
 
+            // Lock submission to prevent concurrent executions
+            isSmsInFlight = true;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Sending SMS...</span>';
+
             // Check if email already has a finalized profile in MongoDB
             try {
                 const checkRes = await fetch(`/api/auth/resolve-identifier?identifier=${encodeURIComponent(email)}`);
                 const checkData = await checkRes.json();
                 if (checkData.exists) {
                     showAlert("An account with this email address already exists. Please sign in instead.", "error");
+                    isSmsInFlight = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> <span>Create Account</span>';
                     return;
                 }
             } catch (cErr) {}
@@ -1032,13 +1189,11 @@
             };
 
             showAlert("Sending genuine verification SMS to your phone...", "info");
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Sending SMS...</span>';
 
             try {
-                // 1. Create or get Firebase Email/Password User
+                // 1. Create or retrieve Firebase Email/Password User
                 let user = auth.currentUser;
-                if (!user || user.email.toLowerCase() !== email.toLowerCase()) {
+                if (!user || !user.email || user.email.toLowerCase() !== email.toLowerCase()) {
                     try {
                         const cred = await auth.createUserWithEmailAndPassword(email, password);
                         user = cred.user;
@@ -1057,8 +1212,18 @@
                     }
                 }
 
-                // 2. Request genuine Firebase SMS phone linking
-                const appVerifier = getRecaptchaVerifier();
+                // If user already had a phone linked in an incomplete previous session, unlink first to allow fresh verification
+                if (user.phoneNumber || (user.providerData && user.providerData.some(p => p.providerId === "phone"))) {
+                    try {
+                        await user.unlink("phone");
+                        console.log("[Auth] Cleaned up previous phone link for fresh verification.");
+                    } catch (unlinkErr) {
+                        console.warn("[Auth] Notice on phone unlink:", unlinkErr.message);
+                    }
+                }
+
+                // 2. Request genuine Firebase SMS phone linking using stable verifier
+                const appVerifier = await getOrCreateRecaptchaVerifier();
                 const confirmationResult = await user.linkWithPhoneNumber(formattedPhone, appVerifier);
 
                 // Store confirmationResult in session
@@ -1071,21 +1236,10 @@
 
             } catch (err) {
                 console.error("[Phone Auth Error]", err);
-                resetRecaptchaVerifier();
-                let msg = err.message;
-                if (err.code === "auth/invalid-phone-number") {
-                    msg = "Invalid phone number format. Please check your number.";
-                } else if (err.code === "auth/credential-already-in-use" || err.code === "auth/provider-already-linked") {
-                    msg = "This phone number is already linked to another Verified Records account.";
-                } else if (err.code === "auth/too-many-requests" || err.code === "auth/quota-exceeded") {
-                    msg = "SMS rate limit exceeded for this phone number or IP. Please wait before retrying.";
-                } else if (err.code === "auth/unauthorized-domain") {
-                    msg = "This domain is not authorized for Firebase Phone Authentication. Please add it in Firebase Console -> Authentication -> Settings -> Authorized domains.";
-                } else if (err.code === "auth/captcha-check-failed") {
-                    msg = "reCAPTCHA verification failed. Please try again.";
-                }
-                showAlert(msg, "error");
+                await resetRecaptchaWidget();
+                showAlert(mapAuthError(err), "error");
             } finally {
+                isSmsInFlight = false;
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> <span>Create Account</span>';
             }
@@ -1124,6 +1278,15 @@
                 modal.style.display = "none";
             }
             clearInterval(resendTimerInterval);
+            isSmsInFlight = false;
+            isResendingOtp = false;
+            isVerifyingOtp = false;
+
+            const submitBtn = document.getElementById("btnSignupSubmit");
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-user-plus" aria-hidden="true"></i> <span>Create Account</span>';
+            }
         }
 
         function startResendCountdown() {
@@ -1149,32 +1312,39 @@
         }
 
         async function resendPhoneOtp() {
-            if (!window.pendingSignupPhone || !auth.currentUser) return;
+            if (isResendingOtp || isSmsInFlight) return;
+            if (!window.pendingSignupPhone || !auth.currentUser) {
+                showOtpAlert("Verification session lost. Please close this modal and try again.", "error");
+                return;
+            }
+
             const resendBtn = document.getElementById("btnResendOtp");
             if (resendBtn) resendBtn.disabled = true;
+            isResendingOtp = true;
 
             showOtpAlert("Requesting new verification code via SMS...", "info");
 
             try {
-                resetRecaptchaVerifier();
-                const appVerifier = getRecaptchaVerifier();
+                // Reset widget state to allow fresh execution without recreation
+                await resetRecaptchaWidget();
+                const appVerifier = await getOrCreateRecaptchaVerifier();
                 const confirmationResult = await auth.currentUser.linkWithPhoneNumber(window.pendingSignupPhone, appVerifier);
                 window.phoneConfirmationResult = confirmationResult;
                 showOtpAlert("A new SMS verification code has been dispatched to your phone.", "success");
                 startResendCountdown();
             } catch (err) {
                 console.error("[Resend Error]", err);
-                resetRecaptchaVerifier();
-                let msg = err.message;
-                if (err.code === "auth/too-many-requests" || err.code === "auth/quota-exceeded") {
-                    msg = "Too many SMS requests. Please wait a few minutes before trying again.";
-                }
-                showOtpAlert(msg, "error");
+                await resetRecaptchaWidget();
+                showOtpAlert(mapAuthError(err), "error");
                 if (resendBtn) resendBtn.disabled = false;
+            } finally {
+                isResendingOtp = false;
             }
         }
 
         async function confirmOtpAndCreateUser() {
+            if (isVerifyingOtp) return;
+
             const otpInput = document.getElementById("otpInput");
             const verifyBtn = document.getElementById("btnVerifyOtp");
             const code = (otpInput ? otpInput.value : "").trim();
@@ -1194,6 +1364,7 @@
                 return;
             }
 
+            isVerifyingOtp = true;
             if (verifyBtn) {
                 verifyBtn.disabled = true;
                 verifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying Code with Firebase...</span>';
@@ -1258,19 +1429,34 @@
 
             } catch (err) {
                 console.error("[OTP Verification Error]", err);
-                let msg = err.message;
-                if (err.code === "auth/invalid-verification-code") {
-                    msg = "Incorrect verification code. Please check your SMS and try again.";
-                } else if (err.code === "auth/code-expired") {
-                    msg = "The verification code has expired. Please click Resend Code.";
-                }
-                showOtpAlert(msg, "error");
+                showOtpAlert(mapAuthError(err, "Verification code is incorrect or expired."), "error");
                 if (verifyBtn) {
                     verifyBtn.disabled = false;
                     verifyBtn.innerHTML = '<i class="fa-solid fa-shield-check"></i> <span>Verify & Complete Registration</span>';
                 }
+            } finally {
+                isVerifyingOtp = false;
             }
         }
+
+        // Setup OTP digits input auto-submit & filter non-digits
+        document.addEventListener("DOMContentLoaded", () => {
+            const otpInput = document.getElementById("otpInput");
+            if (otpInput) {
+                otpInput.addEventListener("input", () => {
+                    otpInput.value = otpInput.value.replace(/\D/g, "").slice(0, 6);
+                    if (otpInput.value.length === 6) {
+                        confirmOtpAndCreateUser();
+                    }
+                });
+                otpInput.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        confirmOtpAndCreateUser();
+                    }
+                });
+            }
+        });
 
         function showOtpAlert(msg, type) {
             const alertBox = document.getElementById("otpAlert");
