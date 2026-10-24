@@ -15,46 +15,44 @@ const VIDEO_CONFIG = {
         id: "administrative",
         title: "Administrative",
         subtitle: "Learn how authorized registrars issue and manage verified university credentials",
-        src: "assets/videos/administrative-demo.mp4",
+        src: "/assets/videos/administrative.mp4",
         badge: "Registrar Guide",
         steps: [
             "Open the Registrar Portal.",
-            "Sign in to an existing administrator account, or follow the institution's process for requesting administrator access.",
-            "Enter the student's details and the certificate information.",
-            "Review the details carefully before submitting.",
-            "Complete any required confirmation.",
-            "Wait for the success message and save the resulting certificate record."
+            "Sign in with the appropriate administrator account.",
+            "Enter and review the certificate details.",
+            "Submit the issuance request.",
+            "Complete the required confirmation.",
+            "Review the result."
         ]
     },
     verification: {
         id: "verification",
         title: "Verification",
         subtitle: "Instantly check the authenticity and conferral details of any issued credential",
-        src: "assets/videos/verification-demo.mp4",
+        src: "/assets/videos/verification.mp4",
         badge: "Public Verification",
         steps: [
-            "Open Verify Your Certificate.",
-            "Enter the required certificate details in the empty fields provided.",
-            "Submit the verification request.",
-            "Review the result and the certificate details.",
-            "When the certificate passes verification, download the verified record as a PDF or print it if those existing options are available."
+            "Open the verification page.",
+            "Enter the certificate details required by the real form.",
+            "Submit the request.",
+            "Review the verification result.",
+            "Download or print the certificate only when the existing application supports it and verification succeeds."
         ]
     },
     documents: {
         id: "documents",
         title: "Document Uploads",
         subtitle: "Safeguard personal academic and identity documents in your encrypted vault",
-        src: "assets/videos/document-uploads-demo.mp4",
+        src: "/assets/videos/document-uploads.mp4",
         badge: "Secure Vault",
         steps: [
-            "Open Save Your Document.",
-            "Choose the correct document category.",
-            "Create a new vault or open an existing vault.",
-            "Unlock the vault using the password you created for it.",
-            "Select your file and enter a title if required.",
-            "Choose Save Normally for private encrypted storage, or select the additional protection option when you want a permanent integrity record.",
-            "Wait for the save confirmation.",
-            "Return to Your Docs whenever you need to open or download the saved file."
+            "Open the document vault.",
+            "Create or open the required vault.",
+            "Unlock it using the vault password.",
+            "Select the document category.",
+            "Upload and save the document.",
+            "Return to the vault to view or download it.",
         ]
     }
 };
@@ -664,10 +662,34 @@ function initNavbarScroll() {
 }
 
 // --------------------------------------------------------------------------
-// 3. VIDEO CARDS & FALLBACK LIGHTWEIGHT ANIMATED PREVIEW CANVASES
+// 3. VIDEO CARDS & REAL TUTORIAL PREVIEWS (WITH FALLBACK CANVASES)
 // --------------------------------------------------------------------------
+function pauseAllPreviewVideos() {
+    document.querySelectorAll(".video-card video").forEach((video) => {
+        try { video.pause(); } catch (e) {}
+    });
+}
+
+function resumeVisiblePreviewVideos() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+    }
+    const isModalActive = document.getElementById("videoModalBackdrop")?.classList.contains("active");
+    if (isModalActive) return;
+
+    document.querySelectorAll(".video-card").forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+        const video = card.querySelector("video");
+        if (video && inViewport) {
+            video.play().catch(() => {});
+        }
+    });
+}
+
 function initVideoCards() {
     const cards = document.querySelectorAll(".video-card");
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     cards.forEach((card) => {
         const videoType = card.dataset.video;
@@ -677,39 +699,42 @@ function initVideoCards() {
         const previewContainer = card.querySelector(".video-preview-wrapper");
         if (!previewContainer) return;
 
-        // Check if an MP4 video exists and can play
-        const testVideo = document.createElement("video");
-        testVideo.className = "video-preview-media";
-        testVideo.muted = true;
-        testVideo.loop = true;
-        testVideo.playsInline = true;
-        testVideo.preload = "metadata";
+        // Create the actual video element for preview
+        const previewVideo = document.createElement("video");
+        previewVideo.className = "video-preview-media";
+        previewVideo.muted = true;
+        previewVideo.loop = true;
+        previewVideo.playsInline = true;
+        previewVideo.preload = "metadata";
+        previewVideo.setAttribute("aria-hidden", "true");
+        previewVideo.setAttribute("tabindex", "-1");
 
         let videoLoaded = false;
 
-        testVideo.oncanplay = function() {
-            if (!videoLoaded) {
-                videoLoaded = true;
-                // Remove fallback canvas if present
-                const fallbackCanvas = previewContainer.querySelector("canvas");
-                if (fallbackCanvas) fallbackCanvas.remove();
-                previewContainer.insertBefore(testVideo, previewContainer.firstChild);
-                testVideo.play().catch(() => {});
-            }
-        };
+        previewVideo.addEventListener("loadeddata", () => {
+            videoLoaded = true;
+            // Clean up fallback canvas if one was inserted
+            const fallbackCanvas = previewContainer.querySelector("canvas");
+            if (fallbackCanvas) fallbackCanvas.remove();
 
-        testVideo.onerror = function() {
-            // Video file not available yet -> Start beautiful animated canvas preview
+            if (!prefersReducedMotion) {
+                const rect = card.getBoundingClientRect();
+                const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+                const isModalOpen = document.getElementById("videoModalBackdrop")?.classList.contains("active");
+                if (inViewport && !isModalOpen) {
+                    previewVideo.play().catch(() => {});
+                }
+            }
+        });
+
+        previewVideo.addEventListener("error", () => {
             if (!videoLoaded && !previewContainer.querySelector("canvas")) {
                 setupFallbackCanvas(previewContainer, videoType, false);
             }
-        };
+        });
 
-        // Attempt loading user video source
-        testVideo.src = config.src;
-
-        // Immediately start canvas as resilient instant preview while video probes
-        setupFallbackCanvas(previewContainer, videoType, false);
+        previewVideo.src = config.src;
+        previewContainer.insertBefore(previewVideo, previewContainer.firstChild);
 
         // Card Click Handler -> Open Enlarged Modal
         card.addEventListener("click", () => openVideoModal(videoType, card));
@@ -721,21 +746,22 @@ function initVideoCards() {
         });
     });
 
-    // Pause canvas/video loops when off-screen
+    // Pause video loops when off-screen to preserve CPU and bandwidth
     if ("IntersectionObserver" in window) {
         const observer = new IntersectionObserver((entries) => {
+            const isModalActive = document.getElementById("videoModalBackdrop")?.classList.contains("active");
             entries.forEach((entry) => {
-                const type = entry.target.dataset.video;
-                if (canvasAnimations[type]) {
-                    canvasAnimations[type].active = entry.isIntersecting;
-                }
                 const videoEl = entry.target.querySelector("video");
                 if (videoEl) {
-                    if (entry.isIntersecting) {
+                    if (entry.isIntersecting && !isModalActive && !prefersReducedMotion) {
                         videoEl.play().catch(() => {});
                     } else {
                         videoEl.pause();
                     }
+                }
+                const type = entry.target.dataset.video;
+                if (canvasAnimations[type]) {
+                    canvasAnimations[type].active = entry.isIntersecting && !isModalActive;
                 }
             });
         }, { threshold: 0.15 });
@@ -1006,6 +1032,9 @@ function openVideoModal(videoType, triggerElement) {
 
     activeModalTriggerCard = triggerElement;
 
+    // Pause preview playback across all background cards
+    pauseAllPreviewVideos();
+
     const backdrop = document.getElementById("videoModalBackdrop");
     const modalTitle = document.getElementById("videoModalTitle");
     const mediaContainer = document.getElementById("videoModalMedia");
@@ -1024,38 +1053,37 @@ function openVideoModal(videoType, triggerElement) {
         </div>
     `).join("");
 
-    // Load Enlarged Video or High-Res Canvas
+    // Load Enlarged Video with full controls and unmuted audio support
     mediaContainer.innerHTML = "";
     const modalVideo = document.createElement("video");
     modalVideo.controls = true;
     modalVideo.autoplay = true;
     modalVideo.playsInline = true;
+    modalVideo.preload = "auto";
+    modalVideo.muted = false; // Enabled audio playback on user gesture
+    modalVideo.setAttribute("aria-label", `${config.title} Tutorial Video`);
+    modalVideo.className = "video-modal-player";
     modalVideo.style.width = "100%";
     modalVideo.style.height = "100%";
 
-    let hasVideo = false;
-
-    modalVideo.oncanplay = function() {
-        hasVideo = true;
-        const canvas = mediaContainer.querySelector("canvas");
-        if (canvas) canvas.remove();
-        mediaContainer.appendChild(modalVideo);
-    };
-
     modalVideo.onerror = function() {
-        if (!hasVideo && !mediaContainer.querySelector("canvas")) {
-            setupFallbackCanvas(mediaContainer, videoType, true);
-        }
+        console.warn(`Tutorial video could not be loaded from ${config.src}. Rendering fallback.`);
+        mediaContainer.innerHTML = "";
+        setupFallbackCanvas(mediaContainer, videoType, true);
     };
 
     modalVideo.src = config.src;
-    // Set fallback canvas immediately while video tests
-    setupFallbackCanvas(mediaContainer, videoType, true);
+    mediaContainer.appendChild(modalVideo);
 
     // Open Modal
     backdrop.classList.add("active");
     backdrop.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+
+    // Start playback (direct user click permits audio playback)
+    modalVideo.play().catch((err) => {
+        console.warn("Playback awaiting user interaction:", err);
+    });
 
     // Set focus on close button
     const closeBtn = document.getElementById("videoModalCloseBtn");
@@ -1070,13 +1098,14 @@ function closeVideoModal() {
     backdrop.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
 
-    // Stop and clear video/canvas in modal
+    // Stop and clear video/canvas in modal to halt streaming and free memory
     const mediaContainer = document.getElementById("videoModalMedia");
     if (mediaContainer) {
         const video = mediaContainer.querySelector("video");
         if (video) {
             video.pause();
-            video.src = "";
+            video.removeAttribute("src");
+            video.load(); // Immediately releases decoder and buffer resources
         }
         mediaContainer.innerHTML = "";
     }
@@ -1089,21 +1118,38 @@ function closeVideoModal() {
         }
     });
 
+    // Resume visible preview videos in viewport
+    resumeVisiblePreviewVideos();
+
     // Return focus to triggered card
     if (activeModalTriggerCard) {
         activeModalTriggerCard.focus();
     }
 }
 
-// Global modal dismiss listeners
+// Global modal dismiss & accessible keyboard trap
 document.addEventListener("keydown", (e) => {
+    const backdrop = document.getElementById("videoModalBackdrop");
+    if (!backdrop || !backdrop.classList.contains("active")) return;
+
     if (e.key === "Escape") {
-        const backdrop = document.getElementById("videoModalBackdrop");
-        if (backdrop && backdrop.classList.contains("active")) {
-            closeVideoModal();
+        closeVideoModal();
+    } else if (e.key === "Tab") {
+        const focusable = backdrop.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), video[controls]');
+        if (focusable.length > 0) {
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         }
     }
 });
+
 // --------------------------------------------------------------------------
 // 4B. SYNCHRONIZED 3-PANEL VIDEO CARDS SCROLL ANIMATION
 // - When scrolling down from Verified Records into Video Guides:

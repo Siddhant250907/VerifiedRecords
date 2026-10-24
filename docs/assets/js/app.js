@@ -84,6 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btn) btn.setAttribute("aria-expanded", "false");
             }
         });
+    });
+
     // 5. Global Floating Dots Background Canvas with Cursor Repulsion
     initGlobalBackgroundParticles();
 });

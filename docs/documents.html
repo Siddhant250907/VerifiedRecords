@@ -159,33 +159,6 @@
                 </p>
             </header>
 
-            <!-- CATEGORY FILTER TABS -->
-            <nav class="vault-category-nav" role="tablist" aria-label="Document Categories">
-                <button type="button" class="vault-category-pill active" data-category="all" role="tab" aria-selected="true">
-                    <i class="fa-solid fa-folder-open"></i>
-                    <span>Your Docs</span>
-                </button>
-                <button type="button" class="vault-category-pill" data-category="aadhaar" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-fingerprint"></i>
-                    <span>E-Aadhaar</span>
-                </button>
-                <button type="button" class="vault-category-pill" data-category="pan" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-address-card"></i>
-                    <span>PAN ID</span>
-                </button>
-                <button type="button" class="vault-category-pill" data-category="dl" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-id-badge"></i>
-                    <span>Driving Licence</span>
-                </button>
-                <button type="button" class="vault-category-pill" data-category="marksheets" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <span>Marksheets</span>
-                </button>
-                <button type="button" class="vault-category-pill" data-category="apaar" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-award"></i>
-                    <span>APAAR ID</span>
-                </button>
-            </nav>
 
             <!-- NOTIFICATION / STATUS MESSAGE BANNER -->
             <div id="vaultAlert" style="display: none; width: 100%; border-radius: 14px; padding: 12px 18px; font-size: 0.9rem; font-weight: 500;"></div>
@@ -250,6 +223,13 @@
                     <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
                     <span>Zero-Knowledge: Your password is never sent to the server or saved to cookies/localStorage.</span>
                 </div>
+
+                <div style="margin-top: 16px; text-align: center; border-top: 1px solid rgba(0, 71, 65, 0.12); padding-top: 14px;">
+                    <button type="button" id="btnSwitchToUnlockVault" style="background: none; border: none; color: #004741; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Already have a vault? Unlock with Password Key</span>
+                    </button>
+                </div>
             </div>
 
             <!-- STATE 2B: RETURNING USER — UNLOCK SECURE VAULT -->
@@ -286,10 +266,45 @@
                     <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
                     <span>Zero-Knowledge: Your password is never sent to the server or saved to cookies/localStorage.</span>
                 </div>
+
+                <div style="margin-top: 16px; text-align: center; border-top: 1px solid rgba(0, 71, 65, 0.12); padding-top: 14px;">
+                    <button type="button" id="btnSwitchToCreateVault" style="background: none; border: none; color: #004741; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>First time or need a new vault? Create Vault Name & Password Key</span>
+                    </button>
+                </div>
             </div>
 
             <!-- STATE 3: VAULT UNLOCKED (ACTIVE) -->
-            <div id="vaultUnlockedView" style="display: none; display: flex; flex-direction: column; gap: 24px;">
+            <div id="vaultUnlockedView" style="display: none; flex-direction: column; gap: 24px;">
+
+                <!-- CATEGORY FILTER TABS (SHOWN ONLY WHEN VAULT IS UNLOCKED) -->
+                <nav class="vault-category-nav" id="vaultCategoryNav" role="tablist" aria-label="Document Categories">
+                    <button type="button" class="vault-category-pill active" data-category="all" role="tab" aria-selected="true">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>Your Docs</span>
+                    </button>
+                    <button type="button" class="vault-category-pill" data-category="aadhaar" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-fingerprint"></i>
+                        <span>E-Aadhaar</span>
+                    </button>
+                    <button type="button" class="vault-category-pill" data-category="pan" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-address-card"></i>
+                        <span>PAN ID</span>
+                    </button>
+                    <button type="button" class="vault-category-pill" data-category="dl" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <span>Driving Licence</span>
+                    </button>
+                    <button type="button" class="vault-category-pill" data-category="marksheets" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>Marksheets</span>
+                    </button>
+                    <button type="button" class="vault-category-pill" data-category="apaar" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-award"></i>
+                        <span>APAAR ID</span>
+                    </button>
+                </nav>
 
                 <!-- MULTI-VAULT SWITCHER & CONTROLS -->
                 <div class="vault-switcher-container" id="vaultSwitcherContainer">

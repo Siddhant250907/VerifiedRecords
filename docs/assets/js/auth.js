@@ -276,19 +276,85 @@ function syncUserAccountToMongo(user, additionalProfile = {}) {
 // --------------------------------------------------------------------------
 // 7. SOCIAL AUTHENTICATION (GOOGLE, APPLE)
 // --------------------------------------------------------------------------
+
+// Handle OAuth redirect return on page load (essential for mobile & Safari Apple OAuth)
+auth.getRedirectResult()
+    .then(result => {
+        if (result && result.user) {
+            const user = result.user;
+            console.log("VerifiedRecords: Signed in via OAuth redirect:", user.email || user.uid);
+            let additional = {};
+            if (result.additionalUserInfo && result.additionalUserInfo.profile) {
+                const profile = result.additionalUserInfo.profile;
+                if (profile.name) {
+                    additional.firstName = profile.name.firstName || "";
+                    additional.lastName = profile.name.lastName || "";
+                }
+            }
+            return syncUserAccountToMongo(user, additional).then(() => {
+                const redirect = new URLSearchParams(window.location.search).get("redirect") || "dashboard.html";
+                window.location.href = redirect;
+            });
+        }
+    })
+    .catch(error => {
+        console.warn("VerifiedRecords: OAuth redirect notice:", error.code, error.message);
+    });
+
+function displaySocialAuthError(error, providerName, alertElementId) {
+    const alertBox = alertElementId ? document.getElementById(alertElementId) : null;
+    let message = error.message;
+
+    if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
+        if (providerName.toLowerCase() === "apple") {
+            message = "Apple Sign-In is configured. Please ensure Apple Provider is enabled in your Firebase Console (Authentication -> Sign-in method -> Apple) with your Apple Services ID & Team ID.";
+        } else {
+            message = `${providerName} Sign-In is not enabled in Firebase Console.`;
+        }
+    } else if (error.code === "auth/popup-closed-by-user") {
+        message = "Sign-in popup was closed before completing.";
+    } else if (error.code === "auth/cancelled-popup-request") {
+        message = "Only one sign-in window allowed at a time.";
+    } else if (error.code === "auth/unauthorized-domain") {
+        message = "This domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+    }
+
+    if (alertBox) {
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        if (alertBox.classList.contains("signup-message-box") || alertElementId === "signupAlert") {
+            alertBox.className = "signup-message-box error";
+        } else if (alertBox.classList.contains("auth-message-box") || alertElementId === "authAlert") {
+            alertBox.className = "auth-message-box error";
+        } else {
+            alertBox.className = "auth-alert alert-error";
+        }
+    } else {
+        alert(message);
+    }
+}
+
 function handleSocialAuth(provider, providerName, alertElementId) {
     const alertBox = alertElementId ? document.getElementById(alertElementId) : null;
 
     if (alertBox) {
         alertBox.style.display = "none";
-        alertBox.className = "auth-alert";
+        alertBox.textContent = "";
     }
 
     auth.signInWithPopup(provider)
         .then(result => {
             const user = result.user;
-            console.log(`VerifiedRecords: Signed in via ${providerName}:`, user.email);
-            return syncUserAccountToMongo(user).then(() => {
+            console.log(`VerifiedRecords: Signed in via ${providerName}:`, user.email || user.uid);
+            let additional = {};
+            if (result.additionalUserInfo && result.additionalUserInfo.profile) {
+                const profile = result.additionalUserInfo.profile;
+                if (profile.name) {
+                    additional.firstName = profile.name.firstName || "";
+                    additional.lastName = profile.name.lastName || "";
+                }
+            }
+            return syncUserAccountToMongo(user, additional).then(() => {
                 const redirect = new URLSearchParams(window.location.search).get("redirect") || "dashboard.html";
                 window.location.href = redirect;
             });
@@ -296,28 +362,16 @@ function handleSocialAuth(provider, providerName, alertElementId) {
         .catch(error => {
             console.warn(`${providerName} popup error:`, error.code, error.message);
 
-            let message = error.message;
-            if (error.code === "auth/operation-not-allowed" || error.code === "auth/configuration-not-found") {
-                if (providerName.toLowerCase() === "apple") {
-                    message = "Apple Sign-In requires OAuth configuration in the Firebase Console (Apple Services ID, Team ID, Key ID, and private key).";
-                } else {
-                    message = `${providerName} Sign-In is not enabled in Firebase Console.`;
-                }
-            } else if (error.code === "auth/popup-closed-by-user") {
-                message = "Sign-in popup was closed before completing.";
-            } else if (error.code === "auth/cancelled-popup-request") {
-                message = "Only one popup request allowed at a time.";
-            } else if (error.code === "auth/unauthorized-domain") {
-                message = "This domain is not authorized in Firebase Console -> Authentication -> Settings -> Authorized domains.";
+            // If popup is blocked by browser (common on Safari / iOS), smoothly fall back to redirect
+            if (error.code === "auth/popup-blocked") {
+                console.log(`VerifiedRecords: Popup blocked for ${providerName}. Redirecting to sign in...`);
+                auth.signInWithRedirect(provider).catch(redirectErr => {
+                    displaySocialAuthError(redirectErr, providerName, alertElementId);
+                });
+                return;
             }
 
-            if (alertBox) {
-                alertBox.textContent = message;
-                alertBox.style.display = "block";
-                alertBox.className = "auth-alert alert-error";
-            } else {
-                alert(message);
-            }
+            displaySocialAuthError(error, providerName, alertElementId);
         });
 }
 

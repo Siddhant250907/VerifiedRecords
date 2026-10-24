@@ -547,6 +547,30 @@
         toggleVaultPasswordBtn.addEventListener("click", () => {
             const isPassword = vaultPasswordInput.type === "password";
             vaultPasswordInput.type = isPassword ? "text" : "password";
+            toggleVaultPasswordBtn.innerHTML = isPassword
+                ? '<i class="fa-solid fa-eye-slash"></i>'
+                : '<i class="fa-solid fa-eye"></i>';
+        });
+    }
+
+    // Switch between Create Vault and Unlock Vault cards
+    const btnSwitchToCreateVault = document.getElementById("btnSwitchToCreateVault");
+    const btnSwitchToUnlockVault = document.getElementById("btnSwitchToUnlockVault");
+
+    if (btnSwitchToCreateVault) {
+        btnSwitchToCreateVault.addEventListener("click", () => {
+            if (vaultLockedCard) vaultLockedCard.style.display = "none";
+            if (vaultFirstTimeCard) vaultFirstTimeCard.style.display = "flex";
+            if (firstTimeVaultPasswordInput) firstTimeVaultPasswordInput.focus();
+        });
+    }
+
+    if (btnSwitchToUnlockVault) {
+        btnSwitchToUnlockVault.addEventListener("click", () => {
+            if (vaultFirstTimeCard) vaultFirstTimeCard.style.display = "none";
+            if (vaultLockedCard) vaultLockedCard.style.display = "flex";
+            if (vaultPasswordInput) vaultPasswordInput.focus();
+        });
     }
 
     // Unlock form submission
@@ -579,18 +603,36 @@
                 const data = await response.json();
                 const existingDocs = data.documents || [];
 
-                // 2. If user already has encrypted documents, test password against the first doc
-                if (existingDocs.length > 0) {
-                    const testDoc = existingDocs.find(d => d.encryptedMetadata && d.encryption && d.encryption.salt && d.encryption.metadataIv);
-                    if (testDoc) {
+                // 2. If user already has encrypted documents, test password across candidate documents
+                const candidateDocs = existingDocs.filter(d => d.encryptedMetadata && d.encryption && d.encryption.salt && d.encryption.metadataIv);
+
+                if (candidateDocs.length > 0) {
+                    let verified = false;
+
+                    // Prioritize documents in active vault, then test across all documents
+                    const sortedCandidates = [...candidateDocs].sort((a, b) => {
+                        const aMatch = (!a.vaultId && (activeVaultId === "default" || !activeVaultId)) || a.vaultId === activeVaultId;
+                        const bMatch = (!b.vaultId && (activeVaultId === "default" || !activeVaultId)) || b.vaultId === activeVaultId;
+                        if (aMatch && !bMatch) return -1;
+                        if (!aMatch && bMatch) return 1;
+                        return 0;
+                    });
+
+                    for (const doc of sortedCandidates) {
                         try {
-                            const salt = VaultCrypto.hexToUint8Array(testDoc.encryption.salt);
-                            const iv = VaultCrypto.hexToUint8Array(testDoc.encryption.metadataIv);
-                            const key = await VaultCrypto.deriveKey(password, salt, testDoc.encryption.iterations || 100000);
-                            await VaultCrypto.decryptJson(key, testDoc.encryptedMetadata, iv);
+                            const salt = VaultCrypto.hexToUint8Array(doc.encryption.salt);
+                            const iv = VaultCrypto.hexToUint8Array(doc.encryption.metadataIv);
+                            const key = await VaultCrypto.deriveKey(password, salt, doc.encryption.iterations || 100000);
+                            await VaultCrypto.decryptJson(key, doc.encryptedMetadata, iv);
+                            verified = true;
+                            break; // Successfully verified password!
                         } catch (decryptErr) {
-                            throw new Error("Incorrect vault password. Authentication tag verification failed.");
+                            // Continue testing remaining documents
                         }
+                    }
+
+                    if (!verified) {
+                        throw new Error("Incorrect vault password. Authentication tag verification failed.");
                     }
                 }
 
@@ -2016,6 +2058,20 @@
             }
         });
     }
+
+    // Dismiss modals when clicking on background backdrop
+    window.addEventListener("click", (e) => {
+        if (e.target === uploadModal && !isUploading) {
+            uploadModal.style.display = "none";
+        }
+        if (e.target === previewModal) {
+            previewModal.style.display = "none";
+        }
+        if (e.target === createVaultModal) {
+            createVaultModal.classList.remove("active");
+            createVaultModal.style.display = "none";
+        }
+    });
 
     // Initialize category sync on page load
     syncCategoryFromUrl();
