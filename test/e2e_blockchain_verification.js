@@ -13,6 +13,7 @@ const artifactPath = path.join(__dirname, "..", "build", "contracts", "Certifica
 const artifact = JSON.parse(fs.readFileSync(artifactPath, "utf-8"));
 const contractAddress = process.env.CONTRACT_ADDRESS || artifact.networks["5777"].address;
 const certificateContract = new web3.eth.Contract(artifact.abi, contractAddress);
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 
 async function runTest() {
     console.log("==================================================");
@@ -29,7 +30,7 @@ async function runTest() {
     };
 
     console.log("\n[Step 1] Preparing certificate for issuance:", testCertId);
-    const prepRes = await fetch("http://localhost:3000/api/certificate/prepare", {
+    const prepRes = await fetch("${BASE_URL}/api/certificate/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(certPayload)
@@ -74,7 +75,7 @@ async function runTest() {
     }
 
     console.log("\n[Step 4] Storing certificate with blockchain metadata in MongoDB...");
-    const recordRes = await fetch("http://localhost:3000/api/certificate", {
+    const recordRes = await fetch("${BASE_URL}/api/certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -116,7 +117,7 @@ async function runTest() {
     const blockNumberBefore = await web3.eth.getBlockNumber();
     const nonceBefore = await web3.eth.getTransactionCount(adminIssuer);
 
-    const verifyRes = await fetch("http://localhost:3000/api/certificate/" + testCertId);
+    const verifyRes = await fetch("${BASE_URL}/api/certificate/" + testCertId);
     const verifyData = await verifyRes.json();
 
     const blockNumberAfter = await web3.eth.getBlockNumber();

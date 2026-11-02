@@ -6,6 +6,16 @@
 (function () {
     "use strict";
 
+    // Authoritative configured issuer wallet addresses (Sepolia & Ganache)
+    const CONFIGURED_ISSUER_WALLETS = [
+        "0x1fc04cfbf2f7b0f32aebecd17880afeb38bfacc7",
+        "0x9317939ea9f3369c83776517f0549dc4552c2931"
+    ];
+    function isConfiguredIssuerWallet(wallet) {
+        if (!wallet) return false;
+        return CONFIGURED_ISSUER_WALLETS.includes(String(wallet).trim().toLowerCase());
+    }
+
     // ----------------------------------------------------------------------
     // 1. DOM REFERENCES
     // ----------------------------------------------------------------------
@@ -307,6 +317,86 @@
      * Dynamically updates the connected account badge and address in the network card
      * by querying real-time on-chain authorization for the active network.
      */
+    function getConfiguredOwnerForNetwork(net) {
+        const n = normalizeClientNetwork(net);
+        if (n === "ganache") {
+            return "0x9317939Ea9f3369C83776517f0549DC4552c2931";
+        }
+        return "0x1FC04CfBF2f7B0F32AEBecd17880afeb38BFacC7";
+    }
+
+    async function validateMetaMaskOwner(targetConfig = null) {
+        const net = targetConfig ? normalizeClientNetwork(targetConfig.network) : normalizeClientNetwork(selectedNetwork);
+        const configuredOwner = getConfiguredOwnerForNetwork(net);
+        const shortOwner = configuredOwner.slice(0, 6) + "..." + configuredOwner.slice(-4);
+
+        const netOwnerEl = document.getElementById("netConfiguredOwnerAddr");
+        if (netOwnerEl) {
+            netOwnerEl.textContent = shortOwner;
+            netOwnerEl.title = configuredOwner;
+        }
+
+        const netMismatchNotice = document.getElementById("netMismatchNotice");
+        const netMismatchNoticeText = document.getElementById("netMismatchNoticeText");
+        const netActiveStatus = document.getElementById("netActiveStatus");
+        const netActiveStatusText = document.getElementById("netActiveStatusText");
+        const issueButton = document.getElementById("issueButton");
+
+        let activeAccount = connectedMetaMaskAccount;
+        if (!activeAccount && typeof window.ethereum !== "undefined") {
+            try {
+                const accs = await window.ethereum.request({ method: "eth_accounts" });
+                if (accs && accs.length > 0) {
+                    activeAccount = accs[0];
+                    connectedMetaMaskAccount = activeAccount;
+                }
+            } catch (e) {}
+        }
+
+        if (!activeAccount) {
+            if (netMismatchNotice) netMismatchNotice.style.display = "block";
+            if (netMismatchNoticeText) {
+                netMismatchNoticeText.innerHTML = `MetaMask is not connected. The configured Platform Owner wallet is <strong class="mono">${escapeHtml(configuredOwner)}</strong>. Please connect this account in MetaMask to sign blockchain transactions.`;
+            }
+            if (netActiveStatus) netActiveStatus.className = "network-status-badge offline";
+            if (netActiveStatusText) netActiveStatusText.textContent = "Owner Wallet Not Connected";
+            if (issueButton) {
+                issueButton.disabled = true;
+                issueButton.title = "MetaMask must be connected to the configured Platform Owner wallet.";
+            }
+            return false;
+        }
+
+        const isMatch = activeAccount.toLowerCase() === configuredOwner.toLowerCase();
+        if (isMatch) {
+            if (netMismatchNotice) netMismatchNotice.style.display = "none";
+            if (netActiveStatus) netActiveStatus.className = "network-status-badge ready";
+            if (netActiveStatusText) netActiveStatusText.textContent = "Ready for Transactions";
+            if (issueButton) {
+                issueButton.disabled = false;
+                issueButton.title = "";
+            }
+            return true;
+        } else {
+            const shortActive = activeAccount.slice(0, 6) + "..." + activeAccount.slice(-4);
+            if (netMismatchNotice) netMismatchNotice.style.display = "block";
+            if (netMismatchNoticeText) {
+                netMismatchNoticeText.innerHTML = `The connected MetaMask account (<strong class="mono">${escapeHtml(shortActive)}</strong>) does not match the configured Platform Owner wallet (<strong class="mono">${escapeHtml(shortOwner)}</strong>) for ${net === 'ganache' ? 'Ganache Local' : 'Ethereum Sepolia'}. Please switch to the owner wallet in MetaMask.`;
+            }
+            if (netActiveStatus) netActiveStatus.className = "network-status-badge offline";
+            if (netActiveStatusText) netActiveStatusText.textContent = "Owner Account Mismatch";
+            if (issueButton) {
+                issueButton.disabled = true;
+                issueButton.title = "Connected MetaMask account does not match the Platform Owner wallet.";
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Dynamically updates the connected account badge and address in the network card
+     * by querying real-time on-chain authorization for the active network.
+     */
     async function updateAccountAndPermissionsDisplay(account, targetConfig = null) {
         connectedMetaMaskAccount = account || null;
         const config = targetConfig || cachedConfigs[selectedNetwork] || null;
@@ -321,6 +411,7 @@
                 netAccountAddr.title = "No active MetaMask account connected";
             }
             updateWalletBadge(null);
+            await validateMetaMaskOwner(config);
             return;
         }
 
@@ -362,6 +453,8 @@
             }
             updateWalletBadge(account, "Connected");
         }
+
+        await validateMetaMaskOwner(config);
     }
 
     function updateWalletBadge(account, roleLabel = null) {
@@ -454,7 +547,7 @@
                 networkHostedNotice.style.display = "flex";
                 if (networkHostedNoticeText) {
                     networkHostedNoticeText.textContent = config.statusMessage ||
-                        "Ganache Local is available only when the local Ganache node is accessible from the local development environment (http://localhost:3000).";
+                        "Ganache Local is available only when the local Ganache node is accessible from the local development environment (http://localhost:5000).";
                 }
             } else {
                 networkHostedNotice.style.display = "none";
@@ -789,6 +882,9 @@
         const net = targetConfig.network || selectedNetwork || "sepolia";
 
         // Direct check against configured expected issuer or contract owner
+        if (isConfiguredIssuerWallet(account)) {
+            return { authorized: true };
+        }
         if (targetConfig.expectedIssuer && targetConfig.expectedIssuer.toLowerCase() === account.toLowerCase()) {
             return { authorized: true };
         }
@@ -1233,7 +1329,7 @@
 
     function getAdminSession() {
         try {
-            const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
+            const raw = sessionStorage.getItem(ADMIN_SESSION_KEY) || localStorage.getItem(ADMIN_SESSION_KEY);
             if (raw) return JSON.parse(raw);
         } catch (e) {}
         return null;
@@ -1242,23 +1338,35 @@
     function setAdminSession(admin) {
         if (!admin) return;
         try {
-            sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(admin));
+            const val = JSON.stringify(admin);
+            sessionStorage.setItem(ADMIN_SESSION_KEY, val);
+            localStorage.setItem(ADMIN_SESSION_KEY, val);
         } catch (e) {}
     }
 
     function clearAdminSession() {
         try {
             sessionStorage.removeItem(ADMIN_SESSION_KEY);
+            localStorage.removeItem(ADMIN_SESSION_KEY);
         } catch (e) {}
     }
 
     function updateAdminGateUI() {
+        // If user is inside the Organization Workspace, workspace issue controller manages the form display
+        const orgWorkspace = document.getElementById("orgWorkspaceSection");
+        if (orgWorkspace && orgWorkspace.style.display !== "none") {
+            return;
+        }
+
         const session = getAdminSession();
         const isAuthenticated = Boolean(session && session.adminUserId);
 
+        // Check if user is currently on the Organization Portal tab
+        const isOrgTabActive = (!tabCertIssuance || !tabCertIssuance.classList.contains("active")) || (tabOrgPortal && tabOrgPortal.classList.contains("active"));
+
         if (isAuthenticated) {
             if (adminGateCard) adminGateCard.style.display = "none";
-            if (adminFormCard) adminFormCard.style.display = "block";
+            if (!isOrgTabActive && adminFormCard) adminFormCard.style.display = "block";
             if (adminIdBadge && activeAdminUserId) {
                 activeAdminUserId.textContent = session.adminUserId;
                 adminIdBadge.style.display = "inline-flex";
@@ -1271,7 +1379,10 @@
                 adminWalletBadge.style.display = isWalletDetailsVisible ? "inline-flex" : "none";
             }
         } else {
-            if (adminGateCard) adminGateCard.style.display = "block";
+            // NEVER show adminGateCard if user is on the Organization Portal tab
+            if (adminGateCard) {
+                adminGateCard.style.display = isOrgTabActive ? "none" : "block";
+            }
             if (adminFormCard) adminFormCard.style.display = "none";
             if (adminIdBadge) adminIdBadge.style.display = "none";
             // Hide MetaMask button and badge completely prior to authentication
@@ -1876,11 +1987,39 @@
         clearInputErrors();
         hideMessage();
 
-        const activeAdmin = getAdminSession();
+        let activeAdmin = getAdminSession();
+        const session = activeAdmin;
+        const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+        const isOrgAdminOrOwner = currentWorkspaceOrg && (
+            currentWorkspaceOrg.userRole === "owner" ||
+            currentWorkspaceOrg.role === "owner" ||
+            currentWorkspaceOrg.userRole === "admin" ||
+            currentWorkspaceOrg.role === "admin" ||
+            Boolean(currentWorkspaceOrg.isAuthorizedIssuer) ||
+            (session && (session.orgId === currentWorkspaceOrg.orgId || session.adminUserId === "admin" || (session.role === "owner" && !session.orgId)))
+        );
+        const isMetaMaskOwner = Boolean(connectedMetaMaskAccount && currentWorkspaceOrg && currentWorkspaceOrg.ownerWallet && connectedMetaMaskAccount.toLowerCase() === currentWorkspaceOrg.ownerWallet.toLowerCase());
+        const isOrgApproved = currentWorkspaceOrg && ((currentWorkspaceOrg.status || "Approved").toLowerCase() === "approved");
+        const isAdmin = Boolean(isConfiguredOwner || isOrgAdminOrOwner || isMetaMaskOwner) && isOrgApproved;
+
         if (!activeAdmin || !activeAdmin.adminUserId) {
-            showMessage("Admin authorization required. Please authenticate with your Admin USER ID & PWD.", "danger");
-            updateAdminGateUI();
-            return;
+            if (currentWorkspaceOrg && isAdmin) {
+                const defaultAdminId = (session && session.adminUserId) ? session.adminUserId : (isConfiguredOwner ? "Platform Owner" : "Organization Owner");
+                activeAdmin = {
+                    adminUserId: defaultAdminId,
+                    role: (session && session.role) || (isConfiguredOwner ? "superadmin" : "owner"),
+                    linkedEmail: (session && session.linkedEmail) || (typeof auth !== "undefined" && auth.currentUser && auth.currentUser.email) || "siddasat@gmail.com",
+                    orgId: currentWorkspaceOrg.orgId
+                };
+                setAdminSession(activeAdmin);
+            } else {
+                showMessage("Admin authorization required. Please authenticate with your Admin USER ID & PWD.", "danger");
+                const orgWorkspace = document.getElementById("orgWorkspaceSection");
+                if (!orgWorkspace || orgWorkspace.style.display === "none") {
+                    updateAdminGateUI();
+                }
+                return;
+            }
         }
 
         const studentName = (studentNameInput ? studentNameInput.value : "").trim();
@@ -1959,6 +2098,29 @@
             issuanceSuccessCard.style.display = "none";
         }
 
+        // Ensure active organization is selected and approved before issuance
+        if (!currentActiveOrg) {
+            if (currentWorkspaceOrg) {
+                currentActiveOrg = currentWorkspaceOrg;
+                selectOrgForIssuance(currentWorkspaceOrg);
+            } else {
+                try {
+                    const saved = sessionStorage.getItem("vr_active_org");
+                    if (saved) currentActiveOrg = JSON.parse(saved);
+                } catch (e) {}
+            }
+        }
+
+        if (!currentActiveOrg) {
+            showMessage("Please select an approved organization in which you have issuing permission before issuing a certificate.", "warning");
+            return;
+        }
+
+        if (currentActiveOrg.status !== "Approved") {
+            showMessage(`Organization "${escapeHtml(currentActiveOrg.name)}" is currently ${escapeHtml(currentActiveOrg.status)}. Only approved organizations are authorized to issue certificates.`, "danger");
+            return;
+        }
+
         const payload = {
             studentName: studentName,
             rollNumber: rollNumber,
@@ -1967,7 +2129,8 @@
             fieldOfCertification: resolvedCertType,
             adminUserId: activeAdmin ? activeAdmin.adminUserId : null,
             certificateId: certificateId,
-            issueDate: issueDate
+            issueDate: issueDate,
+            orgId: currentActiveOrg.orgId
         };
 
         console.log("[1] Admin submit triggered with data:", payload);
@@ -2087,39 +2250,34 @@
             ]);
             timings.authQueryDurationMs = Date.now() - tAuthStart;
 
-            const isOwner = Boolean(ownerCheck && ownerCheck.isOwner);
-            const isAuthorized = Boolean(authCheck && authCheck.authorized) || isOwner;
+            const net = normalizeClientNetwork(selectedNetwork);
+            const configuredOwner = getConfiguredOwnerForNetwork(net);
+            const isOwner = Boolean(ownerCheck && ownerCheck.isOwner) || (activeAccount.toLowerCase() === configuredOwner.toLowerCase());
             connectedMetaMaskAccount = activeAccount;
-            await updateAccountAndPermissionsDisplay(activeAccount, config);
 
-            if (!isAuthorized) {
-                const shortAcc = activeAccount.slice(0, 6) + "..." + activeAccount.slice(-4);
-                const ownerAddr = config.contractOwner || config.expectedIssuer || "Authorized Owner";
-                const shortOwner = (ownerAddr && ownerAddr.length === 42) ? (ownerAddr.slice(0, 6) + "..." + ownerAddr.slice(-4)) : ownerAddr;
-
+            if (!isOwner) {
+                const shortConnected = activeAccount.slice(0, 6) + "..." + activeAccount.slice(-4);
+                const shortExpected = configuredOwner.slice(0, 6) + "..." + configuredOwner.slice(-4);
                 showMessage(
                     `<div style="font-weight: 700; margin-bottom: 6px;">` +
-                    `<i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Connected Account is Not Authorized to Issue Certificates` +
-                    `</div>` +
-                    `<div style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px; opacity: 0.95;">` +
-                    `Connected wallet <strong class="mono">${escapeHtml(shortAcc)}</strong> is not an authorized issuer on the active <strong>${escapeHtml(config.label)}</strong> contract.<br>` +
-                    `Contract Owner: <strong class="mono">${escapeHtml(shortOwner)}</strong>.<br>` +
-                    `• <strong>Option 1 (Fast & Recommended):</strong> Click below to issue directly on-chain via the Institutional Registrar node — no wallet prompts or account switching needed!<br>` +
-                    `• <strong>Option 2:</strong> Switch to an authorized account in MetaMask.` +
-                    `</div>` +
+                    `<i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Platform Owner Wallet Required</div>` +
+                    `<div style="font-size: 0.85rem; line-height: 1.5; margin-bottom: 10px;">` +
+                    `Blockchain transactions on <strong>${net === 'ganache' ? 'Ganache Local' : 'Ethereum Sepolia'}</strong> must be signed by the configured Platform Owner wallet.<br>` +
+                    `Connected account: <strong class="mono">${escapeHtml(shortConnected)}</strong><br>` +
+                    `Required Owner wallet: <strong class="mono">${escapeHtml(shortExpected)}</strong><br>` +
+                    `Please switch to the Platform Owner account in MetaMask, or issue via Direct Registrar.</div>` +
                     `<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px;">` +
                     `<button type="button" class="admin-registrar-btn" id="btnAuthFailRegistrar" style="height: 36px; font-size: 12px; padding: 0 14px;">` +
-                    `<i class="fa-solid fa-bolt"></i> Issue Instantly via Direct Registrar (No Wallet Prompts)` +
+                    `<i class="fa-solid fa-bolt"></i> Issue via Direct Registrar (Node)` +
                     `</button>` +
-                    `<button type="button" class="admin-account-switch-btn" id="btnAuthFailSwitch" style="height: 36px; font-size: 12px; padding: 0 14px; border-radius: 6px; border: 1px solid currentColor; background: rgba(255,255,255,0.15); cursor: pointer; color: inherit; font-weight: 700;">` +
-                    `<i class="fa-solid fa-wallet"></i> Change Account in MetaMask` +
-                    `</button>` +
+                    `<button type="button" class="admin-account-switch-btn" id="btnSwitchToOwnerDuringIssue" style="height: 36px; font-size: 12px; padding: 0 14px; border-radius: 6px; border: 1.5px solid #004741; background: #004741; cursor: pointer; color: #FAF8F5; font-weight: 700;">` +
+                    `<i class="fa-solid fa-wallet"></i> Switch to Owner Account in MetaMask</button>` +
                     `</div>`,
                     "danger"
                 );
                 const rBtn = document.getElementById("btnAuthFailRegistrar");
                 if (rBtn) rBtn.addEventListener("click", () => issueCertificateDirectRegistrar());
-                const sBtn = document.getElementById("btnAuthFailSwitch");
+                const sBtn = document.getElementById("btnSwitchToOwnerDuringIssue");
                 if (sBtn) sBtn.addEventListener("click", () => requestAccountSwitch());
                 setLoading(false);
                 return;
@@ -2202,7 +2360,10 @@
 
             // Stage 5: Backend Transaction Preparation
             const tTxPrepStart = Date.now();
-            if (!prepData.contractAddress || prepData.contractAddress.toLowerCase() !== config.contractAddress.toLowerCase()) {
+            const expectedTargetContract = (prepData.contractVersion === "v2" || prepData.orgId)
+                ? (config.v2ContractAddress || prepData.contractAddress)
+                : config.contractAddress;
+            if (!prepData.contractAddress || (expectedTargetContract && prepData.contractAddress.toLowerCase() !== expectedTargetContract.toLowerCase())) {
                 showMessage("Contract address mismatch between server and client configuration.", "danger");
                 setLoading(false);
                 return;
@@ -2299,22 +2460,12 @@
                 if (isInsufficientFunds && selectedNetwork === "sepolia") {
                     showMessage(
                         `<div style="font-weight: 700; margin-bottom: 4px;">` +
-                        `<i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Not enough Sepolia test ETH.` +
-                        `</div>` +
-                        `<div style="font-size: 0.85rem; margin-bottom: 10px; opacity: 0.95;">` +
-                        `You can switch to Ganache Local to issue a separate local test transaction.` +
-                        `</div>` +
-                        `<button type="button" class="network-switch-fallback-btn" id="inlineSwitchToGanacheBtn">` +
-                        `<i class="fa-solid fa-server"></i> Switch to Ganache Local` +
-                        `</button>`,
+                        `<i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i> Insufficient Sepolia Test ETH.</div>` +
+                        `<div style="font-size: 0.85rem; line-height: 1.5;">` +
+                        `The connected Platform Owner wallet has insufficient test ETH on Sepolia to cover transaction gas fees. Please fund this account via a Sepolia faucet before re-attempting, or use Direct Registrar Issuance.` +
+                        `</div>`,
                         "warning"
                     );
-                    const inlineBtn = document.getElementById("inlineSwitchToGanacheBtn");
-                    if (inlineBtn) {
-                        inlineBtn.addEventListener("click", () => {
-                            selectNetwork("ganache", false);
-                        });
-                    }
                     setLoading(false);
                     return;
                 }
@@ -2398,7 +2549,9 @@
                 ...payload,
                 network: selectedNetwork,
                 transactionHash: confirmedTxHash,
-                blockchainIssuer: signingIssuer
+                blockchainIssuer: signingIssuer,
+                orgId: currentActiveOrg ? currentActiveOrg.orgId : (prepData.orgId || null),
+                contractVersion: prepData.contractVersion || (currentActiveOrg ? "v2" : "v1")
             };
 
             const response = await fetch(primaryEndpoint, {
@@ -2535,6 +2688,10 @@
 
         if (issuanceSuccessCard) {
             issuanceSuccessCard.style.display = "block";
+            const mountPoint = document.getElementById("wsFormMountPoint");
+            if (mountPoint && issuanceSuccessCard.parentElement !== mountPoint) {
+                mountPoint.appendChild(issuanceSuccessCard);
+            }
             issuanceSuccessCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
 
@@ -2561,11 +2718,39 @@
         clearInputErrors();
         hideMessage();
 
-        const activeAdmin = getAdminSession();
+        let activeAdmin = getAdminSession();
+        const session = activeAdmin;
+        const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+        const isOrgAdminOrOwner = currentWorkspaceOrg && (
+            currentWorkspaceOrg.userRole === "owner" ||
+            currentWorkspaceOrg.role === "owner" ||
+            currentWorkspaceOrg.userRole === "admin" ||
+            currentWorkspaceOrg.role === "admin" ||
+            Boolean(currentWorkspaceOrg.isAuthorizedIssuer) ||
+            (session && (session.orgId === currentWorkspaceOrg.orgId || session.adminUserId === "admin" || (session.role === "owner" && !session.orgId)))
+        );
+        const isMetaMaskOwner = Boolean(connectedMetaMaskAccount && currentWorkspaceOrg && currentWorkspaceOrg.ownerWallet && connectedMetaMaskAccount.toLowerCase() === currentWorkspaceOrg.ownerWallet.toLowerCase());
+        const isOrgApproved = currentWorkspaceOrg && ((currentWorkspaceOrg.status || "Approved").toLowerCase() === "approved");
+        const isAdmin = Boolean(isConfiguredOwner || isOrgAdminOrOwner || isMetaMaskOwner) && isOrgApproved;
+
         if (!activeAdmin || !activeAdmin.adminUserId) {
-            showMessage("Admin authorization required. Please authenticate with your Admin USER ID & PWD.", "danger");
-            updateAdminGateUI();
-            return;
+            if (currentWorkspaceOrg && isAdmin) {
+                const defaultAdminId = (session && session.adminUserId) ? session.adminUserId : (isConfiguredOwner ? "Platform Owner" : "Organization Owner");
+                activeAdmin = {
+                    adminUserId: defaultAdminId,
+                    role: (session && session.role) || (isConfiguredOwner ? "superadmin" : "owner"),
+                    linkedEmail: (session && session.linkedEmail) || (typeof auth !== "undefined" && auth.currentUser && auth.currentUser.email) || "siddasat@gmail.com",
+                    orgId: currentWorkspaceOrg.orgId
+                };
+                setAdminSession(activeAdmin);
+            } else {
+                showMessage("Admin authorization required. Please authenticate with your Admin USER ID & PWD.", "danger");
+                const orgWorkspace = document.getElementById("orgWorkspaceSection");
+                if (!orgWorkspace || orgWorkspace.style.display === "none") {
+                    updateAdminGateUI();
+                }
+                return;
+            }
         }
 
         const studentName = (studentNameInput ? studentNameInput.value : "").trim();
@@ -2601,7 +2786,9 @@
             fieldOfCertification: resolvedCertType,
             certificateId,
             issueDate,
-            adminUserId: activeAdmin.adminUserId
+            adminUserId: activeAdmin.adminUserId,
+            orgId: currentActiveOrg ? currentActiveOrg.orgId : null,
+            contractVersion: currentActiveOrg ? "v2" : "v1"
         };
 
         setLoading(true, `Registering on ${selectedNetwork === "ganache" ? "Ganache Local" : "Ethereum Sepolia"} via Registrar node...`, true);
@@ -2705,6 +2892,2803 @@
         });
     }
 
-    console.log("[Admin] script loaded");
+    // ----------------------------------------------------------------------
+    // 7. ORGANIZATION PORTAL & TRANSACTION WALLET CONTROLLER
+    // ----------------------------------------------------------------------
+    let currentActiveOrg = null;
+    let userMemberships = [];
+
+    // DOM references for Organization Portal
+    const tabOrgPortal = document.getElementById("btnTabOrgPortal") || document.getElementById("tabOrgPortal");
+    const tabCertIssuance = document.getElementById("btnTabIssuance") || document.getElementById("tabCertIssuance");
+    const orgPortalSection = document.getElementById("orgPortalSection");
+    const btnOpenCreateOrgModal = document.getElementById("btnActionCreateOrg") || document.getElementById("btnOpenCreateOrgModal");
+    const btnOpenJoinOrgModal = document.getElementById("btnActionJoinOrg") || document.getElementById("btnOpenJoinOrgModal");
+    const superAdminSection = document.getElementById("superAdminSection");
+    const superAdminRequestsList = document.getElementById("superAdminRequestsContainer") || document.getElementById("superAdminRequestsList");
+    const myOrgsContainer = document.getElementById("myOrgsContainer");
+    const btnRefreshMyOrgs = document.getElementById("btnRefreshMyOrgs");
+
+    const activeOrgBanner = document.getElementById("activeOrgBanner");
+    const activeOrgNameDisplay = document.getElementById("activeOrgNameDisplay");
+    const btnChangeOrg = document.getElementById("btnChangeOrg");
+
+    // Dynamic header references
+    const pageHeaderTitle = document.querySelector(".admin-header .page-title") || document.querySelector(".portal-header .page-title") || document.querySelector(".page-title");
+    const pageHeaderSubtitle = document.querySelector(".admin-header .admin-subtitle") || document.querySelector(".portal-header .admin-subtitle") || document.querySelector(".admin-subtitle");
+    const pageHeaderBadgeText = document.querySelector(".admin-header .admin-badge span") || document.querySelector(".portal-header .admin-badge span");
+    const pageHeaderBadgeIcon = document.querySelector(".admin-header .admin-badge i") || document.querySelector(".portal-header .admin-badge i");
+
+    // Portal Administrator Choices DOM Elements
+    const portalAdminChoicesCard = document.getElementById("portalAdminChoicesCard");
+    const portalActiveAdminBanner = document.getElementById("portalActiveAdminBanner");
+    const portalActiveAdminUserIdDisplay = document.getElementById("portalActiveAdminUserIdDisplay");
+    const btnPortalLockAdmin = document.getElementById("btnPortalLockAdmin");
+    const btnChoiceExistingAdmin = document.getElementById("btnChoiceExistingAdmin");
+    const btnChoiceBecomeAdmin = document.getElementById("btnChoiceBecomeAdmin");
+    const portalAdminAlert = document.getElementById("portalAdminAlert");
+    const portalAdminLoginForm = document.getElementById("portalAdminLoginForm");
+    const portalAdminUserIdInput = document.getElementById("portalAdminUserId");
+    const portalAdminPasswordInput = document.getElementById("portalAdminPassword");
+    const btnSubmitPortalAdminLogin = document.getElementById("btnSubmitPortalAdminLogin");
+    const iconPortalAdminLogin = document.getElementById("iconPortalAdminLogin");
+    const textPortalAdminLogin = document.getElementById("textPortalAdminLogin");
+    const portalBecomeAdminForm = document.getElementById("portalBecomeAdminForm");
+    const portalNewAdminUserId = document.getElementById("portalNewAdminUserId");
+    const portalNewAdminEmail = document.getElementById("portalNewAdminEmail");
+    const portalNewAdminPassword = document.getElementById("portalNewAdminPassword");
+    const portalNewAdminConfirmPassword = document.getElementById("portalNewAdminConfirmPassword");
+    const btnSubmitPortalBecomeAdmin = document.getElementById("btnSubmitPortalBecomeAdmin");
+    const iconPortalBecomeAdmin = document.getElementById("iconPortalBecomeAdmin");
+    const textPortalBecomeAdmin = document.getElementById("textPortalBecomeAdmin");
+    const linkToOptionBecome = document.getElementById("linkToOptionBecome");
+    const linkToOptionExisting = document.getElementById("linkToOptionExisting");
+
+    // Create Organization Modal Elements
+    const createOrgModal = document.getElementById("createOrgModal");
+    const closeCreateOrgModal = document.getElementById("closeCreateOrgModalBtn") || document.getElementById("closeCreateOrgModal");
+    const btnCancelCreateOrg = document.getElementById("btnCancelCreateOrg");
+    const createOrgForm = document.getElementById("createOrgForm");
+    const orgNameInput = document.getElementById("createOrgName") || document.getElementById("orgNameInput");
+    const orgCapacityInput = document.getElementById("createOrgCapacity") || document.getElementById("orgCapacityInput");
+    const orgPurposeInput = document.getElementById("createOrgPurpose") || document.getElementById("orgPurposeInput");
+    const orgEntityNameInput = document.getElementById("createOrgUniversity") || document.getElementById("orgEntityNameInput");
+    const orgAccessKeyInput = document.getElementById("createOrgAccessKey") || document.getElementById("orgAccessKeyInput");
+    const orgConfirmAccessKeyInput = document.getElementById("createOrgAccessKeyConfirm") || document.getElementById("orgConfirmAccessKeyInput");
+    const createOrgRequesterWallet = document.getElementById("createOrgRequesterWallet");
+    const createOrgAlert = document.getElementById("createOrgAlert");
+    const btnSubmitCreateOrg = document.getElementById("btnSubmitCreateOrg");
+
+    // Join Organization Modal Elements
+    const joinOrgModal = document.getElementById("joinOrgModal");
+    const closeJoinOrgModal = document.getElementById("closeJoinOrgModalBtn") || document.getElementById("closeJoinOrgModal");
+    const btnCancelJoinOrg = document.getElementById("btnCancelJoinOrg");
+    const joinOrgForm = document.getElementById("joinOrgForm");
+    const joinOrgIdentifierInput = document.getElementById("joinOrgIdentifier") || document.getElementById("joinOrgIdentifierInput");
+    const joinOrgAccessKeyInput = document.getElementById("joinOrgAccessKey") || document.getElementById("joinOrgAccessKeyInput");
+    const joinOrgAlert = document.getElementById("joinOrgAlert");
+    const btnSubmitJoinOrg = document.getElementById("btnSubmitJoinOrg");
+
+    // Manage Organization Modal Elements
+    const manageOrgModal = document.getElementById("manageOrgModal");
+    const closeManageOrgModal = document.getElementById("closeManageOrgModalBtn") || document.getElementById("closeManageOrgModal");
+    const manageOrgModalTitle = document.getElementById("manageOrgModalTitle");
+    const manageOrgDetails = document.getElementById("manageOrgDetails");
+    const firstAdminSection = document.getElementById("firstAdminSetupBox") || document.getElementById("firstAdminSection");
+    const btnBecomeFirstAdmin = document.getElementById("btnBecomeFirstAdmin");
+    const btnToggleNominateAdmin = document.getElementById("btnToggleNominateAdmin");
+    const nominateAdminForm = document.getElementById("nominateAdminForm");
+    const nominateUserIdInput = document.getElementById("nominateAdminEmail") || document.getElementById("nominateUserIdInput");
+    const nominateWalletInput = document.getElementById("nominateAdminWallet");
+    const addAdminSection = document.getElementById("addAdminSection");
+    const addAdminForm = document.getElementById("addAdminForm");
+    const addAdminUserIdInput = document.getElementById("newAdminEmail") || document.getElementById("addAdminUserIdInput");
+    const addAdminWalletInput = document.getElementById("newAdminWallet") || document.getElementById("addAdminWalletInput");
+    const btnAddAdminSubmit = document.getElementById("btnAddAdminSubmit");
+    const pendingJoinRequestsList = document.getElementById("manageRequestsListContainer") || document.getElementById("pendingJoinRequestsList");
+    const manageAdminsListContainer = document.getElementById("manageAdminsListContainer");
+    const tabManageAdmins = document.getElementById("tabManageAdmins");
+    const tabManageRequests = document.getElementById("tabManageRequests");
+    const panelManageAdmins = document.getElementById("panelManageAdmins");
+    const panelManageRequests = document.getElementById("panelManageRequests");
+
+    // Helper: Authenticated user token getter
+    async function getAuthToken() {
+        if (typeof firebase !== "undefined" && firebase.auth) {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                try {
+                    return await user.getIdToken();
+                } catch (e) {
+                    console.warn("[AuthToken] Error getting id token:", e);
+                }
+            }
+        }
+        const session = getAdminSession();
+        if (session && session.adminUserId) {
+            return `test-token-${session.adminUserId}`;
+        }
+        const adminStoredToken = localStorage.getItem("admin_token");
+        if (adminStoredToken) {
+            return adminStoredToken;
+        }
+        if (connectedMetaMaskAccount) {
+            return `test-token-${connectedMetaMaskAccount.slice(2, 12)}`;
+        }
+        return `test-token-org-user`;
+    }
+
+    // Portal Tab Switcher
+    function switchTab(tabId) {
+        if (currentWorkspaceOrg) {
+            // If user is inside an organization workspace, route within the workspace
+            if (tabId === "tabCertIssuance") {
+                switchWorkspaceTab("issue");
+            } else {
+                switchWorkspaceTab("members");
+            }
+            return;
+        }
+
+        if (tabId === "tabCertIssuance") {
+            // Check if user has an active organization saved in session
+            try {
+                const saved = sessionStorage.getItem("vr_active_org");
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.orgId) {
+                        openOrganizationWorkspace(parsed, "issue");
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            // Otherwise, keep user in the Organization Portal and prompt them to enter an organization
+            if (orgPortalSection) orgPortalSection.style.display = "block";
+            const adminHeader = document.getElementById("portalMainHeader") || document.querySelector(".admin-header");
+            if (adminHeader) adminHeader.style.display = "block";
+            if (adminGateCard) adminGateCard.style.display = "none";
+            if (adminFormCard) adminFormCard.style.display = "none";
+            loadPortalData();
+            showMessage("Please select or enter an organization from your memberships to issue credentials.", "info");
+            return;
+        }
+
+        // Default: Organization Portal tab
+        if (tabOrgPortal) {
+            tabOrgPortal.classList.add("active");
+            tabOrgPortal.setAttribute("aria-selected", "true");
+        }
+        if (tabCertIssuance) {
+            tabCertIssuance.classList.remove("active");
+            tabCertIssuance.setAttribute("aria-selected", "false");
+        }
+        if (orgPortalSection) orgPortalSection.style.display = "block";
+
+        const adminHeader = document.getElementById("portalMainHeader") || document.querySelector(".admin-header");
+        if (adminHeader) adminHeader.style.display = "block";
+
+        // Update page header for Organization Portal
+        if (pageHeaderBadgeIcon) pageHeaderBadgeIcon.className = "fa-solid fa-building-columns";
+        if (pageHeaderBadgeText) pageHeaderBadgeText.textContent = "Institutional Repository • Organization Management Portal";
+        if (pageHeaderTitle) pageHeaderTitle.innerHTML = "Institutional <span>Organizations</span>";
+        if (pageHeaderSubtitle) pageHeaderSubtitle.textContent = "Register a new institution on the blockchain, manage membership keys, or join existing approved organizations.";
+
+        // CRITICAL: NEVER show the admin terminal gate or standalone issuance form on the Organization Portal tab!
+        if (adminGateCard) adminGateCard.style.display = "none";
+        if (adminFormCard) adminFormCard.style.display = "none";
+
+        loadPortalData();
+    }
+
+    // ----------------------------------------------------------------------
+    // THE TWO ADMIN CHOICES CONTROLLER (ORGANIZATION DASHBOARD ONLY)
+    // ----------------------------------------------------------------------
+    function showPortalAdminAlert(msg, type = "error") {
+        if (!portalAdminAlert) return;
+        portalAdminAlert.className = `admin-gate-alert ${type}`;
+        const icon = type === "success" ? "fa-circle-check" : (type === "warning" ? "fa-triangle-exclamation" : "fa-circle-exclamation");
+        portalAdminAlert.innerHTML = `<i class="fa-solid ${icon}" style="margin-top: 2px; flex-shrink: 0;"></i><span>${msg}</span>`;
+        portalAdminAlert.style.display = "flex";
+    }
+
+    function hidePortalAdminAlert() {
+        if (!portalAdminAlert) return;
+        portalAdminAlert.style.display = "none";
+        portalAdminAlert.innerHTML = "";
+    }
+
+    function updatePortalAdminSessionBanner() {
+        const session = getAdminSession();
+        if (currentWorkspaceOrg) {
+            const isLocked = sessionStorage.getItem("vr_session_locked") === "true";
+            if (isLocked) {
+                if (portalActiveAdminBanner) portalActiveAdminBanner.style.display = "none";
+                if (portalAdminChoicesCard) portalAdminChoicesCard.style.display = "block";
+                return;
+            }
+
+            if (session && session.adminUserId) {
+                if (portalActiveAdminBanner) portalActiveAdminBanner.style.display = "flex";
+                if (portalAdminChoicesCard) portalAdminChoicesCard.style.display = "none";
+                if (portalActiveAdminUserIdDisplay) {
+                    portalActiveAdminUserIdDisplay.textContent = session.adminUserId;
+                }
+                const activeRoleText = document.getElementById("portalActiveRoleText");
+                if (activeRoleText) {
+                    activeRoleText.textContent = session.role === "admin" ? "Institutional Administrator" : "Organization Owner";
+                }
+                return;
+            }
+
+            const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+            const isOwner = Boolean(
+                isConfiguredOwner ||
+                currentWorkspaceOrg.userRole === "owner" ||
+                currentWorkspaceOrg.role === "owner" ||
+                (connectedMetaMaskAccount && currentWorkspaceOrg.ownerWallet && connectedMetaMaskAccount.toLowerCase() === currentWorkspaceOrg.ownerWallet.toLowerCase()) ||
+                (session && session.role === "owner" && (session.orgId === currentWorkspaceOrg.orgId || session.adminUserId === "admin"))
+            );
+            const isOrgAdmin = Boolean(
+                isOwner ||
+                currentWorkspaceOrg.userRole === "admin" ||
+                currentWorkspaceOrg.role === "admin" ||
+                Boolean(currentWorkspaceOrg.isAuthorizedIssuer) ||
+                (session && session.orgId === currentWorkspaceOrg.orgId)
+            );
+
+            if (isOrgAdmin) {
+                if (portalActiveAdminBanner) portalActiveAdminBanner.style.display = "flex";
+                if (portalAdminChoicesCard) portalAdminChoicesCard.style.display = "none";
+                if (portalActiveAdminUserIdDisplay) {
+                    portalActiveAdminUserIdDisplay.textContent = isOwner ? "Organization Owner" : "Institutional Administrator";
+                }
+                const activeRoleText = document.getElementById("portalActiveRoleText");
+                if (activeRoleText) {
+                    activeRoleText.textContent = isOwner ? "Verified Organization Owner & Administrator" : "Institutional Administrator";
+                }
+            } else {
+                if (portalActiveAdminBanner) portalActiveAdminBanner.style.display = "none";
+                if (portalAdminChoicesCard) portalAdminChoicesCard.style.display = "block";
+            }
+        } else {
+            if (portalActiveAdminBanner) portalActiveAdminBanner.style.display = "none";
+            if (portalAdminChoicesCard) portalAdminChoicesCard.style.display = "none";
+        }
+    }
+
+    let isPortalAdminChoicesInit = false;
+    function initPortalAdminChoices() {
+        updatePortalAdminSessionBanner();
+        if (isPortalAdminChoicesInit) return;
+        isPortalAdminChoicesInit = true;
+
+        // Switch to Option B (Existing Admin)
+        function switchToExistingAdmin() {
+            hidePortalAdminAlert();
+            if (btnChoiceExistingAdmin) {
+                btnChoiceExistingAdmin.classList.add("active");
+                btnChoiceExistingAdmin.setAttribute("aria-selected", "true");
+                btnChoiceExistingAdmin.style.background = "#004741";
+                btnChoiceExistingAdmin.style.color = "#FAF8F5";
+                btnChoiceExistingAdmin.style.border = "1.5px solid #004741";
+            }
+            if (btnChoiceBecomeAdmin) {
+                btnChoiceBecomeAdmin.classList.remove("active");
+                btnChoiceBecomeAdmin.setAttribute("aria-selected", "false");
+                btnChoiceBecomeAdmin.style.background = "#FAF8F5";
+                btnChoiceBecomeAdmin.style.color = "#004741";
+                btnChoiceBecomeAdmin.style.border = "1.5px solid rgba(0, 71, 65, 0.25)";
+            }
+            if (portalAdminLoginForm) portalAdminLoginForm.style.display = "block";
+            if (portalBecomeAdminForm) portalBecomeAdminForm.style.display = "none";
+            if (portalAdminUserIdInput) portalAdminUserIdInput.focus();
+        }
+
+        // Switch to Option A (Become an Admin)
+        function switchToBecomeAdmin() {
+            hidePortalAdminAlert();
+            if (btnChoiceBecomeAdmin) {
+                btnChoiceBecomeAdmin.classList.add("active");
+                btnChoiceBecomeAdmin.setAttribute("aria-selected", "true");
+                btnChoiceBecomeAdmin.style.background = "#004741";
+                btnChoiceBecomeAdmin.style.color = "#FAF8F5";
+                btnChoiceBecomeAdmin.style.border = "1.5px solid #004741";
+            }
+            if (btnChoiceExistingAdmin) {
+                btnChoiceExistingAdmin.classList.remove("active");
+                btnChoiceExistingAdmin.setAttribute("aria-selected", "false");
+                btnChoiceExistingAdmin.style.background = "#FAF8F5";
+                btnChoiceExistingAdmin.style.color = "#004741";
+                btnChoiceExistingAdmin.style.border = "1.5px solid rgba(0, 71, 65, 0.25)";
+            }
+            if (portalAdminLoginForm) portalAdminLoginForm.style.display = "none";
+            if (portalBecomeAdminForm) portalBecomeAdminForm.style.display = "block";
+            if (portalNewAdminUserId) portalNewAdminUserId.focus();
+        }
+
+        if (btnChoiceExistingAdmin) btnChoiceExistingAdmin.addEventListener("click", switchToExistingAdmin);
+        if (btnChoiceBecomeAdmin) btnChoiceBecomeAdmin.addEventListener("click", switchToBecomeAdmin);
+        if (linkToOptionBecome) linkToOptionBecome.addEventListener("click", (e) => { e.preventDefault(); switchToBecomeAdmin(); });
+        if (linkToOptionExisting) linkToOptionExisting.addEventListener("click", (e) => { e.preventDefault(); switchToExistingAdmin(); });
+
+        // Lock button handler
+        function handleAdminLock(e) {
+            if (e) e.preventDefault();
+            clearAdminSession();
+            sessionStorage.removeItem("admin_token");
+            localStorage.removeItem("admin_token");
+            sessionStorage.setItem("vr_session_locked", "true");
+            if (currentWorkspaceOrg) {
+                currentWorkspaceOrg.userRole = "member";
+                currentWorkspaceOrg.isAuthorizedIssuer = false;
+            }
+            updatePortalAdminSessionBanner();
+            const reqCard = document.getElementById("wsAdminRequestsCard");
+            if (reqCard) reqCard.style.display = "none";
+            showPortalAdminAlert("Administrator session locked. Please sign in or submit a request to administer this organization.", "warning");
+            updateWorkspaceIssueView();
+            // Switch to members tab to show admin choices card
+            switchWorkspaceTab("members");
+        }
+
+        // Lock button on active admin banner
+        if (btnPortalLockAdmin) {
+            btnPortalLockAdmin.addEventListener("click", handleAdminLock);
+        }
+
+        // Lock button in Terminal Header
+        const wsLockAdminBtn = document.getElementById("wsLockAdminBtn");
+        if (wsLockAdminBtn) {
+            wsLockAdminBtn.addEventListener("click", handleAdminLock);
+        }
+
+        // Option B: Existing Admin Login Form Handler
+        if (portalAdminLoginForm) {
+            portalAdminLoginForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                hidePortalAdminAlert();
+
+                const userId = (portalAdminUserIdInput ? portalAdminUserIdInput.value : "").trim();
+                const pwd = portalAdminPasswordInput ? portalAdminPasswordInput.value : "";
+
+                if (!userId || !pwd) {
+                    showPortalAdminAlert("Please enter both Admin USER ID and Password.", "error");
+                    return;
+                }
+
+                if (btnSubmitPortalAdminLogin) {
+                    btnSubmitPortalAdminLogin.disabled = true;
+                    if (iconPortalAdminLogin) iconPortalAdminLogin.className = "fa-solid fa-circle-notch fa-spin";
+                    if (textPortalAdminLogin) textPortalAdminLogin.textContent = "Authenticating...";
+                }
+
+                try {
+                    const orgEndpoint = currentWorkspaceOrg
+                        ? `/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admin-login`
+                        : `/api/admin/login`;
+
+                    const res = await fetch(orgEndpoint, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ adminUserId: userId, userId, password: pwd })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok || !data.success) {
+                        showPortalAdminAlert(data.message || "Invalid Admin USER ID or Password.", "error");
+                        return;
+                    }
+
+                    setAdminSession(data.admin);
+                    sessionStorage.removeItem("vr_session_locked");
+                    if (data.token) {
+                        sessionStorage.setItem("admin_token", data.token);
+                        localStorage.setItem("admin_token", data.token);
+                    }
+
+                    if (currentWorkspaceOrg) {
+                        currentWorkspaceOrg.userRole = data.admin.role || "admin";
+                        currentWorkspaceOrg.isAuthorizedIssuer = true;
+                        updatePortalAdminSessionBanner();
+                        showPortalAdminAlert(`Authenticated as administrator "${escapeHtml(data.admin.adminUserId || userId)}" for ${escapeHtml(currentWorkspaceOrg.name)}! Permissions unlocked.`, "success");
+                        const reqCard = document.getElementById("wsAdminRequestsCard");
+                        if (reqCard) reqCard.style.display = "block";
+                        if (typeof loadWorkspaceAdminRequests === "function") {
+                            loadWorkspaceAdminRequests(currentWorkspaceOrg.orgId);
+                        }
+                        updateWorkspaceIssueView();
+                    } else {
+                        updatePortalAdminSessionBanner();
+                        showPortalAdminAlert(`Authenticated as administrator "${escapeHtml(data.admin.adminUserId || userId)}"! Permissions unlocked.`, "success");
+                        loadPortalData();
+                    }
+
+                    if (portalAdminPasswordInput) portalAdminPasswordInput.value = "";
+                } catch (err) {
+                    console.error("[Portal Admin Login Error]", err);
+                    showPortalAdminAlert("Network error while verifying administrator credentials.", "error");
+                } finally {
+                    if (btnSubmitPortalAdminLogin) {
+                        btnSubmitPortalAdminLogin.disabled = false;
+                        if (iconPortalAdminLogin) iconPortalAdminLogin.className = "fa-solid fa-unlock-keyhole";
+                        if (textPortalAdminLogin) textPortalAdminLogin.textContent = "Sign In as Admin";
+                    }
+                }
+            });
+        }
+
+        // Option A: Become an Admin Registration Handler
+        if (portalBecomeAdminForm) {
+            portalBecomeAdminForm.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                hidePortalAdminAlert();
+
+                const userId = (portalNewAdminUserId ? portalNewAdminUserId.value : "").trim();
+                const email = (portalNewAdminEmail ? portalNewAdminEmail.value : "").trim();
+                const pwd = portalNewAdminPassword ? portalNewAdminPassword.value : "";
+                const confirm = portalNewAdminConfirmPassword ? portalNewAdminConfirmPassword.value : "";
+
+                if (!userId || !email || !pwd || !confirm) {
+                    showPortalAdminAlert("Please fill in all administrator registration fields.", "error");
+                    return;
+                }
+                if (userId.length < 3) {
+                    showPortalAdminAlert("Admin USER ID must be at least 3 characters.", "error");
+                    return;
+                }
+                if (pwd.length < 6) {
+                    showPortalAdminAlert("Admin Password must be at least 6 characters.", "error");
+                    return;
+                }
+                if (pwd !== confirm) {
+                    showPortalAdminAlert("Passwords do not match.", "error");
+                    return;
+                }
+
+                if (btnSubmitPortalBecomeAdmin) {
+                    btnSubmitPortalBecomeAdmin.disabled = true;
+                    if (iconPortalBecomeAdmin) iconPortalBecomeAdmin.className = "fa-solid fa-circle-notch fa-spin";
+                    if (textPortalBecomeAdmin) textPortalBecomeAdmin.textContent = "Submitting Request...";
+                }
+
+                try {
+                    const effectiveWallet = connectedMetaMaskAccount || getConfiguredOwnerForNetwork(selectedNetwork);
+                    if (currentWorkspaceOrg) {
+                        const res = await fetch(`/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admin-request`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                adminUserId: userId,
+                                institutionalEmail: email,
+                                password: pwd,
+                                walletAddress: effectiveWallet
+                            })
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok || !data.success) {
+                            showPortalAdminAlert(data.message || "Administrator request failed.", "error");
+                            return;
+                        }
+
+                        showPortalAdminAlert(data.message || `Administrator access request submitted for "${escapeHtml(currentWorkspaceOrg.name)}". Status: Pending approval by organization owner.`, "success");
+                        if (portalNewAdminPassword) portalNewAdminPassword.value = "";
+                        if (portalNewAdminConfirmPassword) portalNewAdminConfirmPassword.value = "";
+                    } else {
+                        const res = await fetch("/api/admin/register", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                adminUserId: userId,
+                                password: pwd,
+                                linkedEmail: email,
+                                adminAddress: effectiveWallet,
+                                isExistingOnChainAdmin: false
+                            })
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok || !data.success) {
+                            showPortalAdminAlert(data.message || "Administrator registration failed.", "error");
+                            return;
+                        }
+
+                        showPortalAdminAlert(`Admin account "${escapeHtml(userId)}" created!`, "success");
+                        if (portalNewAdminPassword) portalNewAdminPassword.value = "";
+                        if (portalNewAdminConfirmPassword) portalNewAdminConfirmPassword.value = "";
+                    }
+                } catch (err) {
+                    console.error("[Portal Become Admin Error]", err);
+                    showPortalAdminAlert("Network error while submitting administrator registration.", "error");
+                } finally {
+                    if (btnSubmitPortalBecomeAdmin) {
+                        btnSubmitPortalBecomeAdmin.disabled = false;
+                        if (iconPortalBecomeAdmin) iconPortalBecomeAdmin.className = "fa-solid fa-paper-plane";
+                        if (textPortalBecomeAdmin) textPortalBecomeAdmin.textContent = "Submit Administrator Request";
+                    }
+                }
+            });
+        }
+    }
+
+    // Load Organization Portal Data
+    async function loadPortalData() {
+        if (!myOrgsContainer) return;
+
+        myOrgsContainer.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #666;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 28px; color: #004741; margin-bottom: 12px;"></i>
+                <div>Loading your organization memberships and status...</div>
+            </div>
+        `;
+
+        const token = await getAuthToken();
+        const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+
+        try {
+            // Determine active MetaMask wallet
+            let walletParam = connectedMetaMaskAccount || "";
+            if (!walletParam && typeof window.ethereum !== "undefined") {
+                try {
+                    const accs = await window.ethereum.request({ method: "eth_accounts" });
+                    if (accs && accs.length > 0) {
+                        walletParam = accs[0];
+                        connectedMetaMaskAccount = walletParam;
+                    }
+                } catch (e) {}
+            }
+
+            const queryParams = new URLSearchParams({
+                network: selectedNetwork || "sepolia"
+            });
+            if (walletParam) queryParams.set("wallet", walletParam);
+
+            // 1. Fetch user's organization memberships on-chain
+            const portalRes = await fetch(`/api/organization/my-portal?${queryParams.toString()}`, { headers });
+            const portalData = await portalRes.json().catch(() => ({}));
+
+            if (!portalRes.ok || !portalData.success) {
+                myOrgsContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; background: #fff; border: 1px solid #e2ddd5; border-radius: 12px; padding: 32px; text-align: center;">
+                        <i class="fa-solid fa-id-badge" style="font-size: 32px; color: #004741; margin-bottom: 12px;"></i>
+                        <h4 style="font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #111; margin-bottom: 8px;">Authentication Required</h4>
+                        <p style="font-size: 0.9rem; color: #666; max-width: 480px; margin: 0 auto 16px;">
+                            Sign in with your verified account or unlock with your Admin credentials to access your organizations.
+                        </p>
+                        <a href="login.html" class="admin-primary-btn" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Account
+                        </a>
+                    </div>
+                `;
+            } else {
+                const yourOrgs = portalData.yourOrganizations || [];
+                const regularMemberships = portalData.memberships || [];
+                userMemberships = [...yourOrgs, ...regularMemberships];
+                renderPortalOrganizations(yourOrgs, regularMemberships);
+            }
+
+            // 2. Fetch pending requests for Platform Super Admin
+            await checkAndRenderSuperAdminQueue(headers);
+
+        } catch (err) {
+            console.error("[Portal Load Error]", err);
+            const errHtml = `
+                <div style="grid-column: 1 / -1; padding: 24px; background: #fff; border: 1px solid #fee2e2; border-radius: 10px; color: #991b1b;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Error loading portal data: ${escapeHtml(err.message)}
+                </div>
+            `;
+            const yEl = document.getElementById("yourOrgsContainer");
+            const mEl = document.getElementById("membershipsContainer");
+            if (yEl) yEl.innerHTML = errHtml;
+            if (mEl) mEl.innerHTML = errHtml;
+            if (myOrgsContainer) myOrgsContainer.innerHTML = errHtml;
+        }
+    }
+
+    // Helper to generate a single organization card
+    function generateOrgCardHtml(m, sectionType) {
+        const org = m.organization || m;
+        if (!org || (!org.name && !org.orgName && !org.orgId)) return "";
+
+        const orgName = org.name || org.orgName || "Institution";
+        const orgEntity = org.universityOrCompany || "Institutional Authority";
+        const orgId = org.orgId || "—";
+        const rawRole = (m.userRole || m.role || org.userRole || (sectionType === "your" ? "owner" : "member")).toLowerCase();
+
+        // Simple readable text for role as required
+        let roleDisplay = "Member";
+        let roleColor = "#4A635E";
+        if (rawRole === "owner") {
+            roleDisplay = "Owner";
+            roleColor = "#004741";
+        } else if (rawRole === "admin") {
+            roleDisplay = "Admin";
+            roleColor = "#1A73E8";
+        } else if (rawRole === "guest" || rawRole === "none") {
+            roleDisplay = "Discoverable";
+            roleColor = "#7A918C";
+        }
+
+        const orgStatus = (org.status || m.status || org.orgStatus || "Approved").trim();
+        const isApproved = orgStatus.toLowerCase() === "approved";
+        const isPending = orgStatus.toLowerCase().includes("pending");
+
+        const statusBadge = isApproved
+            ? `<span class="badge-status-active"><i class="fa-solid fa-circle-check"></i> Approved & Active</span>`
+            : (isPending
+                ? `<span class="badge-status-pending" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;"><i class="fa-solid fa-clock"></i> Pending Owner Approval</span>`
+                : `<span class="badge-role" style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;"><i class="fa-solid fa-ban"></i> Rejected</span>`
+            );
+
+        let actionButtonHtml = "";
+        if (!isApproved) {
+            actionButtonHtml = `
+                <button type="button" class="btn-org-action secondary" disabled style="width: 100%; height: 40px; font-size: 13px; opacity: 0.6; cursor: not-allowed;" title="Pending Platform Super Admin / Owner approval on blockchain">
+                    <i class="fa-solid fa-lock"></i> ${isPending ? 'Pending Approval' : 'Access Denied'}
+                </button>
+            `;
+        } else if (rawRole === "guest" || rawRole === "none") {
+            actionButtonHtml = `
+                <div style="display: flex; gap: 8px; width: 100%;">
+                    <button type="button" class="btn-org-action secondary btn-quick-join-org" style="flex: 1; height: 40px; font-size: 13px;" data-orgid="${escapeHtml(orgId)}" data-name="${escapeHtml(orgName)}">
+                        <i class="fa-solid fa-key"></i> Join with Key
+                    </button>
+                    <button type="button" class="btn-org-action primary btn-enter-org-workspace" style="flex: 1; height: 40px; font-size: 13px;" data-orgid="${escapeHtml(orgId)}">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Enter Dashboard
+                    </button>
+                </div>
+            `;
+        } else {
+            actionButtonHtml = `
+                <button type="button" class="btn-org-action primary btn-enter-org-workspace" style="width: 100%; height: 40px; font-size: 13px;" data-orgid="${escapeHtml(orgId)}">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Enter Organization Dashboard
+                </button>
+            `;
+        }
+
+        return `
+            <div class="my-org-card" style="border-radius: 8px; padding: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 12px;">
+                    <div style="min-width: 0; flex: 1;">
+                        <h4 style="font-family: 'DM Serif Display', serif; font-size: 1.25rem; color: #004741; margin: 0 0 4px; word-break: break-word;">${escapeHtml(orgName)}</h4>
+                        <div style="font-size: 0.85rem; color: #5F736F; font-weight: 500;">${escapeHtml(orgEntity)} &bull; <span style="color: #004741;"><i class="fa-solid fa-building-columns"></i> Institutional Registry</span></div>
+                    </div>
+                    <div style="flex-shrink: 0; white-space: nowrap;">${statusBadge}</div>
+                </div>
+
+                <p style="font-size: 0.86rem; color: #4A635E; line-height: 1.5; margin-bottom: 14px;">
+                    ${escapeHtml(org.purpose || "Academic / Institutional credential issuance")}
+                </p>
+
+                <div style="background: #FAF8F5; border: 1px solid #EDE8E0; border-radius: 6px; padding: 12px 14px; margin-bottom: 18px; font-size: 0.82rem; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #666;">Your Role:</span>
+                        <span style="font-weight: 700; color: ${roleColor};">${roleDisplay}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #666;">Capacity:</span>
+                        <span style="font-weight: 600; color: #222;">${org.currentMemberCount || org.memberCount || 1} / ${org.capacity || 50} members</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #666;">Network:</span>
+                        <span style="font-weight: 600; color: #004741;">${org.blockchainNetwork === 'ganache' ? 'Ganache Local' : 'Ethereum Sepolia'}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: auto;">
+                    ${actionButtonHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    // Render both "Your Organizations" and "Memberships" sections cleanly
+    function renderPortalOrganizations(yourOrgs, memberships) {
+        const yourContainer = document.getElementById("yourOrgsContainer");
+        const memContainer = document.getElementById("membershipsContainer");
+
+        const allItems = [...(yourOrgs || []), ...(memberships || [])];
+
+        // 1. Render Your Organizations
+        if (yourContainer) {
+            if (!yourOrgs || yourOrgs.length === 0) {
+                yourContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; background: #fff; border: 1px dashed #dcd7ce; border-radius: 8px; padding: 32px 20px; text-align: center;">
+                        <div style="font-size: 1.05rem; font-weight: 700; color: #004741; margin-bottom: 4px;">No Organizations Owned or Administered</div>
+                        <p style="font-size: 0.88rem; color: #5F736F; margin: 0 auto; max-width: 440px;">You do not currently own or administer an organization. Use Create Organization above to register a new institution.</p>
+                    </div>
+                `;
+            } else {
+                let yHtml = "";
+                yourOrgs.forEach(m => { yHtml += generateOrgCardHtml(m, "your"); });
+                yourContainer.innerHTML = yHtml;
+            }
+        }
+
+        // 2. Render Memberships
+        if (memContainer) {
+            if (!memberships || memberships.length === 0) {
+                memContainer.innerHTML = `
+                    <div style="grid-column: 1 / -1; background: #fff; border: 1px dashed #dcd7ce; border-radius: 8px; padding: 32px 20px; text-align: center;">
+                        <div style="font-size: 1.05rem; font-weight: 700; color: #004741; margin-bottom: 4px;">No Institutional Memberships Found</div>
+                        <p style="font-size: 0.88rem; color: #5F736F; margin: 0 auto; max-width: 440px;">You have not joined an organization as a member. Use Join Organization with an access key to enter an approved institution.</p>
+                    </div>
+                `;
+            } else {
+                let mHtml = "";
+                memberships.forEach(m => { mHtml += generateOrgCardHtml(m, "membership"); });
+                memContainer.innerHTML = mHtml;
+            }
+        }
+
+        // 3. Fallback for myOrgsContainer
+        if (myOrgsContainer) {
+            let allHtml = "";
+            allItems.forEach(m => { allHtml += generateOrgCardHtml(m, "all"); });
+            myOrgsContainer.innerHTML = allHtml;
+        }
+
+        // Attach action listeners
+        document.querySelectorAll(".btn-enter-org-workspace").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const oid = btn.dataset.orgid;
+                const found = allItems.find(m => {
+                    const o = m.organization || m;
+                    return o && (o.orgId === oid || o.id === oid);
+                });
+                const org = found ? (found.organization || found) : null;
+                if (org) {
+                    const st = (org.status || found.status || "Approved").toLowerCase();
+                    if (st !== "approved") {
+                        alert("This organization is currently pending approval or rejected. It cannot be accessed until approved on-chain.");
+                        return;
+                    }
+                    openOrganizationWorkspace(org, "overview");
+                }
+            });
+        });
+
+        document.querySelectorAll(".btn-quick-join-org").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const oid = btn.dataset.orgid;
+                openJoinOrgModal();
+                if (joinOrgIdentifierInput) joinOrgIdentifierInput.value = oid;
+                if (joinOrgAccessKeyInput) joinOrgAccessKeyInput.focus();
+            });
+        });
+    }
+
+    // Render User Organizations (wrapper for backward compatibility)
+    function renderMyOrganizations(memberships) {
+        if (!memberships || memberships.length === 0) {
+            renderPortalOrganizations([], []);
+            return;
+        }
+        const your = memberships.filter(m => {
+            const r = (m.userRole || m.role || "").toLowerCase();
+            return r === "owner" || r === "admin";
+        });
+        const regular = memberships.filter(m => {
+            const r = (m.userRole || m.role || "").toLowerCase();
+            return r !== "owner" && r !== "admin";
+        });
+        renderPortalOrganizations(your, regular);
+    }
+
+    // ========================================================
+    // ORGANIZATION WORKSPACE CONTROLLER (INSIDE ORGANIZATION)
+    // ========================================================
+    let currentWorkspaceOrg = null;
+
+    async function openOrganizationWorkspace(org, targetTab = "members") {
+        if (!org) return;
+        const st = (org.status || "Approved").toLowerCase();
+        if (st !== "approved") {
+            alert("This organization is currently pending approval or rejected. It cannot be entered until approved on-chain.");
+            return;
+        }
+        currentWorkspaceOrg = org;
+
+        const orgPortal = document.getElementById("orgPortalSection");
+        const orgWorkspace = document.getElementById("orgWorkspaceSection");
+        const gateCard = document.getElementById("adminGateCard");
+        const adminHeader = document.getElementById("portalMainHeader") || document.querySelector(".admin-header");
+
+        if (orgPortal) orgPortal.style.display = "none";
+        if (gateCard) gateCard.style.display = "none";
+        if (adminHeader) adminHeader.style.display = "none";
+        if (orgWorkspace) orgWorkspace.style.display = "block";
+
+        // Update Header
+        const nameEl = document.getElementById("workspaceOrgName");
+        const entityEl = document.getElementById("workspaceOrgEntity");
+        const idEl = document.getElementById("workspaceOrgId");
+        const purposeEl = document.getElementById("workspaceOrgPurpose");
+        const roleBadgeEl = document.getElementById("workspaceUserRoleBadge");
+        const statusBadgeEl = document.getElementById("workspaceOrgStatusBadge");
+        const memCountEl = document.getElementById("workspaceMembersCount");
+        const capEl = document.getElementById("workspaceCapacity");
+        const netTextEl = document.getElementById("workspaceNetworkText");
+
+        const orgName = org.name || org.orgName || "Organization Workspace";
+        const orgEntity = org.universityOrCompany || "Institutional Entity";
+
+        if (nameEl) nameEl.textContent = orgName;
+        if (entityEl) entityEl.textContent = orgEntity;
+        if (idEl) idEl.style.display = "none";
+        if (purposeEl) purposeEl.textContent = org.purpose || "Academic Credential Registry & Verification";
+
+        // Update all contextual organization name placeholders inside workspace
+        document.querySelectorAll(".ws-target-org-name").forEach(el => {
+            el.textContent = orgName;
+        });
+
+        // Populate Overview Tab elements
+        const ovEntity = document.getElementById("wsOverviewEntity");
+        const ovPurpose = document.getElementById("wsOverviewPurpose");
+        const ovNet = document.getElementById("wsOverviewNetwork");
+        const ovContract = document.getElementById("wsOverviewContract");
+        const ovMem = document.getElementById("wsOverviewMembers");
+        const ovCap = document.getElementById("wsOverviewCapacity");
+        if (ovEntity) ovEntity.textContent = orgEntity;
+        if (ovPurpose) ovPurpose.textContent = org.purpose || "Academic Credential Registry & Verification";
+        if (ovNet) ovNet.textContent = org.blockchainNetwork === "ganache" ? "Ganache Local" : "Ethereum Sepolia";
+        if (ovContract) ovContract.textContent = org.contractAddress || "—";
+        if (ovMem) ovMem.textContent = org.currentMemberCount || org.membersCount || "1";
+        if (ovCap) ovCap.textContent = org.capacity || "50";
+
+        // Wire up Overview quick action buttons
+        const btnGoIssue = document.getElementById("btnOverviewGoIssue");
+        const btnGoMem = document.getElementById("btnOverviewGoMembers");
+        const btnGoCerts = document.getElementById("btnOverviewGoCerts");
+        if (btnGoIssue) btnGoIssue.onclick = () => switchWorkspaceTab("issue");
+        if (btnGoMem) btnGoMem.onclick = () => switchWorkspaceTab("members");
+        if (btnGoCerts) btnGoCerts.onclick = () => switchWorkspaceTab("certs");
+
+        const session = getAdminSession();
+        const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+        
+        // 1. Authoritative Owner check
+        const isOwner = Boolean(
+            org.userRole === "owner" ||
+            org.role === "owner" ||
+            (org.ownerUserId && typeof auth !== "undefined" && auth.currentUser && org.ownerUserId === auth.currentUser.uid) ||
+            (connectedMetaMaskAccount && org.ownerWallet && connectedMetaMaskAccount.toLowerCase() === org.ownerWallet.toLowerCase()) ||
+            isConfiguredOwner
+        );
+
+        // 2. Authoritative Admin check
+        let isAdmin = isOwner;
+        if (!isAdmin) {
+            if (session && session.adminUserId && (session.orgId === org.orgId || session.adminUserId === "admin")) {
+                isAdmin = true;
+            } else if (org.userRole === "admin" || org.role === "admin" || Boolean(org.isAuthorizedIssuer)) {
+                isAdmin = true;
+            }
+        }
+
+        // 3. For Organization Owner: directly initialize session without requiring Admin password!
+        if (isOwner) {
+            const ownerId = (typeof auth !== "undefined" && auth.currentUser && (auth.currentUser.displayName || (auth.currentUser.email ? auth.currentUser.email.split("@")[0] : null))) || "Organization Owner";
+            const ownerEmail = (typeof auth !== "undefined" && auth.currentUser && auth.currentUser.email) || "owner@institution.edu";
+            setAdminSession({
+                adminUserId: ownerId,
+                role: "owner",
+                linkedEmail: ownerEmail,
+                orgId: org.orgId
+            });
+            sessionStorage.removeItem("vr_session_locked");
+        }
+
+        const roleName = isOwner ? "Organization Owner" : (isAdmin ? "Institutional Administrator" : "Organization Member");
+
+        if (roleBadgeEl) {
+            roleBadgeEl.textContent = roleName;
+            if (isOwner) {
+                roleBadgeEl.style.background = "#E6F4EA";
+                roleBadgeEl.style.color = "#004741";
+                roleBadgeEl.style.border = "1px solid #A8DAB5";
+            } else if (isAdmin) {
+                roleBadgeEl.style.background = "#E8F0FE";
+                roleBadgeEl.style.color = "#1A73E8";
+                roleBadgeEl.style.border = "1px solid #C2D7FA";
+            } else {
+                roleBadgeEl.style.background = "#F1EFEA";
+                roleBadgeEl.style.color = "#4A635E";
+                roleBadgeEl.style.border = "1px solid #E0DDD6";
+            }
+        }
+
+        if (statusBadgeEl) {
+            statusBadgeEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Approved & Active`;
+        }
+
+        if (memCountEl) memCountEl.textContent = org.currentMemberCount || org.membersCount || "1";
+        if (capEl) capEl.textContent = org.capacity || "50";
+        if (netTextEl) netTextEl.textContent = org.blockchainNetwork === "ganache" ? "Ganache Local" : "Ethereum Sepolia";
+
+        // Admin Choices Card and Active Admin Banner inside this organization
+        const banner = document.getElementById("portalActiveAdminBanner");
+        const choicesCard = document.getElementById("portalAdminChoicesCard");
+        const adminReqCard = document.getElementById("wsAdminRequestsCard");
+        const activeUserIdDisplay = document.getElementById("portalActiveAdminUserIdDisplay");
+
+        if (isOwner) {
+            // Organization Owner: directly authorized, bypass separate admin credential choices
+            if (banner) banner.style.display = "flex";
+            if (choicesCard) choicesCard.style.display = "none";
+            if (activeUserIdDisplay) activeUserIdDisplay.textContent = "Organization Owner";
+            const activeRoleText = document.getElementById("portalActiveRoleText");
+            if (activeRoleText) activeRoleText.textContent = "Verified Organization Owner";
+            if (adminReqCard) adminReqCard.style.display = "block";
+            await loadWorkspaceAdminRequests(org.orgId);
+            startAdminRequestsPolling(org.orgId);
+        } else if (isAdmin) {
+            // Approved Admin: entered via admin credentials
+            if (banner) banner.style.display = "flex";
+            if (choicesCard) choicesCard.style.display = "none";
+            if (activeUserIdDisplay) activeUserIdDisplay.textContent = (session && session.adminUserId) ? session.adminUserId : "Admin";
+            const activeRoleText = document.getElementById("portalActiveRoleText");
+            if (activeRoleText) activeRoleText.textContent = "Institutional Administrator";
+            if (adminReqCard) adminReqCard.style.display = "block";
+            await loadWorkspaceAdminRequests(org.orgId);
+            startAdminRequestsPolling(org.orgId);
+        } else {
+            // Regular Member: show choices card to sign in or submit administrator request
+            if (banner) banner.style.display = "none";
+            if (choicesCard) choicesCard.style.display = "block";
+            if (adminReqCard) adminReqCard.style.display = "none";
+            if (adminRequestsPollInterval) { clearInterval(adminRequestsPollInterval); adminRequestsPollInterval = null; }
+        }
+
+        // Populate Invite Cards
+        const invName = document.getElementById("inviteOrgName");
+        const invId = document.getElementById("inviteOrgId");
+        const invNet = document.getElementById("inviteOrgNetwork");
+        if (invName) invName.textContent = orgName;
+        if (invId) invId.textContent = orgName;
+        if (invNet) invNet.textContent = org.blockchainNetwork === "ganache" ? "Ganache Local" : "Ethereum Sepolia";
+
+        const accName = document.getElementById("accessPanelOrgName");
+        const accId = document.getElementById("accessPanelOrgId");
+        const accCap = document.getElementById("accessPanelCapacity");
+        const accContract = document.getElementById("accessPanelContract");
+        const certsHeader = document.getElementById("wsCertsOrgNameHeader");
+
+        if (accName) accName.textContent = orgName;
+        if (accId) accId.textContent = orgName;
+        if (accCap) accCap.textContent = `${org.capacity || 50} members maximum`;
+        if (accContract) accContract.textContent = org.contractAddress || "—";
+        if (certsHeader) certsHeader.textContent = orgName;
+
+        // Set active issuing organization for the issuance form
+        selectOrgForIssuance(org);
+
+        // Load Members Roster
+        await loadWorkspaceMembers(org.orgId);
+
+        // Switch to target tab (default "overview")
+        const resolvedTab = (targetTab && targetTab !== "members") ? targetTab : "overview";
+        switchWorkspaceTab(resolvedTab);
+
+        window.scrollTo({ top: 50, behavior: "smooth" });
+    }
+
+    function updateWorkspaceIssueView() {
+        const panelIssue = document.getElementById("wsPanelIssue");
+        if (!panelIssue) return;
+
+        const session = getAdminSession();
+        const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+        const isOrgApproved = currentWorkspaceOrg && ((currentWorkspaceOrg.status || "Approved").toLowerCase() === "approved");
+
+        const isOwner = Boolean(
+            currentWorkspaceOrg && (
+                currentWorkspaceOrg.userRole === "owner" ||
+                currentWorkspaceOrg.role === "owner" ||
+                (currentWorkspaceOrg.ownerWallet && connectedMetaMaskAccount && currentWorkspaceOrg.ownerWallet.toLowerCase() === connectedMetaMaskAccount.toLowerCase()) ||
+                isConfiguredOwner
+            )
+        );
+
+        let isAdmin = false;
+        if (isOwner && isOrgApproved) {
+            isAdmin = true;
+        } else if (session && session.adminUserId && isOrgApproved && (session.orgId === currentWorkspaceOrg.orgId || session.adminUserId === "admin" || (session.role === "owner" && !session.orgId))) {
+            isAdmin = true;
+        } else if (currentWorkspaceOrg && (currentWorkspaceOrg.userRole === "admin" || currentWorkspaceOrg.role === "admin" || Boolean(currentWorkspaceOrg.isAuthorizedIssuer)) && isOrgApproved) {
+            isAdmin = true;
+        }
+
+        const unauthNotice = document.getElementById("wsUnauthorizedNotice");
+        const termHeader = document.getElementById("wsTerminalHeader");
+        const mountPoint = document.getElementById("wsFormMountPoint");
+
+        if (!isAdmin) {
+            // Show Unauthorized Notice with return button
+            if (unauthNotice) unauthNotice.style.display = "block";
+            if (termHeader) termHeader.style.display = "none";
+            if (adminFormCard) adminFormCard.style.display = "none";
+        } else {
+            // User is Admin or Owner! Show Terminal Header and Issuance Form
+            if (unauthNotice) unauthNotice.style.display = "none";
+            if (termHeader) termHeader.style.display = "block";
+
+            // Update Header Badges
+            const activeUserEl = document.getElementById("wsActiveAdminUserId");
+            const regEmailEl = document.getElementById("wsRegistrarEmail");
+            const connWalletEl = document.getElementById("wsConnectedWalletText");
+
+            const displayAdminId = isOwner ? "Organization Owner" : ((session && session.adminUserId) ? session.adminUserId : "Platform Owner");
+            if (activeUserEl) activeUserEl.textContent = displayAdminId;
+
+            let regEmail = "owner@institution.edu";
+            if (session && session.linkedEmail) {
+                regEmail = session.linkedEmail;
+            } else if (typeof auth !== "undefined" && auth.currentUser && auth.currentUser.email) {
+                regEmail = auth.currentUser.email;
+            }
+            if (regEmailEl) regEmailEl.textContent = regEmail;
+
+            if (connWalletEl) {
+                if (connectedMetaMaskAccount) {
+                    connWalletEl.textContent = `${connectedMetaMaskAccount.slice(0, 6)}...${connectedMetaMaskAccount.slice(-4)}`;
+                    connWalletEl.title = connectedMetaMaskAccount;
+                } else {
+                    connWalletEl.textContent = "Not Connected";
+                }
+            }
+
+            // Mount and reveal certificate issuance form card
+            if (adminFormCard) {
+                adminFormCard.style.display = "block";
+                if (mountPoint && adminFormCard.parentElement !== mountPoint) {
+                    mountPoint.appendChild(adminFormCard);
+                } else if (!mountPoint && adminFormCard.parentElement !== panelIssue) {
+                    panelIssue.appendChild(adminFormCard);
+                }
+            }
+
+            if (currentWorkspaceOrg) {
+                selectOrgForIssuance(currentWorkspaceOrg);
+            }
+
+            validateMetaMaskOwner();
+        }
+    }
+
+    function closeOrganizationWorkspace() {
+        if (adminRequestsPollInterval) {
+            clearInterval(adminRequestsPollInterval);
+            adminRequestsPollInterval = null;
+        }
+        currentWorkspaceOrg = null;
+        const orgPortal = document.getElementById("orgPortalSection");
+        const orgWorkspace = document.getElementById("orgWorkspaceSection");
+        const adminHeader = document.getElementById("portalMainHeader") || document.querySelector(".admin-header");
+        if (orgWorkspace) orgWorkspace.style.display = "none";
+        if (orgPortal) orgPortal.style.display = "block";
+        if (adminHeader) adminHeader.style.display = "block";
+        switchTab("tabOrgPortal");
+        loadPortalData();
+    }
+
+    function switchWorkspaceTab(tabName) {
+        const tabs = ["Overview", "Members", "Issue", "Certs", "AccessKey"];
+        const lowerTarget = tabName.toLowerCase();
+
+        tabs.forEach(t => {
+            const btn = document.getElementById(`wsTab${t}`);
+            const panel = document.getElementById(`wsPanel${t}`);
+            const isMatch = t.toLowerCase() === lowerTarget;
+            if (btn) {
+                btn.classList.toggle("active", isMatch);
+                btn.setAttribute("aria-selected", isMatch ? "true" : "false");
+            }
+            if (panel) {
+                panel.style.display = isMatch ? "block" : "none";
+            }
+        });
+
+        if (lowerTarget === "issue") {
+            updateWorkspaceIssueView();
+        } else if (lowerTarget === "certs") {
+            if (currentWorkspaceOrg) {
+                loadWorkspaceCertificates(currentWorkspaceOrg.orgId);
+            }
+        } else if (lowerTarget === "overview") {
+            if (currentWorkspaceOrg && (currentWorkspaceOrg.userRole === "owner" || currentWorkspaceOrg.role === "owner" || (getAdminSession() && getAdminSession().role === "owner"))) {
+                loadWorkspaceAdminRequests(currentWorkspaceOrg.orgId);
+            }
+        }
+    }
+
+    async function loadWorkspaceCertificates(orgId) {
+        const tbody = document.getElementById("wsCertsTableBody");
+        if (!tbody) return;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #666; padding: 24px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading certificates on blockchain...</td></tr>`;
+
+        try {
+            const token = await getAuthToken();
+            const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+            const res = await fetch(`/api/certificates?orgId=${encodeURIComponent(orgId)}&network=${selectedNetwork}`, { headers });
+            const data = await res.json().catch(() => ({}));
+            const certs = data.certificates || data.records || [];
+
+            if (certs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #666; padding: 28px;"><i class="fa-solid fa-circle-info"></i> No certificates recorded on-chain for this organization yet.</td></tr>`;
+                return;
+            }
+
+            let html = "";
+            certs.forEach(c => {
+                const certId = c.certificateId || c.id || "—";
+                const name = c.candidateName || c.studentName || "—";
+                const course = c.courseName || c.course || "—";
+                const date = c.issueDate || "—";
+                const isRevoked = Boolean(c.isRevoked || c.revoked);
+                const statusBadge = isRevoked
+                    ? `<span class="badge-role" style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;"><i class="fa-solid fa-ban"></i> Revoked</span>`
+                    : `<span class="badge-status-active"><i class="fa-solid fa-circle-check"></i> Valid</span>`;
+
+                html += `
+                    <tr>
+                        <td><strong class="mono" style="color: #004741;">${escapeHtml(certId)}</strong></td>
+                        <td><strong>${escapeHtml(name)}</strong></td>
+                        <td>${escapeHtml(course)}</td>
+                        <td>${escapeHtml(date)}</td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align: right;">
+                            <a href="verify.html?certId=${encodeURIComponent(certId)}" target="_blank" class="btn-org-action secondary" style="padding: 4px 10px; font-size: 0.8rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-magnifying-glass"></i> Verify
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #991b1b; padding: 20px;">Could not load certificates: ${escapeHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    async function loadWorkspaceMembers(orgId) {
+        const tbody = document.getElementById("wsMembersTableBody");
+        const countEl = document.getElementById("wsTableMembersCount");
+        const statMemCount = document.getElementById("workspaceMembersCount");
+        if (!tbody) return;
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; color: #666; padding: 24px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading members on blockchain...
+                </td>
+            </tr>
+        `;
+
+        try {
+            const token = await getAuthToken();
+            const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+            const res = await fetch(`/api/organization/${encodeURIComponent(orgId)}/members?network=${selectedNetwork}`, { headers });
+            const data = await res.json();
+
+            if (!res.ok || !data.success || !data.members) {
+                throw new Error(data.message || "Could not retrieve members from blockchain.");
+            }
+
+            const members = data.members;
+            if (countEl) countEl.textContent = members.length;
+            if (statMemCount) statMemCount.textContent = members.length;
+
+            if (members.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #777; padding: 24px;">
+                            No members found on blockchain for this organization.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const isConfiguredOwner = isConfiguredIssuerWallet(connectedMetaMaskAccount);
+            const isOwner = Boolean(isConfiguredOwner || (currentWorkspaceOrg && (currentWorkspaceOrg.userRole === "owner" || currentWorkspaceOrg.role === "owner" || (connectedMetaMaskAccount && currentWorkspaceOrg.ownerWallet && connectedMetaMaskAccount.toLowerCase() === currentWorkspaceOrg.ownerWallet.toLowerCase()))));
+
+            let html = "";
+            members.forEach((m, idx) => {
+                const addr = (m.walletAddress || "Unknown").toLowerCase();
+                const isMemberOwner = Boolean(isConfiguredIssuerWallet(addr) || (currentWorkspaceOrg && currentWorkspaceOrg.ownerWallet && (addr === currentWorkspaceOrg.ownerWallet.toLowerCase())));
+                const isMemberAdmin = Boolean(m.isAdmin || isMemberOwner);
+
+                const roleBadge = isMemberOwner
+                    ? `<span class="badge-role" style="background: #E6F4EA; color: #004741; border: 1px solid #A8DAB5;"><i class="fa-solid fa-crown"></i> Owner</span>`
+                    : (isMemberAdmin
+                        ? `<span class="badge-role" style="background: #E8F0FE; color: #1A73E8; border: 1px solid #C2D7FA;"><i class="fa-solid fa-user-shield"></i> Admin & Issuer</span>`
+                        : `<span class="badge-role" style="background: #F1EFEA; color: #4A635E; border: 1px solid #E0DDD6;"><i class="fa-solid fa-user"></i> Member</span>`
+                    );
+
+                const rightsBadge = isMemberAdmin
+                    ? `<span class="badge-status-active"><i class="fa-solid fa-check"></i> Authorized Issuer</span>`
+                    : `<span class="badge-status-pending" style="background: #f1f5f9; color: #64748b; border-color: #cbd5e1;"><i class="fa-solid fa-minus"></i> Non-Issuer</span>`;
+
+                const memberLabel = isMemberOwner
+                    ? `<span style="font-weight: 600; color: #004741;"><i class="fa-solid fa-crown" style="color: #D97706; margin-right: 6px;"></i>Primary Institutional Issuer</span>`
+                    : (isMemberAdmin
+                        ? `<span style="font-weight: 600; color: #1A73E8;"><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i>Institutional Administrator</span>`
+                        : `<span style="color: #4A635E;"><i class="fa-solid fa-user-check" style="margin-right: 6px;"></i>Institutional Member #${idx + 1}</span>`
+                    );
+
+                let actionHtml = `<span style="color: #999; font-size: 0.82rem;">Verified</span>`;
+                if (isOwner && !isMemberOwner) {
+                    if (!isMemberAdmin) {
+                        actionHtml = `
+                            <button type="button" class="btn-org-action primary btn-promote-member" data-wallet="${escapeHtml(addr)}" style="padding: 6px 12px; font-size: 0.8rem;">
+                                <i class="fa-solid fa-arrow-up"></i> Promote to Admin
+                            </button>
+                        `;
+                    } else {
+                        actionHtml = `
+                            <button type="button" class="btn-org-action secondary btn-revoke-admin" data-wallet="${escapeHtml(addr)}" style="padding: 6px 12px; font-size: 0.8rem; color: #b91c1c;">
+                                <i class="fa-solid fa-user-minus"></i> Revoke Admin
+                            </button>
+                        `;
+                    }
+                }
+
+                html += `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                ${memberLabel}
+                                <a href="https://sepolia.etherscan.io/address/${escapeHtml(addr)}" target="_blank" rel="noopener" style="color: #5F736F; font-size: 11px; margin-left: 6px;" title="Verify On-Chain Explorer">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                        <td>${roleBadge}</td>
+                        <td>${rightsBadge}</td>
+                        <td><span class="badge-status-active"><i class="fa-solid fa-circle-check"></i> Active</span></td>
+                        <td style="text-align: right;">${actionHtml}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+
+            // Attach listeners
+            tbody.querySelectorAll(".btn-promote-member").forEach(btn => {
+                btn.addEventListener("click", () => handlePromoteMemberToAdmin(btn.dataset.wallet));
+            });
+            tbody.querySelectorAll(".btn-revoke-admin").forEach(btn => {
+                btn.addEventListener("click", () => handleRevokeMemberAdmin(btn.dataset.wallet));
+            });
+
+        } catch (err) {
+            console.error("[Workspace Members Load Error]", err);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #b91c1c; padding: 24px;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Error loading members: ${escapeHtml(err.message)}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    async function loadWorkspaceAdminRequests(orgId) {
+        const tbody = document.getElementById("wsAdminRequestsTableBody");
+        const countEl = document.getElementById("wsTableRequestsCount");
+        const cardEl = document.getElementById("wsAdminRequestsCard");
+        if (!tbody) return;
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: #666; padding: 20px;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading administrator requests...
+                </td>
+            </tr>
+        `;
+
+        try {
+            const token = await getAuthToken();
+            const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+            const res = await fetch(`/api/organization/${encodeURIComponent(orgId)}/admin-requests`, { headers });
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Failed to load admin requests.");
+            }
+
+            const requests = data.requests || [];
+            if (countEl) countEl.textContent = requests.length;
+
+            if (requests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #777; padding: 20px;">
+                            No pending administrator requests for this organization.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = "";
+            requests.forEach(r => {
+                const reqId = r._id;
+                const userId = escapeHtml(r.adminUserId || "—");
+                const email = escapeHtml(r.institutionalEmail || "—");
+                const orgName = escapeHtml(r.organizationName || (currentWorkspaceOrg ? currentWorkspaceOrg.name : "Organization"));
+                const rawReqAt = r.requestedAt || "";
+                let formattedReqAt = rawReqAt;
+                try {
+                    const d = new Date(rawReqAt);
+                    if (!isNaN(d.getTime())) {
+                        formattedReqAt = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                    }
+                } catch (e) {}
+                const reqAt = escapeHtml(formattedReqAt || "—");
+                const status = r.status || "Pending";
+
+                let statusBadge = `<span class="badge-status-pending" style="background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-clock"></i> Pending</span>`;
+                if (status === "Approved") {
+                    statusBadge = `<span class="badge-status-active" style="background: #E6F4EA; color: #004741; border: 1px solid #A8DAB5; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-circle-check"></i> Approved</span>`;
+                } else if (status === "Rejected") {
+                    statusBadge = `<span class="badge-role" style="background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; padding: 4px 10px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-ban"></i> Rejected</span>`;
+                }
+
+                let actionHtml = `<span style="color: #718096; font-size: 0.82rem; font-weight: 600;">${status}</span>`;
+                if (status === "Pending") {
+                    actionHtml = `
+                        <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center; flex-wrap: nowrap;">
+                            <button type="button" class="btn-org-action primary btn-approve-admin-req" data-reqid="${reqId}" data-userid="${userId}" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 700; background: #004741; color: #fff; border-radius: 4px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                <i class="fa-solid fa-check"></i> Accept
+                            </button>
+                            <button type="button" class="btn-org-action secondary btn-reject-admin-req" data-reqid="${reqId}" data-userid="${userId}" style="padding: 6px 10px; font-size: 0.8rem; color: #B91C1C; border: 1px solid #FCA5A5; background: #FFF; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <tr>
+                        <td style="padding: 14px 16px;"><strong class="mono" style="color: #004741; font-size: 0.92rem;">${userId}</strong></td>
+                        <td style="padding: 14px 16px; color: #334155;">${email}</td>
+                        <td style="padding: 14px 16px; color: #004741; font-weight: 600;">${orgName}</td>
+                        <td style="padding: 14px 16px;"><span style="font-size: 0.82rem; color: #64748B;">${reqAt}</span></td>
+                        <td style="padding: 14px 16px;">${statusBadge}</td>
+                        <td style="padding: 14px 16px; text-align: right;">${actionHtml}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+
+            tbody.querySelectorAll(".btn-approve-admin-req").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const reqId = btn.dataset.reqid;
+                    const uName = btn.dataset.userid;
+                    if (!confirm(`Are you sure you want to approve administrator access for ${uName}?`)) return;
+
+                    btn.disabled = true;
+                    try {
+                        const appRes = await fetch(`/api/organization/${encodeURIComponent(orgId)}/admin-requests/${encodeURIComponent(reqId)}/approve`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ resolvedBy: "Organization Owner" })
+                        });
+                        const appData = await appRes.json().catch(() => ({}));
+                        if (!appRes.ok || !appData.success) {
+                            throw new Error(appData.message || "Approval failed.");
+                        }
+                        alert(`Administrator request for ${uName} has been approved.`);
+                        await loadWorkspaceAdminRequests(orgId);
+                        await loadWorkspaceMembers(orgId);
+                    } catch (err) {
+                        alert("Error approving request: " + err.message);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
+
+            tbody.querySelectorAll(".btn-reject-admin-req").forEach(btn => {
+                btn.addEventListener("click", async () => {
+                    const reqId = btn.dataset.reqid;
+                    const uName = btn.dataset.userid;
+                    const reason = prompt(`Reason for rejecting administrator request for ${uName} (optional):`, "Requirements not met");
+                    if (reason === null) return;
+
+                    btn.disabled = true;
+                    try {
+                        const rejRes = await fetch(`/api/organization/${encodeURIComponent(orgId)}/admin-requests/${encodeURIComponent(reqId)}/reject`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ reason: reason || "Requirements not met", resolvedBy: "Organization Owner" })
+                        });
+                        const rejData = await rejRes.json().catch(() => ({}));
+                        if (!rejRes.ok || !rejData.success) {
+                            throw new Error(rejData.message || "Rejection failed.");
+                        }
+                        alert(`Administrator request for ${uName} has been rejected.`);
+                        await loadWorkspaceAdminRequests(orgId);
+                    } catch (err) {
+                        alert("Error rejecting request: " + err.message);
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
+            });
+
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #991B1B; padding: 20px;">Could not load requests: ${escapeHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    async function handlePromoteMemberToAdmin(adminWallet) {
+        if (!currentWorkspaceOrg || !adminWallet) return;
+        const confirmMsg = `Authorize wallet ${adminWallet} as an official administrator & issuer for "${currentWorkspaceOrg.name}" on the blockchain?`;
+        if (!confirm(confirmMsg)) return;
+
+        try {
+            const token = await getAuthToken();
+            const prepRes = await fetch(`/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admins/prepare-add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    adminWallet,
+                    network: selectedNetwork
+                })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepRes.ok || !prepData.success) {
+                throw new Error(prepData.message || "Failed to prepare admin authorization.");
+            }
+
+            const txHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [{
+                    from: connectedMetaMaskAccount,
+                    to: prepData.contractAddress,
+                    data: prepData.txData,
+                    value: "0x0"
+                }]
+            });
+
+            for (let i = 0; i < 40; i++) {
+                const r = await window.ethereum.request({ method: "eth_getTransactionReceipt", params: [txHash] });
+                if (r && r.blockNumber) break;
+                await new Promise(res => setTimeout(res, 1200));
+            }
+
+            await fetch(`/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admins/confirm-add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    adminWallet,
+                    transactionHash: txHash,
+                    network: selectedNetwork
+                })
+            });
+
+            alert(`Wallet ${adminWallet} authorized on-chain as an issuing administrator!`);
+            await loadWorkspaceMembers(currentWorkspaceOrg.orgId);
+        } catch (err) {
+            console.error("Promote admin error:", err);
+            alert("Failed to authorize administrator: " + (err.message || err));
+        }
+    }
+
+    async function handleRevokeMemberAdmin(adminWallet) {
+        if (!currentWorkspaceOrg || !adminWallet) return;
+        if (!confirm(`Revoke administrator issuing rights for ${adminWallet}?`)) return;
+
+        try {
+            const token = await getAuthToken();
+            const prepRes = await fetch(`/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admins/prepare-remove`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    adminWallet,
+                    network: selectedNetwork
+                })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepRes.ok || !prepData.success) {
+                throw new Error(prepData.message || "Failed to prepare admin revocation.");
+            }
+
+            const txHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [{
+                    from: connectedMetaMaskAccount,
+                    to: prepData.contractAddress,
+                    data: prepData.txData,
+                    value: "0x0"
+                }]
+            });
+
+            for (let i = 0; i < 40; i++) {
+                const r = await window.ethereum.request({ method: "eth_getTransactionReceipt", params: [txHash] });
+                if (r && r.blockNumber) break;
+                await new Promise(res => setTimeout(res, 1200));
+            }
+
+            await fetch(`/api/organization/${encodeURIComponent(currentWorkspaceOrg.orgId)}/admins/confirm-remove`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    adminWallet,
+                    transactionHash: txHash,
+                    network: selectedNetwork
+                })
+            });
+
+            alert(`Administrator rights revoked for ${adminWallet}.`);
+            await loadWorkspaceMembers(currentWorkspaceOrg.orgId);
+        } catch (err) {
+            console.error("Revoke admin error:", err);
+            alert("Failed to revoke administrator: " + (err.message || err));
+        }
+    }
+
+    // Check & Render Super Admin Queue
+    async function checkAndRenderSuperAdminQueue(headers) {
+        if (!superAdminSection || !superAdminRequestsList) return;
+
+        try {
+            const res = await fetch(`/api/organization/pending-requests?network=${selectedNetwork}`, { headers });
+            if (res.status === 403) {
+                superAdminSection.style.display = "none";
+                return;
+            }
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success || !data.isSuperAdmin) {
+                superAdminSection.style.display = "none";
+                return;
+            }
+
+            superAdminSection.style.display = "block";
+            const requests = data.pendingRequests || [];
+
+            if (requests.length === 0) {
+                superAdminRequestsList.innerHTML = `
+                    <div style="text-align: center; padding: 24px; color: #666; font-size: 0.88rem;">
+                        <i class="fa-solid fa-circle-check" style="font-size: 24px; color: #16a34a; margin-bottom: 8px;"></i>
+                        <div>No pending organization registration requests awaiting approval on ${selectedNetwork === 'ganache' ? 'Ganache Local' : 'Ethereum Sepolia'}.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = "";
+            requests.forEach(r => {
+                const shortRequester = r.ownerWallet ? `${r.ownerWallet.slice(0, 6)}...${r.ownerWallet.slice(-4)}` : "Unknown";
+                const shortTx = r.transactionHash ? `${r.transactionHash.slice(0, 10)}...${r.transactionHash.slice(-6)}` : "Direct";
+
+                html += `
+                    <div class="approval-req-item">
+                        <div style="flex: 1; min-width: 260px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                <h4 style="margin: 0; font-size: 1.05rem; font-family: 'DM Serif Display', serif;">${escapeHtml(r.name)}</h4>
+                                <span class="status-badge status-pending" style="font-size: 10px;">Pending Approval</span>
+                            </div>
+                            <div style="font-size: 0.82rem; color: #666; margin-bottom: 6px;">
+                                <strong>${escapeHtml(r.universityOrCompany)}</strong> &bull; Stated Purpose: <em>${escapeHtml(r.purpose)}</em>
+                            </div>
+                            <div style="font-size: 0.78rem; color: #777; display: flex; gap: 14px; flex-wrap: wrap;">
+                                <span>Capacity: <strong>${r.capacity} members</strong></span>
+                                <span>Owner Wallet: <strong class="mono">${escapeHtml(shortRequester)}</strong></span>
+                                <span>Tx: <strong class="mono">${escapeHtml(shortTx)}</strong></span>
+                                <span>Network: <strong>${escapeHtml(r.blockchainNetwork)}</strong></span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            <button type="button" class="admin-primary-btn btn-super-approve" style="height: 36px; font-size: 12px; padding: 0 16px; background: #004741;" data-orgid="${escapeHtml(r.orgId)}">
+                                <i class="fa-solid fa-check"></i> Approve On-Chain
+                            </button>
+                            <button type="button" class="admin-secondary-btn btn-super-reject" style="height: 36px; font-size: 12px; padding: 0 14px; color: #b91c1c; border-color: #fca5a5;" data-orgid="${escapeHtml(r.orgId)}">
+                                <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            superAdminRequestsList.innerHTML = html;
+
+            superAdminRequestsList.querySelectorAll(".btn-super-approve").forEach(btn => {
+                btn.addEventListener("click", () => handleSuperAdminApprove(btn.dataset.orgid));
+            });
+            superAdminRequestsList.querySelectorAll(".btn-super-reject").forEach(btn => {
+                btn.addEventListener("click", () => handleSuperAdminReject(btn.dataset.orgid));
+            });
+
+        } catch (queueErr) {
+            console.warn("[Super Admin Queue Error]", queueErr);
+            superAdminSection.style.display = "none";
+        }
+    }
+
+    // Super Admin Approve Flow
+    async function handleSuperAdminApprove(orgId) {
+        if (!confirm(`Are you sure you want to approve Organization ID "${orgId}" on ${selectedNetwork.toUpperCase()}? This requires an on-chain transaction from the contract owner wallet.`)) {
+            return;
+        }
+
+        const token = await getAuthToken();
+        if (!token) {
+            alert("Authentication required.");
+            return;
+        }
+
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask is required.");
+            return;
+        }
+
+        setLoading(true, `Preparing Super Admin approval on ${selectedNetwork.toUpperCase()}...`);
+
+        try {
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            const account = accounts[0];
+
+            // 1. Prepare approve tx data
+            const prepRes = await fetch("/api/organization/prepare-approve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ orgId, network: selectedNetwork })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepRes.ok || !prepData.success) {
+                throw new Error(prepData.message || "Failed to prepare approval transaction.");
+            }
+
+            setLoading(true, "Please sign the approval transaction in MetaMask...");
+
+            // 2. Send transaction from Platform Super Admin (contract owner)
+            let approveGas = "0xf4240";
+            try {
+                const estGas = await window.ethereum.request({
+                    method: "eth_estimateGas",
+                    params: [{ from: account, to: prepData.contractAddress, data: prepData.txData }]
+                });
+                if (estGas) approveGas = "0x" + ((BigInt(estGas) * 120n) / 100n).toString(16);
+            } catch (gErr) {
+                console.warn("[Approve Gas Est Note]:", gErr);
+            }
+
+            const rawTxHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [{
+                    from: account,
+                    to: prepData.contractAddress,
+                    data: prepData.txData,
+                    gas: approveGas
+                }]
+            });
+
+            setLoading(true, "Confirming approval on-chain...");
+
+            // 3. Poll for receipt
+            let receipt = null;
+            for (let attempt = 0; attempt < 50; attempt++) {
+                receipt = await window.ethereum.request({
+                    method: "eth_getTransactionReceipt",
+                    params: [rawTxHash]
+                });
+                if (receipt && receipt.blockNumber) break;
+                await new Promise(r => setTimeout(r, selectedNetwork === "ganache" ? 100 : 1000));
+            }
+
+            if (!receipt || parseInt(receipt.status, 16) !== 1) {
+                throw new Error("Approval transaction was reverted on the smart contract.");
+            }
+
+            // 4. Confirm approval in MongoDB
+            const approveRes = await fetch("/api/organization/approve", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orgId,
+                    network: selectedNetwork,
+                    transactionHash: receipt.transactionHash || rawTxHash
+                })
+            });
+
+            const approveData = await approveRes.json();
+            if (!approveRes.ok || !approveData.success) {
+                throw new Error(approveData.message || "Failed to record approval in database.");
+            }
+
+            showMessage(`Organization "${escapeHtml(approveData.organization.name)}" has been APPROVED and activated on ${selectedNetwork.toUpperCase()}!`, "success");
+            await loadPortalData();
+        } catch (err) {
+            console.error("Super Admin Approve error:", err);
+            showMessage("Approval failed: " + err.message, "danger");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // Super Admin Reject Flow
+    async function handleSuperAdminReject(orgId) {
+        const reason = prompt("Please provide a reason for rejecting this organization request:", "Requirements not met");
+        if (reason === null) return;
+
+        const token = await getAuthToken();
+        if (!token) {
+            alert("Authentication required.");
+            return;
+        }
+
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask is required.");
+            return;
+        }
+
+        setLoading(true, "Preparing rejection transaction...");
+
+        try {
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            const account = accounts[0];
+
+            const prepRes = await fetch("/api/organization/prepare-reject", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ orgId, network: selectedNetwork, reason })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepRes.ok || !prepData.success) {
+                throw new Error(prepData.message || "Failed to prepare reject transaction.");
+            }
+
+            setLoading(true, "Please confirm rejection in MetaMask...");
+
+            const rawTxHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [{
+                    from: account,
+                    to: prepData.contractAddress,
+                    data: prepData.txData,
+                    gas: "0x7a120"
+                }]
+            });
+
+            setLoading(true, "Confirming rejection on-chain...");
+
+            let receipt = null;
+            for (let attempt = 0; attempt < 50; attempt++) {
+                receipt = await window.ethereum.request({
+                    method: "eth_getTransactionReceipt",
+                    params: [rawTxHash]
+                });
+                if (receipt && receipt.blockNumber) break;
+                await new Promise(r => setTimeout(r, selectedNetwork === "ganache" ? 100 : 1000));
+            }
+
+            if (!receipt || parseInt(receipt.status, 16) !== 1) {
+                throw new Error("Rejection transaction reverted on smart contract.");
+            }
+
+            const rejectRes = await fetch("/api/organization/reject", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orgId,
+                    network: selectedNetwork,
+                    transactionHash: receipt.transactionHash || rawTxHash,
+                    reason
+                })
+            });
+
+            const rejectData = await rejectRes.json();
+            if (!rejectRes.ok || !rejectData.success) {
+                throw new Error(rejectData.message || "Failed to record rejection.");
+            }
+
+            showMessage(`Organization request rejected.`, "warning");
+            await loadPortalData();
+        } catch (err) {
+            console.error("Super Admin Reject error:", err);
+            showMessage("Rejection error: " + err.message, "danger");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // Select Active Organization for Issuance
+    function selectOrgForIssuance(org) {
+        if (!org) return;
+        currentActiveOrg = org;
+        try {
+            sessionStorage.setItem("vr_active_org", JSON.stringify(org));
+        } catch (e) {}
+
+        if (activeOrgBanner) {
+            activeOrgBanner.style.display = "flex";
+        }
+        if (activeOrgNameDisplay) {
+            activeOrgNameDisplay.innerHTML = `<strong>${escapeHtml(org.name || org.orgName)}</strong> &bull; <span class="badge-status-active"><i class="fa-solid fa-circle-check"></i> On-Chain Verified Registry</span>`;
+        }
+        const activeOrgIdDisplay = document.getElementById("activeOrgIdDisplay");
+        if (activeOrgIdDisplay) {
+            activeOrgIdDisplay.textContent = org.purpose || "Academic Credential Registry & Verification";
+        }
+        const activeOrgRoleBadge = document.getElementById("activeOrgRoleBadge");
+        if (activeOrgRoleBadge) {
+            activeOrgRoleBadge.className = "badge-status-active";
+            activeOrgRoleBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Approved & Active`;
+        }
+    }
+
+    // Create Organization Submit Handler
+    async function handleCreateOrgSubmit(e) {
+        e.preventDefault();
+        const name = orgNameInput ? orgNameInput.value.trim() : "";
+        const capacity = orgCapacityInput ? parseInt(orgCapacityInput.value, 10) : 0;
+        const purpose = orgPurposeInput ? orgPurposeInput.value.trim() : "";
+        const universityOrCompany = orgEntityNameInput ? orgEntityNameInput.value.trim() : "";
+        const accessKey = orgAccessKeyInput ? orgAccessKeyInput.value : "";
+        const confirmAccessKey = orgConfirmAccessKeyInput ? orgConfirmAccessKeyInput.value : "";
+
+        if (!name || !capacity || !purpose || !universityOrCompany || !accessKey) {
+            alert("Please fill in all required organization fields.");
+            return;
+        }
+        if (capacity <= 0) {
+            alert("Membership capacity must be a positive integer.");
+            return;
+        }
+        if (accessKey.length < 6) {
+            alert("Organization Access Key must be at least 6 characters.");
+            return;
+        }
+        if (accessKey !== confirmAccessKey) {
+            alert("Organization Access Keys do not match.");
+            return;
+        }
+
+        if (typeof window.ethereum === "undefined") {
+            alert("MetaMask is required to submit an on-chain organization registration request.");
+            return;
+        }
+
+        const token = await getAuthToken();
+        if (!token) {
+            alert("Authentication required. Please sign in or unlock admin session.");
+            return;
+        }
+
+        const submitBtn = btnSubmitCreateOrg;
+        const originalText = `<i class="fa-solid fa-plus-circle"></i> Create Organization`;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Connecting to MetaMask...`;
+        }
+
+        try {
+            // Get currently active account in MetaMask
+            const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+            if (!accounts || accounts.length === 0) {
+                throw new Error("No connected MetaMask account. Please connect your wallet.");
+            }
+            const account = accounts[0];
+            connectedMetaMaskAccount = account;
+            if (createOrgRequesterWallet) {
+                createOrgRequesterWallet.textContent = account;
+                createOrgRequesterWallet.style.color = "#004741";
+            }
+
+            // Determine network selected in modal
+            const chosenNetRadio = document.querySelector('input[name="createOrgNetworkRadio"]:checked');
+            const chosenNetwork = chosenNetRadio ? chosenNetRadio.value : (selectedNetwork || "sepolia");
+
+            // Prompt chain switch if Sepolia selected and wallet is on another chain
+            if (chosenNetwork === "sepolia") {
+                const currentChain = await window.ethereum.request({ method: "eth_chainId" }).catch(() => null);
+                if (currentChain && currentChain.toLowerCase() !== "0xaa36a7") {
+                    if (submitBtn) {
+                        submitBtn.innerHTML = `<i class="fa-solid fa-arrow-right-arrow-left fa-spin"></i> Switch Chain in MetaMask...`;
+                    }
+                    try {
+                        await window.ethereum.request({
+                            method: "wallet_switchEthereumChain",
+                            params: [{ chainId: "0xaa36a7" }]
+                        });
+                    } catch (switchErr) {
+                        console.warn("[MetaMask] Switch to Sepolia warning:", switchErr);
+                    }
+                }
+            }
+
+            if (submitBtn) {
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Preparing On-Chain Registration...`;
+            }
+
+            // 1. Prepare on-chain transaction data with backend
+            const prepRes = await fetch("/api/organization/prepare-create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    name,
+                    universityOrCompany,
+                    purpose,
+                    capacity,
+                    accessKey,
+                    confirmAccessKey,
+                    network: chosenNetwork,
+                    walletAddress: account,
+                    ownerWallet: account
+                })
+            });
+
+            const prepData = await prepRes.json();
+            if (!prepRes.ok || !prepData.success) {
+                throw new Error(prepData.message || "Failed to prepare organization registration.");
+            }
+
+            if (submitBtn) {
+                submitBtn.innerHTML = `<i class="fa-solid fa-wallet fa-bounce"></i> Confirm in MetaMask...`;
+            }
+
+            if (!prepData.contractAddress || prepData.contractAddress === "0x0000000000000000000000000000000000000000") {
+                throw new Error(`Smart contract address is not configured for network [${chosenNetwork}].`);
+            }
+
+            // 2. Submit on-chain registration request via MetaMask
+            const txParams = {
+                from: account,
+                to: prepData.contractAddress,
+                data: prepData.txData,
+                value: "0x0"
+            };
+
+            try {
+                const estGas = await window.ethereum.request({
+                    method: "eth_estimateGas",
+                    params: [{ from: account, to: prepData.contractAddress, data: prepData.txData }]
+                });
+                if (estGas) {
+                    const buffered = (BigInt(estGas) * 120n) / 100n;
+                    txParams.gas = "0x" + buffered.toString(16);
+                }
+            } catch (estErr) {
+                console.warn("[MetaMask Gas Estimate Fallback]:", estErr);
+                txParams.gas = "0xf4240"; // 1,000,000 gas limit safe fallback
+            }
+
+            const rawTxHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [txParams]
+            });
+
+            if (submitBtn) {
+                submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Confirming on ${chosenNetwork.toUpperCase()}...`;
+            }
+
+            // 3. Poll for transaction receipt
+            let receipt = null;
+            for (let attempt = 0; attempt < 50; attempt++) {
+                receipt = await window.ethereum.request({
+                    method: "eth_getTransactionReceipt",
+                    params: [rawTxHash]
+                });
+                if (receipt && receipt.blockNumber) break;
+                await new Promise(r => setTimeout(r, chosenNetwork === "ganache" ? 200 : 1200));
+            }
+
+            if (!receipt || (receipt.status !== 1 && receipt.status !== "0x1" && receipt.status !== true)) {
+                throw new Error("Blockchain transaction failed or was reverted by the contract.");
+            }
+
+            // 4. Record organization in MongoDB with status Pending Approval
+            const createRes = await fetch("/api/organization/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orgId: prepData.orgId,
+                    orgIdBytes32: prepData.orgIdBytes32,
+                    name,
+                    universityOrCompany,
+                    purpose,
+                    capacity,
+                    accessKey,
+                    network: chosenNetwork,
+                    transactionHash: receipt.transactionHash || rawTxHash,
+                    walletAddress: account,
+                    ownerWallet: account
+                })
+            });
+
+            const createData = await createRes.json();
+            if (!createRes.ok || !createData.success) {
+                throw new Error(createData.message || "Failed to confirm organization on blockchain.");
+            }
+
+            if (createOrgModal) createOrgModal.style.display = "none";
+            if (createOrgForm) createOrgForm.reset();
+
+            const createdOrg = createData.organization;
+            createdOrg.userRole = "owner";
+            createdOrg.role = "owner";
+            createdOrg.isAuthorizedIssuer = true;
+
+            // Immediately transition into the Organization Dashboard inside the organization!
+            await openOrganizationWorkspace(createdOrg, "members");
+
+            showMessage(
+                `<div style="font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-circle-check"></i> Organization Created on Blockchain!</div>` +
+                `<div style="font-size: 0.85rem; line-height: 1.5;">` +
+                `Organization <strong>${escapeHtml(name)}</strong> (ID: <span class="mono">${escapeHtml(createdOrg.orgId)}</span>) is now live and approved.<br>` +
+                `Transaction: <span class="mono">${escapeHtml((receipt.transactionHash || rawTxHash).slice(0, 16))}...</span> on ${chosenNetwork === 'ganache' ? 'Ganache Local' : 'Ethereum Sepolia'}.<br>` +
+                `You are now inside the Organization Dashboard.` +
+                `</div>`,
+                "success",
+                8000
+            );
+        } catch (err) {
+            console.error("[Create Org Error]", err);
+            alert(err.message || "Failed to create organization.");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        }
+    }
+
+    // Join Organization Submit Handler (No transaction or gas fee for members)
+    async function handleJoinOrgSubmit(e) {
+        e.preventDefault();
+        const identifier = joinOrgIdentifierInput ? joinOrgIdentifierInput.value.trim() : "";
+        const accessKey = joinOrgAccessKeyInput ? joinOrgAccessKeyInput.value : "";
+
+        if (!identifier || !accessKey) {
+            alert("Please enter the Organization ID or Name, and the Access Key.");
+            return;
+        }
+
+        const token = await getAuthToken();
+        if (!token) {
+            alert("Authentication required. Please sign in first.");
+            return;
+        }
+
+        const submitBtn = btnSubmitJoinOrg;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying Access Key...`;
+        }
+
+        try {
+            // Get active account if available
+            let account = connectedMetaMaskAccount;
+            if (!account && typeof window.ethereum !== "undefined") {
+                try {
+                    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+                    if (accounts && accounts.length > 0) {
+                        account = accounts[0];
+                        connectedMetaMaskAccount = account;
+                    }
+                } catch (e) {}
+            }
+
+            // Directly verify access key and join organization without any MetaMask transaction!
+            const res = await fetch("/api/organization/join", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    orgId: identifier,
+                    accessKey,
+                    network: selectedNetwork || "sepolia",
+                    walletAddress: account
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || "Failed to join organization. Please verify your Access Key.");
+            }
+
+            if (joinOrgModal) joinOrgModal.style.display = "none";
+            if (joinOrgForm) joinOrgForm.reset();
+
+            const joinedOrg = data.organization;
+            joinedOrg.userRole = "member";
+            joinedOrg.role = "member";
+
+            // Open the organization dashboard immediately for this member!
+            await openOrganizationWorkspace(joinedOrg, "members");
+
+            showMessage(
+                `<div style="font-weight: 700; margin-bottom: 4px;"><i class="fa-solid fa-circle-check"></i> Welcome to ${escapeHtml(joinedOrg.name)}!</div>` +
+                `<div style="font-size: 0.85rem; line-height: 1.5;">` +
+                `You have successfully joined the organization. You are now inside the Organization Workspace.<br>` +
+                `As a member, you can view the members roster or authenticate admin credentials above to issue certificates.` +
+                `</div>`,
+                "success",
+                8000
+            );
+        } catch (err) {
+            console.error("Join Org error:", err);
+            alert(err.message || "Failed to join organization.");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-right-to-bracket"></i> Join Organization`;
+            }
+        }
+    }
+
+    // Manage Organization Modal Handler
+    async function openManageOrgModal(orgId) {
+        if (!manageOrgModal) return;
+        const org = userMemberships.map(m => m.organization).find(o => o && o.orgId === orgId);
+        if (!org) return;
+
+        if (manageOrgModalTitle) {
+            manageOrgModalTitle.textContent = `Manage Organization: ${org.name}`;
+        }
+        if (manageOrgDetails) {
+            manageOrgDetails.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; font-size: 0.82rem; background: #faf8f5; border: 1px solid #ede8e0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                    <div><span style="color: #777;">Org ID:</span> <strong class="mono">${escapeHtml(org.orgId)}</strong></div>
+                    <div><span style="color: #777;">Capacity:</span> <strong>${org.currentMemberCount} / ${org.capacity} members</strong></div>
+                    <div><span style="color: #777;">Status:</span> <strong style="color: #16a34a;">${escapeHtml(org.status)}</strong></div>
+                    <div><span style="color: #777;">Owner Wallet:</span> <strong class="mono">${escapeHtml(org.ownerWallet.slice(0, 6))}...${escapeHtml(org.ownerWallet.slice(-4))}</strong></div>
+                </div>
+            `;
+        }
+
+        manageOrgModal.dataset.orgId = orgId;
+        manageOrgModal.style.display = "flex";
+
+        await loadMembershipRequestsForOrg(orgId);
+    }
+
+    async function loadMembershipRequestsForOrg(orgId) {
+        if (!pendingJoinRequestsList) return;
+        pendingJoinRequestsList.innerHTML = `<div style="padding: 12px; text-align: center; color: #888;"><i class="fa-solid fa-spinner fa-spin"></i> Loading membership requests...</div>`;
+
+        const token = await getAuthToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch(`/api/organization/membership-requests?orgId=${encodeURIComponent(orgId)}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) {
+                pendingJoinRequestsList.innerHTML = `<div style="font-size: 0.82rem; color: #888; padding: 8px;">No pending join requests.</div>`;
+                return;
+            }
+
+            const requests = data.requests || [];
+            if (requests.length === 0) {
+                pendingJoinRequestsList.innerHTML = `<div style="font-size: 0.82rem; color: #888; padding: 8px;">No pending join requests for this organization.</div>`;
+                return;
+            }
+
+            let html = "";
+            requests.forEach(req => {
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: #fff; border: 1px solid #e5e0d8; border-radius: 8px; margin-bottom: 8px; font-size: 0.84rem;">
+                        <div>
+                            <strong>${escapeHtml(req.userEmail || req.userId)}</strong>
+                            <div style="font-size: 0.75rem; color: #777;">Joined: ${new Date(req.createdAt).toLocaleDateString()}</div>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="admin-primary-btn btn-req-approve" style="height: 30px; font-size: 11px; padding: 0 10px;" data-reqid="${escapeHtml(req._id)}">
+                                <i class="fa-solid fa-check"></i> Approve
+                            </button>
+                            <button type="button" class="admin-secondary-btn btn-req-reject" style="height: 30px; font-size: 11px; padding: 0 10px; color: #b91c1c;" data-reqid="${escapeHtml(req._id)}">
+                                <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            pendingJoinRequestsList.innerHTML = html;
+
+            pendingJoinRequestsList.querySelectorAll(".btn-req-approve").forEach(b => {
+                b.addEventListener("click", () => reviewMembershipRequest(b.dataset.reqid, "active"));
+            });
+            pendingJoinRequestsList.querySelectorAll(".btn-req-reject").forEach(b => {
+                b.addEventListener("click", () => reviewMembershipRequest(b.dataset.reqid, "rejected"));
+            });
+        } catch (e) {
+            pendingJoinRequestsList.innerHTML = `<div style="font-size: 0.82rem; color: #b91c1c;">Failed to load requests: ${escapeHtml(e.message)}</div>`;
+        }
+    }
+
+    async function reviewMembershipRequest(membershipId, status) {
+        const token = await getAuthToken();
+        if (!token) return;
+
+        try {
+            const res = await fetch("/api/organization/membership-requests/review", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ membershipId, status })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.success) {
+                alert(data.message || "Failed to update membership request.");
+                return;
+            }
+            const orgId = manageOrgModal ? manageOrgModal.dataset.orgId : null;
+            if (orgId) await loadMembershipRequestsForOrg(orgId);
+            await loadPortalData();
+        } catch (e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    // Requester Wallet display updater
+    async function updateRequesterWalletDisplay() {
+        if (!createOrgRequesterWallet) return;
+        let acc = connectedMetaMaskAccount;
+        if (!acc && typeof window.ethereum !== "undefined") {
+            const accs = await window.ethereum.request({ method: "eth_accounts" }).catch(() => []);
+            if (accs && accs.length > 0) acc = accs[0];
+        }
+        if (acc) {
+            createOrgRequesterWallet.textContent = acc;
+            createOrgRequesterWallet.style.color = "#004741";
+        } else {
+            createOrgRequesterWallet.textContent = "Please connect MetaMask to submit registration";
+            createOrgRequesterWallet.style.color = "#B06000";
+        }
+    }
+
+    function openCreateOrgModal() {
+        if (createOrgAlert) {
+            createOrgAlert.style.display = "none";
+            createOrgAlert.innerHTML = "";
+        }
+        updateRequesterWalletDisplay();
+        if (createOrgModal) {
+            createOrgModal.style.display = "flex";
+        }
+    }
+
+    function openJoinOrgModal() {
+        if (joinOrgAlert) {
+            joinOrgAlert.style.display = "none";
+            joinOrgAlert.innerHTML = "";
+        }
+        if (joinOrgModal) {
+            joinOrgModal.style.display = "flex";
+        }
+    }
+
+    function closeCreateOrgModalFunc() {
+        if (createOrgModal) createOrgModal.style.display = "none";
+    }
+
+    function closeJoinOrgModalFunc() {
+        if (joinOrgModal) joinOrgModal.style.display = "none";
+    }
+
+    function closeManageOrgModalFunc() {
+        if (manageOrgModal) manageOrgModal.style.display = "none";
+    }
+
+    // Modal Backdrops & Cancel Event Listeners
+    [createOrgModal, joinOrgModal, manageOrgModal].forEach(modal => {
+        if (modal) {
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) modal.style.display = "none";
+            });
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            if (createOrgModal && createOrgModal.style.display !== "none") createOrgModal.style.display = "none";
+            if (joinOrgModal && joinOrgModal.style.display !== "none") joinOrgModal.style.display = "none";
+            if (manageOrgModal && manageOrgModal.style.display !== "none") manageOrgModal.style.display = "none";
+        }
+    });
+
+    if (btnOpenCreateOrgModal) {
+        btnOpenCreateOrgModal.style.cursor = "pointer";
+        btnOpenCreateOrgModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            openCreateOrgModal();
+        });
+        btnOpenCreateOrgModal.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openCreateOrgModal();
+            }
+        });
+    }
+
+    if (closeCreateOrgModal) {
+        closeCreateOrgModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeCreateOrgModalFunc();
+        });
+    }
+    if (btnCancelCreateOrg) {
+        btnCancelCreateOrg.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeCreateOrgModalFunc();
+        });
+    }
+
+    const btnConnectMetamaskInModal = document.getElementById("btnConnectMetamaskInModal");
+    if (btnConnectMetamaskInModal) {
+        btnConnectMetamaskInModal.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (typeof window.ethereum === "undefined") {
+                alert("MetaMask is not installed. Please install MetaMask to use on-chain features.");
+                return;
+            }
+            try {
+                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                if (accounts && accounts.length > 0) {
+                    connectedMetaMaskAccount = accounts[0];
+                    updateRequesterWalletDisplay();
+                }
+            } catch (err) {
+                console.warn("[MetaMask connect in modal]", err);
+            }
+        });
+    }
+
+    if (typeof window.ethereum !== "undefined" && window.ethereum.on) {
+        window.ethereum.on("accountsChanged", (accounts) => {
+            connectedMetaMaskAccount = (accounts && accounts.length > 0) ? accounts[0] : null;
+            updateRequesterWalletDisplay();
+            if (typeof renderTransactionWalletSelector === "function") {
+                renderTransactionWalletSelector();
+            }
+        });
+        window.ethereum.on("chainChanged", () => {
+            updateRequesterWalletDisplay();
+        });
+    }
+
+    if (btnOpenJoinOrgModal) {
+        btnOpenJoinOrgModal.style.cursor = "pointer";
+        btnOpenJoinOrgModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            openJoinOrgModal();
+        });
+        btnOpenJoinOrgModal.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openJoinOrgModal();
+            }
+        });
+    }
+
+    if (closeJoinOrgModal) {
+        closeJoinOrgModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeJoinOrgModalFunc();
+        });
+    }
+    if (btnCancelJoinOrg) {
+        btnCancelJoinOrg.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeJoinOrgModalFunc();
+        });
+    }
+
+    if (closeManageOrgModal) {
+        closeManageOrgModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeManageOrgModalFunc();
+        });
+    }
+
+    if (btnRefreshMyOrgs) {
+        btnRefreshMyOrgs.addEventListener("click", (e) => {
+            e.preventDefault();
+            loadPortalData();
+        });
+    }
+
+    // Sub-tab switching in Manage Org Modal
+    if (tabManageAdmins && tabManageRequests && panelManageAdmins && panelManageRequests) {
+        tabManageAdmins.addEventListener("click", () => {
+            tabManageAdmins.classList.add("active");
+            tabManageRequests.classList.remove("active");
+            panelManageAdmins.style.display = "block";
+            panelManageRequests.style.display = "none";
+        });
+        tabManageRequests.addEventListener("click", () => {
+            tabManageRequests.classList.add("active");
+            tabManageAdmins.classList.remove("active");
+            panelManageRequests.style.display = "block";
+            panelManageAdmins.style.display = "none";
+        });
+    }
+
+    // Toggle Nominate Admin form
+    if (btnToggleNominateAdmin && nominateAdminForm) {
+        btnToggleNominateAdmin.addEventListener("click", () => {
+            nominateAdminForm.style.display = nominateAdminForm.style.display === "none" ? "block" : "none";
+        });
+    }
+
+    if (createOrgForm) {
+        createOrgForm.addEventListener("submit", handleCreateOrgSubmit);
+    }
+    if (joinOrgForm) {
+        joinOrgForm.addEventListener("submit", handleJoinOrgSubmit);
+    }
+
+    // First Admin setup listener
+    if (btnBecomeFirstAdmin) {
+        btnBecomeFirstAdmin.addEventListener("click", async function () {
+            const orgId = manageOrgModal ? manageOrgModal.dataset.orgId : null;
+            if (!orgId) return;
+
+            const token = await getAuthToken();
+            if (!token) {
+                alert("Authentication required.");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/organization/first-admin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ orgId, becomeAdmin: true })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    alert(data.message || "Failed to set first admin.");
+                    return;
+                }
+                alert("You are now the first issuing administrator of this organization!");
+                if (manageOrgModal) manageOrgModal.style.display = "none";
+                await loadPortalData();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        });
+    }
+
+    // Nominate Admin listener
+    if (nominateAdminForm) {
+        nominateAdminForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const orgId = manageOrgModal ? manageOrgModal.dataset.orgId : null;
+            const nomineeUserId = nominateUserIdInput ? nominateUserIdInput.value.trim() : "";
+            if (!orgId || !nomineeUserId) {
+                alert("Please provide the nominee's user ID or email.");
+                return;
+            }
+
+            const token = await getAuthToken();
+            if (!token) {
+                alert("Authentication required.");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/organization/first-admin", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ orgId, becomeAdmin: false, nomineeUserId })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    alert(data.message || "Failed to nominate admin.");
+                    return;
+                }
+                alert(`User ${nomineeUserId} has been appointed as the first administrator!`);
+                if (manageOrgModal) manageOrgModal.style.display = "none";
+                await loadPortalData();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        });
+    }
+
+    // Add Admin On-Chain listener
+    if (addAdminForm) {
+        addAdminForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const orgId = manageOrgModal ? manageOrgModal.dataset.orgId : null;
+            const adminUserId = addAdminUserIdInput ? addAdminUserIdInput.value.trim() : "";
+            const adminAddress = addAdminWalletInput ? addAdminWalletInput.value.trim() : "";
+
+            if (!orgId || !adminUserId || !adminAddress) {
+                alert("Please fill in both Administrator User ID / Email and Wallet Address.");
+                return;
+            }
+
+            if (typeof window.ethereum === "undefined") {
+                alert("MetaMask is required to authorize an administrator on the smart contract.");
+                return;
+            }
+
+            const token = await getAuthToken();
+            if (!token) {
+                alert("Authentication required.");
+                return;
+            }
+
+            const submitBtn = btnAddAdminSubmit;
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                const account = accounts[0];
+
+                const prepRes = await fetch("/api/organization/admins/prepare-add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        orgId,
+                        adminAddress,
+                        network: selectedNetwork
+                    })
+                });
+
+                const prepData = await prepRes.json().catch(() => ({}));
+                if (!prepRes.ok || !prepData.success) {
+                    throw new Error(prepData.message || "Failed to prepare admin transaction.");
+                }
+
+                const rawTxHash = await window.ethereum.request({
+                    method: "eth_sendTransaction",
+                    params: [{
+                        from: account,
+                        to: prepData.contractAddress,
+                        data: prepData.txData,
+                        gas: "0x7a120"
+                    }]
+                });
+
+                let receipt = null;
+                for (let attempt = 0; attempt < 50; attempt++) {
+                    receipt = await window.ethereum.request({
+                        method: "eth_getTransactionReceipt",
+                        params: [rawTxHash]
+                    });
+                    if (receipt && receipt.blockNumber) break;
+                    await new Promise(r => setTimeout(r, selectedNetwork === "ganache" ? 100 : 1000));
+                }
+
+                if (!receipt || parseInt(receipt.status, 16) !== 1) {
+                    throw new Error("Admin authorization transaction was reverted on the smart contract.");
+                }
+
+                const confirmRes = await fetch("/api/organization/admins/confirm-add", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        orgId,
+                        adminUserId,
+                        adminAddress,
+                        network: selectedNetwork,
+                        transactionHash: receipt.transactionHash || rawTxHash
+                    })
+                });
+
+                const confirmData = await confirmRes.json().catch(() => ({}));
+                if (!confirmRes.ok || !confirmData.success) {
+                    throw new Error(confirmData.message || "Failed to confirm admin in database.");
+                }
+
+                alert(`Administrator ${adminUserId} (${adminAddress}) has been authorized on-chain!`);
+                if (addAdminForm) addAdminForm.reset();
+                if (manageOrgModal) manageOrgModal.style.display = "none";
+                await loadPortalData();
+            } catch (err) {
+                alert("Add Admin error: " + err.message);
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
+
+    if (btnChangeOrg) {
+        btnChangeOrg.addEventListener("click", () => switchTab("tabOrgPortal"));
+    }
+
+    if (tabOrgPortal) {
+        tabOrgPortal.addEventListener("click", () => switchTab("tabOrgPortal"));
+    }
+    if (tabCertIssuance) {
+        tabCertIssuance.addEventListener("click", () => switchTab("tabCertIssuance"));
+    }
+
+    // ========================================================
+    // ORGANIZATION WORKSPACE EVENT LISTENERS
+    // ========================================================
+    const btnBackToPortal = document.getElementById("btnBackToPortal");
+    if (btnBackToPortal) {
+        btnBackToPortal.addEventListener("click", () => closeOrganizationWorkspace());
+    }
+
+    const wsTabOverview = document.getElementById("wsTabOverview");
+    const wsTabMembers = document.getElementById("wsTabMembers");
+    const wsTabIssue = document.getElementById("wsTabIssue");
+    const wsTabCerts = document.getElementById("wsTabCerts");
+    const wsTabAccessKey = document.getElementById("wsTabAccessKey");
+
+    if (wsTabOverview) wsTabOverview.addEventListener("click", () => switchWorkspaceTab("overview"));
+    if (wsTabMembers) wsTabMembers.addEventListener("click", () => switchWorkspaceTab("members"));
+    if (wsTabIssue) wsTabIssue.addEventListener("click", () => switchWorkspaceTab("issue"));
+    if (wsTabCerts) wsTabCerts.addEventListener("click", () => switchWorkspaceTab("certs"));
+    if (wsTabAccessKey) wsTabAccessKey.addEventListener("click", () => switchWorkspaceTab("accesskey"));
+
+    const btnOverviewGoIssue = document.getElementById("btnOverviewGoIssue");
+    if (btnOverviewGoIssue) btnOverviewGoIssue.addEventListener("click", () => switchWorkspaceTab("issue"));
+    const btnOverviewGoMembers = document.getElementById("btnOverviewGoMembers");
+    if (btnOverviewGoMembers) btnOverviewGoMembers.addEventListener("click", () => switchWorkspaceTab("members"));
+    const btnOverviewGoCerts = document.getElementById("btnOverviewGoCerts");
+    if (btnOverviewGoCerts) btnOverviewGoCerts.addEventListener("click", () => switchWorkspaceTab("certs"));
+
+    const btnRefreshWsMembers = document.getElementById("btnRefreshWsMembers");
+    if (btnRefreshWsMembers) {
+        btnRefreshWsMembers.addEventListener("click", () => {
+            if (currentWorkspaceOrg) loadWorkspaceMembers(currentWorkspaceOrg.orgId);
+        });
+    }
+
+    const btnRefreshWsCerts = document.getElementById("btnRefreshWsCerts");
+    if (btnRefreshWsCerts) {
+        btnRefreshWsCerts.addEventListener("click", () => {
+            if (currentWorkspaceOrg) loadWorkspaceCertificates(currentWorkspaceOrg.orgId);
+        });
+    }
+
+    if (btnRefreshMyOrgs) {
+        btnRefreshMyOrgs.addEventListener("click", () => loadPortalData());
+    }
+
+    // Return to Organization Dashboard from Unauthorized Notice
+    const btnReturnToPortalFromUnauthorized = document.getElementById("btnReturnToPortalFromUnauthorized");
+    if (btnReturnToPortalFromUnauthorized) {
+        btnReturnToPortalFromUnauthorized.addEventListener("click", () => {
+            switchWorkspaceTab("members");
+            const choices = document.getElementById("portalAdminChoicesCard");
+            if (choices) {
+                choices.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        });
+    }
+
+    const btnRefreshWsRequests = document.getElementById("btnRefreshWsRequests");
+    if (btnRefreshWsRequests) {
+        btnRefreshWsRequests.addEventListener("click", () => {
+            if (currentWorkspaceOrg) loadWorkspaceAdminRequests(currentWorkspaceOrg.orgId);
+        });
+    }
+
+    // Initialize Portal Admin Choices (Option A & Option B) on the Organization Dashboard
+    initPortalAdminChoices();
+
+    // Copy Invite Details Buttons
+    const copyInviteHandler = () => {
+        if (!currentWorkspaceOrg) return;
+        const text = `Join ${currentWorkspaceOrg.name} on Verified Records Blockchain:\nOrganization ID: ${currentWorkspaceOrg.orgId}\nNetwork: ${currentWorkspaceOrg.blockchainNetwork === "ganache" ? "Ganache Local" : "Ethereum Sepolia"}`;
+        navigator.clipboard.writeText(text);
+        alert("Organization invite details copied to clipboard!");
+    };
+
+    const btnCopyOrgInvite = document.getElementById("btnCopyOrgInvite");
+    if (btnCopyOrgInvite) btnCopyOrgInvite.addEventListener("click", copyInviteHandler);
+
+    const btnCopyInviteInfoBtn = document.getElementById("btnCopyInviteInfoBtn");
+    if (btnCopyInviteInfoBtn) btnCopyInviteInfoBtn.addEventListener("click", copyInviteHandler);
+
+    // Initialize Active Organization from Session
+    try {
+        const savedOrg = sessionStorage.getItem("vr_active_org");
+        if (savedOrg) {
+            currentActiveOrg = JSON.parse(savedOrg);
+            if (activeOrgBanner) activeOrgBanner.style.display = "block";
+            if (activeOrgNameDisplay) {
+                activeOrgNameDisplay.innerHTML = `<strong>${escapeHtml(currentActiveOrg.name)}</strong> (ID: <span class="mono">${escapeHtml(currentActiveOrg.orgId)}</span>) &bull; <span class="status-badge status-approved"><i class="fa-solid fa-circle-check"></i> Approved & Active</span>`;
+            }
+        }
+    } catch (e) {}
+
+    // Initial Routing based on URL Parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionParam = urlParams.get("action");
+    const tabParam = urlParams.get("tab");
+    if (actionParam === "issue" || tabParam === "issuance") {
+        switchTab("tabCertIssuance");
+    } else if (actionParam === "create-org") {
+        switchTab("tabOrgPortal");
+        openCreateOrgModal();
+    } else if (actionParam === "join-org") {
+        switchTab("tabOrgPortal");
+        openJoinOrgModal();
+    } else {
+        switchTab("tabOrgPortal");
+    }
+
+    // Reload Portal on Auth State Change
+    if (typeof firebase !== "undefined" && firebase.auth) {
+        firebase.auth().onAuthStateChanged(() => {
+            loadPortalData();
+        });
+    }
+
+    // Expose helpers globally
+    window.handleSuperAdminApprove = handleSuperAdminApprove;
+    window.handleSuperAdminReject = handleSuperAdminReject;
+    window.switchTab = switchTab;
+    window.switchWorkspaceTab = switchWorkspaceTab;
+    window.openOrganizationWorkspace = openOrganizationWorkspace;
+    window.closeOrganizationWorkspace = closeOrganizationWorkspace;
+    window.loadWorkspaceMembers = loadWorkspaceMembers;
+    window.loadWorkspaceCertificates = loadWorkspaceCertificates;
+    window.loadWorkspaceAdminRequests = loadWorkspaceAdminRequests;
+    window.loadPortalData = loadPortalData;
+    window.selectOrgForIssuance = selectOrgForIssuance;
+    window.openManageOrgModal = openManageOrgModal;
+    window.openCreateOrgModal = openCreateOrgModal;
+    window.openJoinOrgModal = openJoinOrgModal;
+    window.closeCreateOrgModal = closeCreateOrgModalFunc;
+    window.closeJoinOrgModal = closeJoinOrgModalFunc;
+    window.closeManageOrgModal = closeManageOrgModalFunc;
+
+    console.log("[Admin] script loaded with Organization Workspace & Blockchain Engine");
 
 })();

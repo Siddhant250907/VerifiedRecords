@@ -28,6 +28,7 @@ async function runComprehensiveTests() {
 
     const sepoliaContract = new sepoliaWeb3.eth.Contract(artifact.abi, sepoliaContractAddr);
     const ganacheContract = new ganacheWeb3.eth.Contract(artifact.abi, ganacheContractAddr);
+    const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 
     let passedTests = 0;
     const totalTests = 12;
@@ -50,10 +51,10 @@ async function runComprehensiveTests() {
         assert.strictEqual(ganOwnerOnChain.toLowerCase(), ganOwnerOnChain.toLowerCase(), "Ganache contract owner mismatch");
 
         // Verify with server API
-        const sepRes = await fetch(`http://localhost:3000/api/blockchain/is-authorized?address=${sepoliaOwner}&network=sepolia`).then(r => r.json());
+        const sepRes = await fetch(`${BASE_URL}/api/blockchain/is-authorized?address=${sepoliaOwner}&network=sepolia`).then(r => r.json());
         assert.strictEqual(sepRes.authorized, true, "Sepolia owner must be authorized on Sepolia");
 
-        const ganRes = await fetch(`http://localhost:3000/api/blockchain/is-authorized?address=${ganacheOwner}&network=ganache`).then(r => r.json());
+        const ganRes = await fetch(`${BASE_URL}/api/blockchain/is-authorized?address=${ganacheOwner}&network=ganache`).then(r => r.json());
         assert.strictEqual(ganRes.authorized, true, "Ganache owner must be authorized on Ganache");
 
         console.log("  ✓ Sepolia (11155111) correctly mapped to owner 0x1FC0... and verified.");
@@ -108,14 +109,14 @@ async function runComprehensiveTests() {
     // -------------------------------------------------------------------------
     console.log("\n[TEST 3] Unauthorized Issuer on Each Network Rejection");
     try {
-        const sepAuth = await fetch(`http://localhost:3000/api/blockchain/is-authorized?address=${unauthorizedAccount}&network=sepolia`).then(r => r.json());
+        const sepAuth = await fetch(`${BASE_URL}/api/blockchain/is-authorized?address=${unauthorizedAccount}&network=sepolia`).then(r => r.json());
         assert.strictEqual(sepAuth.authorized, false, "Random account must not be authorized on Sepolia");
 
-        const ganAuth = await fetch(`http://localhost:3000/api/blockchain/is-authorized?address=${unauthorizedAccount}&network=ganache`).then(r => r.json());
+        const ganAuth = await fetch(`${BASE_URL}/api/blockchain/is-authorized?address=${unauthorizedAccount}&network=ganache`).then(r => r.json());
         assert.strictEqual(ganAuth.authorized, false, "Random account must not be authorized on Ganache");
 
         // Verify cross-network: Ganache owner on Sepolia should NOT be authorized unless added
-        const crossAuth = await fetch(`http://localhost:3000/api/blockchain/is-authorized?address=${ganacheOwner}&network=sepolia`).then(r => r.json());
+        const crossAuth = await fetch(`${BASE_URL}/api/blockchain/is-authorized?address=${ganacheOwner}&network=sepolia`).then(r => r.json());
         assert.strictEqual(crossAuth.authorized, false, "Ganache owner is unauthorized on Sepolia by default");
 
         console.log("  ✓ Unauthorized account rejected on Sepolia contract (authorized: false).");

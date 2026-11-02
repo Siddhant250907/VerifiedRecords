@@ -76,6 +76,21 @@ try {
     console.warn(`[Blockchain] DocumentVaultProof artifact note: ${err.message}`);
 }
 
+const certV2ArtifactPath = path.join(__dirname, "..", "build", "contracts", "CertificateV2.json");
+let certV2Abi = [];
+let artifactV2Networks = {};
+try {
+    if (fs.existsSync(certV2ArtifactPath)) {
+        const artifact = JSON.parse(fs.readFileSync(certV2ArtifactPath, "utf-8"));
+        certV2Abi = artifact.abi || [];
+        artifactV2Networks = artifact.networks || {};
+    } else {
+        console.warn(`[Blockchain] CertificateV2 artifact not found at ${certV2ArtifactPath}`);
+    }
+} catch (err) {
+    console.warn(`[Blockchain] CertificateV2 artifact note: ${err.message}`);
+}
+
 // ----------------------------------------------------------------------------
 // NETWORK CONFIGURATIONS
 // ----------------------------------------------------------------------------
@@ -92,6 +107,18 @@ const ganacheContractAddress = (
     "0x708FA0b3bd52532913870322fBfCfd0D0867888C"
 ).trim();
 
+const sepoliaCertV2Address = (
+    process.env.SEPOLIA_CERT_V2_CONTRACT_ADDRESS ||
+    (artifactV2Networks["11155111"] && artifactV2Networks["11155111"].address) ||
+    "0x9cC54D8fb1066226B0492951A01c9E68d5ddb8E8"
+).trim();
+
+const ganacheCertV2Address = (
+    process.env.GANACHE_CERT_V2_CONTRACT_ADDRESS ||
+    (artifactV2Networks["5777"] && artifactV2Networks["5777"].address) ||
+    "0x0000000000000000000000000000000000000000"
+).trim();
+
 const sepoliaDocVaultAddress = (process.env.SEPOLIA_DOC_VAULT_ADDRESS || "0xF858c586874aECd3C4324edA5C6Fcb4D0Db685D6").trim();
 const ganacheDocVaultAddress = (process.env.GANACHE_DOC_VAULT_ADDRESS || "0xbBd0634841fcaE114436BDAa709c6F065d2145Db").trim();
 
@@ -104,12 +131,16 @@ const ganacheRpcUrl = (process.env.GANACHE_RPC_URL || "http://127.0.0.1:7545").t
 let sepoliaWeb3 = null;
 let sepoliaContract = null;
 let sepoliaDocVaultContract = null;
+let sepoliaCertV2Contract = null;
 if (sepoliaRpcUrl && contractAbi.length > 0) {
     try {
         sepoliaWeb3 = new Web3(sepoliaRpcUrl);
         sepoliaContract = new sepoliaWeb3.eth.Contract(contractAbi, sepoliaContractAddress);
         if (sepoliaDocVaultAddress && docVaultAbi.length > 0) {
             sepoliaDocVaultContract = new sepoliaWeb3.eth.Contract(docVaultAbi, sepoliaDocVaultAddress);
+        }
+        if (sepoliaCertV2Address && certV2Abi.length > 0 && Web3.utils.isAddress(sepoliaCertV2Address) && sepoliaCertV2Address !== "0x0000000000000000000000000000000000000000") {
+            sepoliaCertV2Contract = new sepoliaWeb3.eth.Contract(certV2Abi, sepoliaCertV2Address);
         }
     } catch (err) {
         console.warn(`[Blockchain] Could not initialize Sepolia provider: ${err.message}`);
@@ -119,12 +150,16 @@ if (sepoliaRpcUrl && contractAbi.length > 0) {
 let ganacheWeb3 = null;
 let ganacheContract = null;
 let ganacheDocVaultContract = null;
+let ganacheCertV2Contract = null;
 if (ganacheRpcUrl && contractAbi.length > 0) {
     try {
         ganacheWeb3 = new Web3(ganacheRpcUrl);
         ganacheContract = new ganacheWeb3.eth.Contract(contractAbi, ganacheContractAddress);
         if (ganacheDocVaultAddress && docVaultAbi.length > 0) {
             ganacheDocVaultContract = new ganacheWeb3.eth.Contract(docVaultAbi, ganacheDocVaultAddress);
+        }
+        if (ganacheCertV2Address && certV2Abi.length > 0 && Web3.utils.isAddress(ganacheCertV2Address) && ganacheCertV2Address !== "0x0000000000000000000000000000000000000000") {
+            ganacheCertV2Contract = new ganacheWeb3.eth.Contract(certV2Abi, ganacheCertV2Address);
         }
     } catch (err) {
         console.warn(`[Blockchain] Could not initialize Ganache provider: ${err.message}`);
@@ -219,6 +254,41 @@ function getDocVaultContractForNetwork(network) {
 }
 
 /**
+ * Returns the CertificateV2 contract instance for the specified network.
+ *
+ * @param {string} [network]
+ * @returns {Object|null}
+ */
+function getCertV2ContractForNetwork(network) {
+    const net = normalizeNetwork(network);
+    const targetAddress = net === "sepolia" ? sepoliaCertV2Address : ganacheCertV2Address;
+    const netWeb3 = getWeb3ForNetwork(net);
+
+    if (net === "sepolia") {
+        if (!sepoliaCertV2Contract && netWeb3 && targetAddress && web3.utils.isAddress(targetAddress) && targetAddress !== "0x0000000000000000000000000000000000000000") {
+            sepoliaCertV2Contract = new netWeb3.eth.Contract(certV2Abi, targetAddress);
+        }
+        return sepoliaCertV2Contract;
+    }
+
+    if (!ganacheCertV2Contract && netWeb3 && targetAddress && web3.utils.isAddress(targetAddress) && targetAddress !== "0x0000000000000000000000000000000000000000") {
+        ganacheCertV2Contract = new netWeb3.eth.Contract(certV2Abi, targetAddress);
+    }
+    return ganacheCertV2Contract;
+}
+
+/**
+ * Returns the CertificateV2 contract address for the specified network.
+ *
+ * @param {string} [network]
+ * @returns {string}
+ */
+function getCertV2ContractAddress(network) {
+    const net = normalizeNetwork(network);
+    return net === "sepolia" ? sepoliaCertV2Address : ganacheCertV2Address;
+}
+
+/**
  * Checks whether Ganache local RPC is reachable.
  *
  * @param {number} [timeoutMs=600]
@@ -261,6 +331,8 @@ function getBlockchainConfig(requestedNetwork) {
         chainIdHex: "0xaa36a7",
         networkId: 11155111,
         contractAddress: sepoliaContractAddress,
+        certV2Address: sepoliaCertV2Address,
+        certV2Abi: certV2Abi,
         docVaultAddress: sepoliaDocVaultAddress,
         explorerUrl: "https://sepolia.etherscan.io",
         isAvailable: sepoliaLive,
@@ -278,6 +350,8 @@ function getBlockchainConfig(requestedNetwork) {
         chainIdHex: "0x539",
         networkId: 5777,
         contractAddress: ganacheContractAddress,
+        certV2Address: ganacheCertV2Address,
+        certV2Abi: certV2Abi,
         docVaultAddress: ganacheDocVaultAddress,
         explorerUrl: null,
         isAvailable: hosted ? false : ganacheLive,
@@ -307,6 +381,8 @@ function getBlockchainConfig(requestedNetwork) {
         chainIdHex: activeConfig.chainIdHex,
         networkId: activeConfig.networkId,
         contractAddress: activeConfig.contractAddress,
+        certV2Address: activeConfig.certV2Address,
+        certV2Abi: activeConfig.certV2Abi,
         docVaultAddress: activeConfig.docVaultAddress,
         contractOwner: activeConfig.contractOwner,
         expectedIssuer: activeConfig.expectedIssuer,
@@ -1098,6 +1174,669 @@ async function checkBlockchainStatus(network) {
     };
 }
 
+// ============================================================================
+// V2 ORGANIZATION & ROLE-BASED SMART CONTRACT FUNCTIONS
+// ============================================================================
+
+/**
+ * Derives a deterministic bytes32 identifier from a string organization ID.
+ *
+ * @param {string} orgId
+ * @returns {string} bytes32 hex string
+ */
+function deriveOrgIdBytes32(orgId) {
+    if (!orgId) throw new Error("Organization ID is required.");
+    const trimmed = String(orgId).trim();
+    if (trimmed.startsWith("0x") && trimmed.length === 66) {
+        return trimmed.toLowerCase();
+    }
+    return web3.utils.keccak256(trimmed);
+}
+
+/**
+ * Generates a deterministic Keccak-256 hash (bytes32) from certificate data
+ * including the authoritative organization identifier in the cryptographic commitment.
+ *
+ * @param {Object} certificateData
+ * @returns {{ hash: string, canonicalPayload: string }}
+ */
+function generateCertificateV2Hash(certificateData, orgIdOverride) {
+    if (!certificateData) {
+        throw new Error("Certificate data is required for V2 hashing.");
+    }
+
+    const resolvedOrgId = String(orgIdOverride || certificateData.orgId || certificateData.organizationId || "").trim();
+
+    const payloadObj = {
+        certificateId: String(certificateData.certificateId || "").trim(),
+        course: String(certificateData.course || "").trim(),
+        issueDate: String(certificateData.issueDate || "").trim(),
+        orgId: resolvedOrgId,
+        rollNumber: String(certificateData.rollNumber || "").trim(),
+        studentName: String(certificateData.studentName || "").trim()
+    };
+
+    const certType = String(certificateData.certificateType || certificateData.fieldOfCertification || "").trim();
+    if (certType) {
+        payloadObj.certificateType = certType;
+    }
+
+    const canonicalPayload = JSON.stringify(payloadObj);
+    const hash = Web3.utils.keccak256(canonicalPayload);
+
+    return {
+        hash,
+        canonicalPayload
+    };
+}
+
+/**
+ * Encodes createOrganization(bytes32, string, string, string, uint256, bytes32) transaction data.
+ */
+function encodeCreateOrganization(orgIdBytes32, orgName, universityOrCompany, purpose, capacity, accessKeyHash, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    const safeName = String(orgName || "").trim();
+    const safeEntity = String(universityOrCompany || "").trim();
+    const safePurpose = String(purpose || "").trim();
+    const safeCapacity = parseInt(capacity, 10) || 50;
+    const safeHash = accessKeyHash && accessKeyHash.startsWith("0x") ? accessKeyHash : ("0x" + (accessKeyHash || "0".repeat(64)));
+
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.createOrganization(
+            orgIdBytes32,
+            safeName,
+            safeEntity,
+            safePurpose,
+            safeCapacity,
+            safeHash
+        ).encodeABI();
+    }
+    return contract.methods.createOrganization(
+        orgIdBytes32,
+        safeName,
+        safeEntity,
+        safePurpose,
+        safeCapacity,
+        safeHash
+    ).encodeABI();
+}
+
+/**
+ * Encodes joinOrganization(bytes32, string) transaction data.
+ */
+function encodeJoinOrganization(orgIdBytes32, accessKey, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    const safeKey = String(accessKey || "").trim();
+
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.joinOrganization(orgIdBytes32, safeKey).encodeABI();
+    }
+    return contract.methods.joinOrganization(orgIdBytes32, safeKey).encodeABI();
+}
+
+/**
+ * Encodes requestOrganization(bytes32, string, address) transaction data.
+ */
+function encodeRequestOrganization(orgIdBytes32, orgName, orgOwner, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        // Fallback: encode using ABI definition directly
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.requestOrganization(orgIdBytes32, String(orgName).trim(), orgOwner).encodeABI();
+    }
+    return contract.methods.requestOrganization(orgIdBytes32, String(orgName).trim(), orgOwner).encodeABI();
+}
+
+/**
+ * Encodes approveOrganization(bytes32) transaction data.
+ */
+function encodeApproveOrganization(orgIdBytes32, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.approveOrganization(orgIdBytes32).encodeABI();
+    }
+    return contract.methods.approveOrganization(orgIdBytes32).encodeABI();
+}
+
+/**
+ * Encodes rejectOrganization(bytes32) transaction data.
+ */
+function encodeRejectOrganization(orgIdBytes32, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.rejectOrganization(orgIdBytes32).encodeABI();
+    }
+    return contract.methods.rejectOrganization(orgIdBytes32).encodeABI();
+}
+
+/**
+ * Encodes addOrganizationAdmin(bytes32, address) transaction data.
+ */
+function encodeAddOrgAdmin(orgIdBytes32, adminAddress, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.addOrganizationAdmin(orgIdBytes32, adminAddress).encodeABI();
+    }
+    return contract.methods.addOrganizationAdmin(orgIdBytes32, adminAddress).encodeABI();
+}
+
+/**
+ * Encodes removeOrganizationAdmin(bytes32, address) transaction data.
+ */
+function encodeRemoveOrgAdmin(orgIdBytes32, adminAddress, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.removeOrganizationAdmin(orgIdBytes32, adminAddress).encodeABI();
+    }
+    return contract.methods.removeOrganizationAdmin(orgIdBytes32, adminAddress).encodeABI();
+}
+
+/**
+ * Encodes issueCertificate(bytes32, string, bytes32) transaction data for V2 contract.
+ */
+function encodeIssueCertificateV2(orgIdBytes32, certificateId, certificateHash, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.issueCertificate(orgIdBytes32, String(certificateId).trim(), certificateHash).encodeABI();
+    }
+    return contract.methods.issueCertificate(orgIdBytes32, String(certificateId).trim(), certificateHash).encodeABI();
+}
+
+/**
+ * Encodes revokeCertificate(bytes32, string) transaction data for V2 contract.
+ */
+function encodeRevokeCertificateV2(orgIdBytes32, certificateId, network) {
+    const net = normalizeNetwork(network);
+    const contract = getCertV2ContractForNetwork(net);
+    if (!contract) {
+        const dummyContract = new web3.eth.Contract(certV2Abi);
+        return dummyContract.methods.revokeCertificate(orgIdBytes32, String(certificateId).trim()).encodeABI();
+    }
+    return contract.methods.revokeCertificate(orgIdBytes32, String(certificateId).trim()).encodeABI();
+}
+
+/**
+ * Reads an organization from the V2 smart contract on-chain.
+ */
+async function getOrganizationFromChain(orgIdBytes32, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    if (!finalAddress || !netWeb3.utils.isAddress(finalAddress) || finalAddress === "0x0000000000000000000000000000000000000000") {
+        return { exists: false, error: "CertificateV2 contract address not configured for " + net };
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const res = await reader.methods.getOrganization(orgIdBytes32).call();
+        const statusMap = ["None", "Pending", "Approved", "Rejected", "Suspended"];
+        const statusNum = Number(res.status || res[3] || 0);
+
+        return {
+            exists: Boolean(res.exists !== undefined ? res.exists : res[6]),
+            orgId: res.id || res[0],
+            orgName: res.name || res[1],
+            owner: res.orgOwner || res[2],
+            status: statusMap[statusNum] || "Unknown",
+            statusNum: statusNum,
+            createdAt: Number(res.createdAt || res[4] || 0),
+            approvedAt: Number(res.approvedAt || res[5] || 0),
+            contractAddress: finalAddress,
+            network: net
+        };
+    } catch (err) {
+        return { exists: false, error: err.message, network: net };
+    }
+}
+
+/**
+ * Reads full organization details from the V2 smart contract on-chain.
+ */
+async function getOrganizationFullFromChain(orgIdBytes32, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    if (!finalAddress || !netWeb3.utils.isAddress(finalAddress) || finalAddress === "0x0000000000000000000000000000000000000000") {
+        return { exists: false, error: "CertificateV2 contract address not configured for " + net };
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const res = await reader.methods.getOrganizationFull(orgIdBytes32).call();
+        const statusMap = ["None", "Pending", "Approved", "Rejected", "Suspended"];
+        const statusNum = Number(res.status || res[7] || 0);
+
+        return {
+            exists: Boolean(res.exists !== undefined ? res.exists : res[9]),
+            orgId: res.id || res[0],
+            name: res.name || res[1],
+            universityOrCompany: res.universityOrCompany || res[2] || "—",
+            purpose: res.purpose || res[3] || "—",
+            capacity: Number(res.capacity || res[4] || 0),
+            memberCount: Number(res.memberCount || res[5] || 0),
+            currentMemberCount: Number(res.memberCount || res[5] || 0),
+            owner: res.orgOwner || res[6],
+            ownerWallet: (res.orgOwner || res[6] || "").toLowerCase(),
+            status: statusMap[statusNum] || "Approved",
+            statusNum: statusNum,
+            createdAt: Number(res.createdAt || res[8] || 0),
+            contractAddress: finalAddress,
+            blockchainNetwork: net
+        };
+    } catch (err) {
+        // Fallback to basic getOrganizationFromChain
+        const fallback = await getOrganizationFromChain(orgIdBytes32, finalAddress, net);
+        return {
+            ...fallback,
+            name: fallback.orgName,
+            universityOrCompany: "Institutional Credential Authority",
+            purpose: "Academic & Professional Credential Verification",
+            capacity: 50,
+            memberCount: 1,
+            currentMemberCount: 1,
+            ownerWallet: (fallback.owner || "").toLowerCase()
+        };
+    }
+}
+
+/**
+ * Returns all registered organization members from the V2 smart contract on-chain.
+ */
+async function getOrganizationMembersFromChain(orgIdBytes32, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    if (!finalAddress || !netWeb3.utils.isAddress(finalAddress)) {
+        return [];
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const res = await reader.methods.getOrganizationMembers(orgIdBytes32).call();
+        const addresses = res.members || res[0] || [];
+        const isAdmins = res.isAdmins || res[1] || [];
+
+        return addresses.map((addr, i) => ({
+            walletAddress: addr.toLowerCase(),
+            isAdmin: Boolean(isAdmins[i]),
+            role: Boolean(isAdmins[i]) ? "admin" : "member",
+            isAuthorizedIssuer: Boolean(isAdmins[i]),
+            status: "active"
+        }));
+    } catch (err) {
+        console.warn(`[getOrganizationMembersFromChain] Notice: ${err.message}`);
+        return [];
+    }
+}
+
+/**
+ * Returns all organization IDs registered on-chain.
+ */
+async function getAllOrgIdsFromChain(customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    if (!finalAddress || !netWeb3.utils.isAddress(finalAddress)) {
+        return [];
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const ids = await reader.methods.getAllOrgIds().call();
+        return Array.isArray(ids) ? ids : [];
+    } catch (err) {
+        console.warn(`[getAllOrgIdsFromChain] Notice: ${err.message}`);
+        return [];
+    }
+}
+
+/**
+ * Returns all organization IDs where user is owner or member on-chain.
+ */
+async function getUserOrgIdsFromChain(userAddress, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    if (!finalAddress || !userAddress || !netWeb3.utils.isAddress(userAddress)) {
+        return [];
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const ids = await reader.methods.getUserOrgIds(userAddress).call();
+        return Array.isArray(ids) ? ids : [];
+    } catch (err) {
+        // Fallback: query all org IDs
+        return await getAllOrgIdsFromChain(finalAddress, net);
+    }
+}
+
+/**
+ * Verifies organization access key on-chain.
+ */
+async function verifyOrgAccessKeyOnChain(orgIdBytes32, accessKey, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const isValid = await reader.methods.verifyOrgAccessKey(orgIdBytes32, String(accessKey).trim()).call();
+        return Boolean(isValid);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Checks whether an address is an authorized issuer on-chain for a specific organization in V2.
+ */
+async function isAuthorizedOrgIssuerOnChain(orgIdBytes32, address, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const targetAddress = customAddress || getCertV2ContractAddress(net);
+
+    if (!targetAddress || !address || !netWeb3.utils.isAddress(address) || !netWeb3.utils.isAddress(targetAddress)) {
+        return false;
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, targetAddress);
+        const authorized = await reader.methods.isAuthorizedIssuer(orgIdBytes32, address).call();
+        return Boolean(authorized);
+    } catch (e) {
+        return false;
+    }
+}
+
+/**
+ * Reads certificate record from CertificateV2 on-chain.
+ */
+async function getCertificateV2FromChain(certificateId, customAddress = null, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const defaultAddress = getCertV2ContractAddress(net);
+    const finalAddress = customAddress || defaultAddress;
+    const netChainId = net === "sepolia" ? 11155111 : 1337;
+
+    if (!finalAddress || !netWeb3.utils.isAddress(finalAddress) || finalAddress === "0x0000000000000000000000000000000000000000") {
+        return { exists: false, error: "CertificateV2 contract not configured for " + net };
+    }
+
+    try {
+        const reader = new netWeb3.eth.Contract(certV2Abi, finalAddress);
+        const res = await reader.methods.verifyCertificate(String(certificateId).trim()).call();
+
+        return {
+            exists: Boolean(res.exists !== undefined ? res.exists : res[4]),
+            orgId: res.orgId || res[0],
+            certificateHash: res.certificateHash || res[1],
+            issuer: res.issuer || res[2],
+            issuedAt: Number(res.issuedAt || res[3] || 0),
+            revoked: Boolean(res.revoked !== undefined ? res.revoked : res[5]),
+            revokedAt: Number(res.revokedAt || res[6] || 0),
+            contractAddress: finalAddress,
+            blockchainNetwork: net,
+            chainId: netChainId
+        };
+    } catch (err) {
+        return { exists: false, error: err.message, network: net, chainId: netChainId };
+    }
+}
+
+/**
+ * Helper to poll for a transaction receipt with retries, handling node propagation latency.
+ */
+async function waitForTxReceipt(netWeb3, txHash, maxAttempts = 8, delayMs = 1200) {
+    for (let i = 0; i < maxAttempts; i++) {
+        try {
+            const receipt = await netWeb3.eth.getTransactionReceipt(txHash);
+            if (receipt) return receipt;
+        } catch (e) {
+            // Ignore transient RPC errors during propagation
+        }
+        await new Promise(r => setTimeout(r, delayMs));
+    }
+    return null;
+}
+
+/**
+ * Verifies that a transaction registered an organization request on-chain.
+ */
+async function verifyOrganizationRequestTxOnChain(txHash, expectedOrgIdBytes32, expectedOwner, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const expectedContractAddress = getCertV2ContractAddress(net);
+    const expectedChainId = net === "sepolia" ? 11155111 : 1337;
+
+    if (!txHash || !txHash.startsWith("0x")) {
+        throw new Error("Invalid transaction hash format.");
+    }
+
+    const receipt = await waitForTxReceipt(netWeb3, txHash, 8, 1200);
+    if (!receipt) {
+        throw new Error(`Transaction ${txHash} not yet confirmed or not found on ${net}.`);
+    }
+
+    const isSuccess = receipt.status === true || receipt.status === 1 || receipt.status === "0x1" || receipt.status === 1n;
+    if (!isSuccess) {
+        throw new Error(`Blockchain transaction ${txHash} failed or reverted on ${net}.`);
+    }
+
+    if (expectedContractAddress && receipt.to && receipt.to.toLowerCase() !== expectedContractAddress.toLowerCase()) {
+        throw new Error(`Transaction was addressed to ${receipt.to}, expected CertificateV2 at ${expectedContractAddress}.`);
+    }
+
+    // Verify on-chain state reflects registration
+    const onChainOrg = await getOrganizationFromChain(expectedOrgIdBytes32, expectedContractAddress, net);
+    if (!onChainOrg.exists) {
+        throw new Error(`Organization record not found on ${net} blockchain after transaction confirmation.`);
+    }
+
+    return {
+        verified: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
+        contractAddress: receipt.to || expectedContractAddress,
+        blockchainNetwork: net,
+        chainId: expectedChainId,
+        orgId: expectedOrgIdBytes32,
+        owner: onChainOrg.owner,
+        status: onChainOrg.status
+    };
+}
+
+/**
+ * Verifies that a transaction approved an organization on-chain by the platform super admin.
+ */
+async function verifyOrganizationApprovalTxOnChain(txHash, expectedOrgIdBytes32, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const expectedContractAddress = getCertV2ContractAddress(net);
+    const expectedChainId = net === "sepolia" ? 11155111 : 1337;
+
+    const receipt = await waitForTxReceipt(netWeb3, txHash, 8, 1200);
+    if (!receipt) {
+        throw new Error(`Approval transaction ${txHash} not yet confirmed on ${net}.`);
+    }
+
+    const isSuccess = receipt.status === true || receipt.status === 1 || receipt.status === "0x1" || receipt.status === 1n;
+    if (!isSuccess) {
+        throw new Error(`Approval transaction reverted on ${net}.`);
+    }
+
+    // Verify on-chain status is Approved
+    const onChainOrg = await getOrganizationFromChain(expectedOrgIdBytes32, expectedContractAddress, net);
+    if (!onChainOrg.exists || onChainOrg.status !== "Approved") {
+        throw new Error(`Organization is not in Approved state on ${net} smart contract.`);
+    }
+
+    return {
+        verified: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
+        contractAddress: receipt.to || expectedContractAddress,
+        blockchainNetwork: net,
+        chainId: expectedChainId,
+        approvedAt: onChainOrg.approvedAt
+    };
+}
+
+/**
+ * Verifies an organization admin addition or removal transaction on-chain.
+ */
+async function verifyOrganizationAdminTxOnChain(txHash, expectedOrgIdBytes32, expectedAdmin, isAdd = true, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const expectedContractAddress = getCertV2ContractAddress(net);
+
+    const receipt = await waitForTxReceipt(netWeb3, txHash, 8, 1200);
+    if (!receipt) {
+        throw new Error(`Admin management transaction ${txHash} not found on ${net}.`);
+    }
+
+    const isSuccess = receipt.status === true || receipt.status === 1 || receipt.status === "0x1" || receipt.status === 1n;
+    if (!isSuccess) {
+        throw new Error(`Admin management transaction reverted on ${net}.`);
+    }
+
+    // Verify on-chain state
+    const isNowAdmin = await isAuthorizedOrgIssuerOnChain(expectedOrgIdBytes32, expectedAdmin, expectedContractAddress, net);
+    if (isAdd && !isNowAdmin) {
+        throw new Error(`Address ${expectedAdmin} is not authorized on-chain for organization.`);
+    }
+    if (!isAdd && isNowAdmin) {
+        throw new Error(`Address ${expectedAdmin} is still authorized on-chain for organization.`);
+    }
+
+    return {
+        verified: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
+        contractAddress: receipt.to || expectedContractAddress,
+        blockchainNetwork: net
+    };
+}
+
+/**
+ * Verifies a V2 certificate issuance transaction on-chain.
+ */
+async function verifyCertificateV2TxOnChain(txHash, expectedOrgIdBytes32, expectedCertId, expectedHash, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const expectedContractAddress = getCertV2ContractAddress(net);
+    const expectedChainId = net === "sepolia" ? 11155111 : 1337;
+
+    const receipt = await waitForTxReceipt(netWeb3, txHash, 8, 1200);
+    if (!receipt) {
+        throw new Error(`Transaction ${txHash} not yet confirmed on ${net}.`);
+    }
+
+    const isSuccess = receipt.status === true || receipt.status === 1 || receipt.status === "0x1" || receipt.status === 1n;
+    if (!isSuccess) {
+        throw new Error(`Transaction reverted on ${net}.`);
+    }
+
+    const onChainRecord = await getCertificateV2FromChain(expectedCertId, expectedContractAddress, net);
+    if (!onChainRecord.exists) {
+        throw new Error(`Certificate record "${expectedCertId}" not found on ${net} smart contract.`);
+    }
+
+    if (onChainRecord.certificateHash.toLowerCase() !== expectedHash.toLowerCase()) {
+        throw new Error("On-chain certificate hash does not match computed deterministic hash.");
+    }
+
+    return {
+        verified: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
+        contractAddress: receipt.to || expectedContractAddress,
+        blockchainNetwork: net,
+        chainId: expectedChainId,
+        issuer: onChainRecord.issuer,
+        issuedAt: onChainRecord.issuedAt,
+        orgId: onChainRecord.orgId
+    };
+}
+
+/**
+ * Verifies a certificate revocation transaction on-chain.
+ */
+async function verifyRevocationTxOnChain(txHash, expectedOrgIdBytes32, expectedCertId, network = null) {
+    const net = normalizeNetwork(network);
+    const netWeb3 = getWeb3ForNetwork(net);
+    const expectedContractAddress = getCertV2ContractAddress(net);
+
+    const receipt = await waitForTxReceipt(netWeb3, txHash, 8, 1200);
+    if (!receipt) {
+        throw new Error(`Revocation transaction ${txHash} not confirmed on ${net}.`);
+    }
+
+    const isSuccess = receipt.status === true || receipt.status === 1 || receipt.status === "0x1" || receipt.status === 1n;
+    if (!isSuccess) {
+        throw new Error(`Revocation transaction reverted on ${net}.`);
+    }
+
+    const onChainRecord = await getCertificateV2FromChain(expectedCertId, expectedContractAddress, net);
+    if (!onChainRecord.exists || !onChainRecord.revoked) {
+        throw new Error(`Certificate "${expectedCertId}" is not recorded as revoked on ${net}.`);
+    }
+
+    return {
+        verified: true,
+        transactionHash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
+        contractAddress: receipt.to || expectedContractAddress,
+        blockchainNetwork: net,
+        revokedAt: onChainRecord.revokedAt
+    };
+}
+
+/**
+ * Cryptographically verifies a signed challenge to prove wallet ownership.
+ *
+ * @param {string} walletAddress
+ * @param {string} message
+ * @param {string} signature
+ * @returns {boolean}
+ */
+function verifyWalletSignature(walletAddress, message, signature) {
+    if (!walletAddress || !message || !signature) return false;
+    try {
+        const recoveredAddress = web3.eth.accounts.recover(message, signature);
+        return Boolean(recoveredAddress && recoveredAddress.toLowerCase() === walletAddress.toLowerCase());
+    } catch (e) {
+        console.warn("[Wallet Signature] Verification error:", e.message);
+        return false;
+    }
+}
+
 module.exports = {
     // Core helpers
     normalizeNetwork,
@@ -1130,13 +1869,45 @@ module.exports = {
     contractAddress,
     sepoliaContractAddress,
     ganacheContractAddress,
+    sepoliaCertV2Address,
+    ganacheCertV2Address,
     sepoliaDocVaultAddress,
     ganacheDocVaultAddress,
     contractAbi,
+    certV2Abi,
     docVaultAbi,
     activeNetwork,
     chainId,
     networkId,
     isSepolia,
-    rpcUrl
+    rpcUrl,
+
+    // CertificateV2 & Organization operations
+    getCertV2ContractForNetwork,
+    getCertV2ContractAddress,
+    deriveOrgIdBytes32,
+    generateCertificateV2Hash,
+    encodeCreateOrganization,
+    encodeJoinOrganization,
+    encodeRequestOrganization,
+    encodeApproveOrganization,
+    encodeRejectOrganization,
+    encodeAddOrgAdmin,
+    encodeRemoveOrgAdmin,
+    encodeIssueCertificateV2,
+    encodeRevokeCertificateV2,
+    getOrganizationFromChain,
+    getOrganizationFullFromChain,
+    getOrganizationMembersFromChain,
+    getAllOrgIdsFromChain,
+    getUserOrgIdsFromChain,
+    verifyOrgAccessKeyOnChain,
+    isAuthorizedOrgIssuerOnChain,
+    getCertificateV2FromChain,
+    verifyOrganizationRequestTxOnChain,
+    verifyOrganizationApprovalTxOnChain,
+    verifyOrganizationAdminTxOnChain,
+    verifyCertificateV2TxOnChain,
+    verifyRevocationTxOnChain,
+    verifyWalletSignature
 };

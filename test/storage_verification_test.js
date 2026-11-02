@@ -19,7 +19,7 @@ const mongoose = require("mongoose");
 const Document = require("../server/models/document");
 const { verifyAssetExists, fetchEncryptedBuffer, deleteEncryptedAsset } = require("../server/cloudinary");
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 const TEST_TOKEN = "test-token-test_storage_user_999";
 const EXISTING_DOC_ID = "8e18df29-4656-49cc-bd2e-d3850edd6095";
 

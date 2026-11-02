@@ -19,6 +19,13 @@ module.exports = async function (deployer, network, accounts) {
   console.log(`[Migration] DocumentVaultProof deployed at: ${vaultInstance.address}`);
   console.log(`=======================================================`);
 
+  // 3. Deploy CertificateV2 (Organization Registry & Role-Based Issuance)
+  const CertificateV2 = artifacts.require("CertificateV2");
+  await deployer.deploy(CertificateV2);
+  const certV2Instance = await CertificateV2.deployed();
+  console.log(`[Migration] CertificateV2 deployed at: ${certV2Instance.address}`);
+  console.log(`=======================================================`);
+
   // 2. Ensure initial issuer is authorized by contract owner if configured
   const initialIssuer = process.env.INITIAL_ISSUER_ADDRESS;
   if (initialIssuer && web3.utils.isAddress(initialIssuer)) {

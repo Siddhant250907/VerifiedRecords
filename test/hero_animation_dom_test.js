@@ -24,10 +24,12 @@ function assert(condition, message) {
     }
 }
 
-// 1. Fetch live http://localhost:3000/index.html
+const PORT = process.env.PORT || 5000;
+
+// 1. Fetch live http://localhost:PORT/index.html
 function fetchLiveHTML() {
     return new Promise((resolve, reject) => {
-        http.get('http://localhost:3000/index.html', (res) => {
+        http.get(`http://localhost:${PORT}/index.html`, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => resolve(data));
@@ -36,7 +38,7 @@ function fetchLiveHTML() {
 }
 
 async function runTests() {
-    console.log('1. Testing Live Server Response (http://localhost:3000/index.html)...');
+    console.log(`1. Testing Live Server Response (http://localhost:${PORT}/index.html)...`);
     let html = '';
     try {
         html = await fetchLiveHTML();
@@ -63,11 +65,12 @@ async function runTests() {
     const row1Content = html.substring(row1Idx, row2Idx);
     const row2Content = html.substring(row2Idx, html.indexOf('</div>\n                    </div>\n                </div>', row2Idx) + 50);
 
-    assert(row1Content.includes('id="btnServiceIssue"') && row1Content.includes('href="admin.html"'), 'Row 1 contains Issue a Certificate (admin.html)');
+    assert((row1Content.includes('id="btnServiceJoinOrg"') || row1Content.includes('id="btnServiceIssue"')) && row1Content.includes('Join the Organization'), 'Row 1 contains Join the Organization button');
+    assert(row1Content.includes('admin.html?action=join-org'), 'Join the Organization links to admin.html?action=join-org');
     assert(row1Content.includes('id="btnServiceVerify"') && row1Content.includes('href="verify.html"'), 'Row 1 contains Verify a Certificate (verify.html)');
     assert(row1Content.includes('id="btnServiceSave"') && row1Content.includes('href="documents.html"'), 'Row 1 contains Save your Documents (documents.html)');
-    assert(row2Content.includes('id="btnServiceCreateOrg"') && row2Content.includes('openUpcomingOrgNotice(event)'), 'Row 2 contains Create Organization with handler');
-    assert(row2Content.includes('class="upcoming-tag">Soon</span>'), 'Create Organization has "Soon" tag preserved');
+    assert(row2Content.includes('id="btnServiceCreateOrg"') && row2Content.includes('admin.html?action=create-org'), 'Row 2 contains Create Organization linking to admin.html?action=create-org');
+    assert(!row2Content.includes('upcoming-tag'), 'Create Organization Soon tag has been removed for active usage');
 
     // Check CSS for buttons
     assert(css.includes('.services-buttons-row.services-row-primary') && css.includes('flex-wrap: nowrap;'), 'Desktop Row 1 is flex-wrap: nowrap (single line on desktop)');

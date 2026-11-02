@@ -13,7 +13,7 @@
 const http = require("http");
 const { Web3 } = require("web3");
 
-const BASE_URL = "http://127.0.0.1:3000";
+const BASE_URL = `http://127.0.0.1:${process.env.PORT || 5000}`;
 const GANACHE_RPC = "http://127.0.0.1:7545";
 
 function makeRequest(path, method = "GET", body = null, headers = {}) {

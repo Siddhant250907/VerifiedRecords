@@ -91,6 +91,45 @@ const certificateSchema = new mongoose.Schema({
         type: Number,
         required: false,
         default: null
+    },
+
+    orgId: {
+        type: String,
+        required: false,
+        default: null,
+        index: true
+    },
+
+    organizationName: {
+        type: String,
+        required: false,
+        default: null
+    },
+
+    contractVersion: {
+        type: String,
+        enum: ["v1", "v2"],
+        default: "v1"
+    },
+
+    isRevoked: {
+        type: Boolean,
+        default: false
+    },
+
+    revokedAt: {
+        type: Date,
+        default: null
+    },
+
+    revocationTxHash: {
+        type: String,
+        default: null
+    },
+
+    revocationIssuer: {
+        type: String,
+        default: null
     }
 });
 

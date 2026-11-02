@@ -1542,6 +1542,27 @@ function initNavbarBrandInteraction() {
 }
 
 // --------------------------------------------------------------------------
+// 8B. SERVICE BUTTON ROUTING (Join the Organization & Create Organization)
+// --------------------------------------------------------------------------
+function initServiceOrgLinks() {
+    const btnJoin = document.getElementById("btnServiceJoinOrg") || document.getElementById("btnServiceIssue");
+    if (btnJoin) {
+        btnJoin.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = "admin.html?action=join-org";
+        });
+    }
+
+    const btnCreate = document.getElementById("btnServiceCreateOrg");
+    if (btnCreate) {
+        btnCreate.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.location.href = "admin.html?action=create-org";
+        });
+    }
+}
+
+// --------------------------------------------------------------------------
 // 9. INITIALIZE ON DOM CONTENT LOADED
 // --------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
@@ -1552,6 +1573,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initFloatingParticles();
     initNavbarScroll();
     initNavbarBrandInteraction();
+    initServiceOrgLinks();
     initVideoCards();
     initVideoCardsScrollAnimation();
     initLiveStats();

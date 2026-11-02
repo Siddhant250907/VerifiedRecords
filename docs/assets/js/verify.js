@@ -406,6 +406,28 @@
             `;
         }
 
+        // Authoritative Organization Field (Requirement 9)
+        const orgDisplayName = cert.organizationName ||
+            (cert.orgId ? `Organization ID: ${cert.orgId}` : "Legacy / Unassigned Record");
+        const orgBadgeType = cert.orgId ? "Verified Organization" : "Legacy Record";
+        const orgBadgeIcon = cert.orgId ? "fa-shield-halved" : "fa-clock-rotate-left";
+
+        fieldsHtml += `
+            <div class="credential-field featured-org" style="grid-column: 1 / -1; background: #f8fafc; border: 1.5px solid #cbd5e1; border-left: 4px solid #004741; border-radius: 8px; padding: 10px 14px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span class="credential-label" style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                        <i class="fa-solid fa-building-columns" aria-hidden="true" style="color: #004741;"></i> Issuing Organization
+                    </span>
+                    <span class="credential-value" style="font-size: 14px; font-weight: 800; color: #004741;">
+                        Organization: ${escapeHtml(orgDisplayName)}
+                    </span>
+                </div>
+                <span class="cert-type-pill" style="font-size: 9px; font-weight: 700; background: #e6f4ea; color: #137333; padding: 3px 8px; border-radius: 6px; border: 1px solid #ceead6; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid ${orgBadgeIcon}" aria-hidden="true"></i> ${escapeHtml(orgBadgeType)}
+                </span>
+            </div>
+        `;
+
         // 2. Roll Number
         if (cert.rollNumber) {
             fieldsHtml += `
@@ -717,9 +739,20 @@
                     </p>
 
                     <!-- Student Name (Featured Highlight) -->
-                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-left: 4px solid #2563eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;">
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-left: 4px solid #2563eb; border-radius: 8px; padding: 12px 16px; margin-bottom: 10px;">
                         <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px;">Student Name</span>
                         <span style="font-size: 20px; font-weight: 800; color: #1e3a8a;">${escapeHtml(cert.studentName)}</span>
+                    </div>
+
+                    <!-- Authoritative Organization Field (Requirement 9) -->
+                    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-left: 4px solid #004741; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <span style="font-size: 8.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Issuing Organization</span>
+                            <span style="font-size: 14px; font-weight: 800; color: #004741;">Organization: ${escapeHtml(cert.organizationName || (cert.orgId ? `Organization ID: ${cert.orgId}` : "Legacy / Unassigned Record"))}</span>
+                        </div>
+                        <span style="font-size: 9px; font-weight: 700; background: #e6f4ea; color: #137333; padding: 3px 8px; border-radius: 6px; border: 1px solid #ceead6;">
+                            ${escapeHtml(cert.orgId ? "Verified Organization" : "Legacy Record")}
+                        </span>
                     </div>
 
                     <!-- Academic Details Grid -->
@@ -975,18 +1008,31 @@
                 result = null;
             }
 
-            // A. CHECK FOR HISTORICAL LOCAL PROOF ONLY (HOSTED ENVIRONMENT CHECK)
+            // A. CHECK FOR REVOCATION (REQUIREMENT 7 & 8)
+            if (result && result.isRevoked) {
+                const message = "Certificate Revoked";
+                const subtext = result.message || "This certificate has been officially revoked by the issuing organization and is no longer valid.";
+                openInvalidModal(message, subtext);
+                showInlineAlert("danger", message, subtext);
+                return;
+            }
+
+            // B. CHECK FOR HISTORICAL LOCAL PROOF ONLY (HOSTED ENVIRONMENT CHECK)
             if (result && result.localProofOnly && result.certificate) {
                 showInlineAlert(
                     "warning",
                     "Historical Local Proof",
                     result.message || "This certificate was registered on a local Ganache development blockchain. Live on-chain verification is unavailable from this hosted environment."
                 );
+                if (result.organization && result.certificate) {
+                    result.certificate.organizationName = result.organization.name;
+                    result.certificate.orgId = result.organization.orgId;
+                }
                 renderVerifiedResult(result.certificate, result.blockchain);
                 return;
             }
 
-            // B. NOT VERIFIED / NOT FOUND
+            // C. NOT VERIFIED / NOT FOUND
             if (!response.ok || !result || result.verified !== true || !result.certificate) {
                 const message = "Certificate could not be verified.";
                 const subtext = (result && result.message) ? result.message : "Please check both Your Name and Your Certificate ID and try again.";
@@ -998,7 +1044,7 @@
                 return;
             }
 
-            // B. STRICT CLIENT-SIDE NAME AND ID MATCH VERIFICATION
+            // D. STRICT CLIENT-SIDE NAME AND ID MATCH VERIFICATION
             const normalize = (s) => String(s || "").toLowerCase().replace(/\s+/g, " ").trim();
             const inputNameNorm = normalize(trimmedName);
             const certNameNorm = normalize(result.certificate.studentName);
@@ -1013,7 +1059,14 @@
                 return;
             }
 
-            // C. BOTH MATCHED SUCCESSFULLY
+            // Attach authoritative organization snapshot to certificate object
+            if (result.organization && result.certificate) {
+                result.certificate.organizationName = result.organization.name;
+                result.certificate.orgId = result.organization.orgId;
+                result.certificate.isLegacy = result.organization.isLegacy;
+            }
+
+            // E. BOTH MATCHED SUCCESSFULLY
             closeInvalidModal();
             hideInlineAlert();
 

@@ -107,8 +107,10 @@ async function runVideoIntegrationTests() {
     assert(cssContent.includes('.video-modal-backdrop') && cssContent.includes('backdrop-filter: blur('), 'Modal backdrop blur retained');
     assert(cssContent.includes('.video-card') && cssContent.includes('border-radius:'), 'Card rounded corners retained');
 
+    const PORT = parseInt(process.env.PORT || "5000", 10);
+
     // 5. Check Live HTTP Serving on Local Express Server
-    console.log('\n5. Checking Live Express HTTP Serving (http://localhost:3000):');
+    console.log(`\n5. Checking Live Express HTTP Serving (http://localhost:${PORT}):`);
     const testEndpoints = [
         { path: '/assets/videos/administrative.mp4', expectedType: 'video/mp4' },
         { path: '/assets/videos/verification.mp4', expectedType: 'video/mp4' },
@@ -119,7 +121,7 @@ async function runVideoIntegrationTests() {
         await new Promise((resolve) => {
             const req = http.request({
                 hostname: 'localhost',
-                port: 3000,
+                port: PORT,
                 path: ep.path,
                 method: 'HEAD'
             }, (res) => {
@@ -140,7 +142,7 @@ async function runVideoIntegrationTests() {
     await new Promise((resolve) => {
         const req = http.request({
             hostname: 'localhost',
-            port: 3000,
+            port: PORT,
             path: '/assets/videos/administrative.mp4',
             method: 'GET',
             headers: { 'Range': 'bytes=0-100' }

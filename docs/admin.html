@@ -25,7 +25,7 @@
 
     <!-- Shared CSS Design System -->
     <link rel="stylesheet"
-          href="assets/css/style.css">
+          href="assets/css/style.css?v=2.3">
 
 </head>
 
@@ -161,249 +161,662 @@
         <div class="admin-container">
 
             <!-- ADMINISTRATIVE HEADER -->
-            <header class="admin-header">
+            <header class="admin-header" id="portalMainHeader">
                 <div class="admin-badge">
-                    <i class="fa-solid fa-stamp" aria-hidden="true"></i>
-                    <span>Office of the Registrar • Certificate Issuance Terminal</span>
+                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                    <span>Institutional Repository • Organization Management Portal</span>
                 </div>
 
                 <h1 class="page-title">
-                    Issue Academic <span>Certificate</span>
+                    Institutional <span>Organizations</span>
                 </h1>
 
                 <p class="admin-subtitle">
-                    Record and register an official academic degree or diploma in the university's permanent repository.
+                    Register a new institution on the blockchain, manage membership keys, or enter your organization workspace.
                 </p>
 
                 <!-- Officer email display (Preserved for auth.js) -->
-                <div class="admin-user-badge" id="adminUserBadge" style="display:none;">
+                <div class="admin-user-badge" id="adminUserBadge" style="display:none; border-radius: 6px;">
                     <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
-                    <span>Authorized Registrar:</span>
+                    <span>Authorized Officer:</span>
                     <span id="userEmail"></span>
                 </div>
 
                 <!-- Option to view MetaMask Account details (Only available AFTER successful authentication) -->
                 <div class="admin-wallet-toggle-wrap" id="adminWalletToggleWrap" style="display:none; margin-top: 8px;">
-                    <button type="button" class="admin-wallet-toggle-btn" id="toggleWalletDetailsBtn" title="Toggle MetaMask Details">
+                    <button type="button" class="admin-wallet-toggle-btn" id="toggleWalletDetailsBtn" title="Toggle MetaMask Details" style="border-radius: 6px;">
                         <i class="fa-solid fa-wallet" aria-hidden="true"></i>
-                        <span id="toggleWalletText">View MetaMask Details</span>
+                        <span id="toggleWalletText">View Platform Owner Status</span>
                         <i class="fa-solid fa-chevron-down" id="toggleWalletChevron" aria-hidden="true" style="font-size: 0.75rem; margin-left: 4px;"></i>
                     </button>
                 </div>
 
                 <!-- MetaMask status badge (Hidden by default, shown only when authenticated user opts in) -->
-                <div class="admin-user-badge" id="adminWalletBadge" style="display:none; margin-top: 8px;">
+                <div class="admin-user-badge" id="adminWalletBadge" style="display:none; margin-top: 8px; border-radius: 6px;">
                     <i class="fa-solid fa-wallet" aria-hidden="true"></i>
-                    <span>MetaMask Issuer:</span>
+                    <span>MetaMask Signer:</span>
                     <span id="adminWalletAccount" class="mono">Not Connected</span>
                 </div>
 
                 <!-- Active Admin USER ID Badge -->
-                <div class="admin-user-badge admin-id-badge" id="adminIdBadge" style="display:none; margin-top: 8px;">
+                <div class="admin-user-badge admin-id-badge" id="adminIdBadge" style="display:none; margin-top: 8px; border-radius: 6px;">
                     <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
                     <span>Admin USER ID:</span>
                     <strong id="activeAdminUserId"></strong>
-                    <button type="button" class="admin-badge-lock-btn" id="lockAdminBtn" title="Lock admin terminal / Switch account" aria-label="Lock Admin Session">
-                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                    <button type="button" class="admin-badge-lock-btn" id="lockAdminBtn" title="Lock admin session / Switch account" aria-label="Lock Admin Session" style="border-radius: 4px;">
+                        <i class="fa-solid fa-lock"></i>
                         <span>Lock</span>
                     </button>
                 </div>
             </header>
 
-
             <!-- ==========================================
-                 ADMIN SECURITY GATE (AUTHENTICATE OR CREATE ADMIN)
+                 SECTION 1: ORGANIZATION PORTAL
             =========================================== -->
-            <div class="admin-gate-card card" id="adminGateCard">
-                <div class="admin-gate-header">
-                    <div class="admin-gate-icon-orb" aria-hidden="true">
-                        <i class="fa-solid fa-user-shield"></i>
+            <div id="orgPortalSection" class="org-portal-section">
+                <!-- Two Primary Action Cards: Create & Join Organization -->
+                <div class="portal-hero-actions">
+                    <div class="portal-action-card" id="btnActionCreateOrg" role="button" tabindex="0" onclick="window.openCreateOrgModal && window.openCreateOrgModal()" style="border-radius: 8px;">
+                        <div>
+                            <div class="portal-action-icon-wrap" style="border-radius: 6px;">
+                                <i class="fa-solid fa-building-columns"></i>
+                            </div>
+                            <h2 class="portal-action-title">Create Organization</h2>
+                            <p class="portal-action-desc">
+                                Register a new institution on the blockchain.
+                            </p>
+                        </div>
+                        <span class="portal-action-btn-pill" style="border-radius: 6px;">
+                            <span>Create Now</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
                     </div>
-                    <div class="admin-gate-title-wrap">
-                        <h2 class="admin-gate-title">Administrative Terminal Access</h2>
+
+                    <div class="portal-action-card" id="btnActionJoinOrg" role="button" tabindex="0" onclick="window.openJoinOrgModal && window.openJoinOrgModal()" style="border-radius: 8px;">
+                        <div>
+                            <div class="portal-action-icon-wrap" style="border-radius: 6px;">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <h2 class="portal-action-title">Join Organization</h2>
+                            <p class="portal-action-desc">
+                                Join an approved organization with an access key.
+                            </p>
+                        </div>
+                        <span class="portal-action-btn-pill" style="border-radius: 6px;">
+                            <span>Join Now</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </span>
                     </div>
-                    <p class="admin-gate-subtitle">
-                        Please sign in with your <strong>Admin USER ID</strong> & <strong>Password (PWD)</strong>, or create an administrator account to issue academic credentials.
+                </div>
+
+                <!-- Super Admin Approval Section (Only rendered for Platform Super Admin) -->
+                <div class="super-admin-card" id="superAdminSection" style="display: none;">
+                    <div class="super-admin-header">
+                        <h2 class="super-admin-title">
+                            <i class="fa-solid fa-crown" style="color: #D97706;"></i>
+                            <span>Platform Super Admin • Organization Approval Queue</span>
+                        </h2>
+                        <span class="super-admin-badge">Contract Owner Access</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #4A635E; margin: 0 0 16px 0;">
+                        Review pending institutional organization requests. Approval requires an on-chain transaction from the deployed contract owner.
                     </p>
+                    <div id="superAdminRequestsContainer" class="approval-requests-list">
+                        <!-- Populated dynamically via JS -->
+                        <div style="text-align: center; color: #5F736F; padding: 20px;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i> Checking pending requests...
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Tab Switcher: [Already an Admin? (Sign In)] vs [Create Admin Account] -->
-                <div class="admin-gate-tabs" role="tablist">
-                    <button type="button" class="admin-gate-tab active" id="tabAdminLogin" role="tab" aria-selected="true">
-                        <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
-                        <span>Already an Admin? (Sign In)</span>
-                    </button>
-                    <button type="button" class="admin-gate-tab" id="tabAdminRegister" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
-                        <span>Create Admin Account</span>
-                    </button>
+                <!-- Organization Directory Sections: Your Organizations & Memberships -->
+                <div class="my-orgs-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <h2 style="font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #004741; margin: 0 0 4px;">Institutional Directory</h2>
+                            <p style="font-size: 0.9rem; color: #5F736F; margin: 0;">Select an organization to enter its institutional workspace and manage academic credentials.</p>
+                        </div>
+                        <button type="button" class="btn-org-action secondary" id="btnRefreshMyOrgs" title="Refresh organizations" style="padding: 9px 18px; border-radius: 6px;">
+                            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Section: Your Organizations (Owned or Administered) -->
+                    <div class="orgs-directory-block" style="margin-bottom: 32px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: rgba(0, 71, 65, 0.08); color: #004741; border-radius: 6px; font-size: 15px;">
+                                <i class="fa-solid fa-building-shield"></i>
+                            </span>
+                            <div>
+                                <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: #004741; margin: 0;">Your Organizations</h3>
+                                <div style="font-size: 0.82rem; color: #5F736F;">Organizations you own or administer with dashboard and certificate issuance privileges.</div>
+                            </div>
+                        </div>
+                        <div id="yourOrgsContainer" class="my-orgs-grid">
+                            <div style="text-align: center; color: #5F736F; padding: 24px; grid-column: 1 / -1; background: #fff; border: 1px dashed #dcd7ce; border-radius: 8px;">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading your organizations...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Memberships (Regular Participant) -->
+                    <div class="orgs-directory-block">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: rgba(0, 71, 65, 0.08); color: #004741; border-radius: 6px; font-size: 15px;">
+                                <i class="fa-solid fa-id-badge"></i>
+                            </span>
+                            <div>
+                                <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: #004741; margin: 0;">Memberships</h3>
+                                <div style="font-size: 0.82rem; color: #5F736F;">Organizations in which you participate as an institutional member.</div>
+                            </div>
+                        </div>
+                        <div id="membershipsContainer" class="my-orgs-grid">
+                            <div style="text-align: center; color: #5F736F; padding: 24px; grid-column: 1 / -1; background: #fff; border: 1px dashed #dcd7ce; border-radius: 8px;">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading memberships...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Maintained for test compatibility -->
+                    <div id="myOrgsContainer" style="display: none;"></div>
                 </div>
-
-                <!-- Gate Alert Messages -->
-                <div id="adminGateAlert" class="admin-gate-alert" style="display:none;" role="alert"></div>
-
-                <!-- PANEL 1: ADMIN LOGIN FORM -->
-                <form id="adminLoginForm" class="admin-gate-form">
-                    <div class="admin-form-group">
-                        <label for="adminAuthUserId" class="admin-label">
-                            <span>Admin USER ID<span class="required-star">*</span></span>
-                            <span class="admin-label-hint">Registered admin username</span>
-                        </label>
-                        <div class="admin-input-group" id="groupAdminAuthUserId">
-                            <span class="admin-input-icon" aria-hidden="true">
-                                <i class="fa-solid fa-id-badge"></i>
-                            </span>
-                            <input
-                                type="text"
-                                id="adminAuthUserId"
-                                class="admin-input mono"
-                                placeholder="Admin USER ID"
-                                autocomplete="username"
-                                spellcheck="false"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="adminAuthPassword" class="admin-label">
-                            <span>Admin Password (PWD)<span class="required-star">*</span></span>
-                        </label>
-                        <div class="admin-input-group" id="groupAdminAuthPassword">
-                            <span class="admin-input-icon" aria-hidden="true">
-                                <i class="fa-solid fa-lock"></i>
-                            </span>
-                            <input
-                                type="password"
-                                id="adminAuthPassword"
-                                class="admin-input"
-                                placeholder="Enter your admin password"
-                                autocomplete="current-password"
-                                required
-                            >
-                            <button
-                                type="button"
-                                class="cert-combobox-action-btn"
-                                id="toggleAuthPwdBtn"
-                                title="Toggle password visibility"
-                                aria-label="Toggle password visibility"
-                            >
-                                <i class="fa-regular fa-eye" id="toggleAuthPwdIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="admin-submit-btn" id="adminLoginBtn">
-                        <span class="btn-icon-wrap">
-                            <i class="fa-solid fa-unlock-keyhole" id="adminLoginBtnIcon"></i>
-                        </span>
-                        <span id="adminLoginBtnText">Authenticate & Unlock Terminal</span>
-                    </button>
-
-                    <div class="admin-gate-footer-hint">
-                        <span>New administrator? </span>
-                        <button type="button" class="admin-gate-link-btn" id="switchToRegisterBtn">
-                            Create an Admin Account
-                        </button>
-                    </div>
-                </form>
-
-                <!-- PANEL 2: ADMIN REGISTRATION FORM -->
-                <form id="adminRegisterForm" class="admin-gate-form" style="display:none;">
-                    <div class="admin-form-group">
-                        <label for="adminCreateUserId" class="admin-label">
-                            <span>Choose Admin USER ID<span class="required-star">*</span></span>
-                            <span class="admin-label-hint">Saved securely in MongoDB</span>
-                        </label>
-                        <div class="admin-input-group" id="groupAdminCreateUserId">
-                            <span class="admin-input-icon" aria-hidden="true">
-                                <i class="fa-solid fa-id-badge"></i>
-                            </span>
-                            <input
-                                type="text"
-                                id="adminCreateUserId"
-                                class="admin-input mono"
-                                placeholder="Admin USER ID"
-                                autocomplete="username"
-                                spellcheck="false"
-                                required
-                            >
-                        </div>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="adminCreatePassword" class="admin-label">
-                            <span>Admin Password (PWD)<span class="required-star">*</span></span>
-                            <span class="admin-label-hint">Minimum 6 characters</span>
-                        </label>
-                        <div class="admin-input-group" id="groupAdminCreatePassword">
-                            <span class="admin-input-icon" aria-hidden="true">
-                                <i class="fa-solid fa-lock"></i>
-                            </span>
-                            <input
-                                type="password"
-                                id="adminCreatePassword"
-                                class="admin-input"
-                                placeholder="Create a strong admin password"
-                                autocomplete="new-password"
-                                required
-                            >
-                            <button
-                                type="button"
-                                class="cert-combobox-action-btn"
-                                id="toggleCreatePwdBtn"
-                                title="Toggle password visibility"
-                                aria-label="Toggle password visibility"
-                            >
-                                <i class="fa-regular fa-eye" id="toggleCreatePwdIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="admin-form-group">
-                        <label for="adminCreateConfirmPassword" class="admin-label">
-                            <span>Confirm Password (PWD)<span class="required-star">*</span></span>
-                        </label>
-                        <div class="admin-input-group" id="groupAdminCreateConfirmPassword">
-                            <span class="admin-input-icon" aria-hidden="true">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </span>
-                            <input
-                                type="password"
-                                id="adminCreateConfirmPassword"
-                                class="admin-input"
-                                placeholder="Re-enter admin password to confirm"
-                                autocomplete="new-password"
-                                required
-                            >
-                            <button
-                                type="button"
-                                class="cert-combobox-action-btn"
-                                id="toggleConfirmPwdBtn"
-                                title="Toggle password visibility"
-                                aria-label="Toggle password visibility"
-                            >
-                                <i class="fa-regular fa-eye" id="toggleConfirmPwdIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="admin-submit-btn" id="adminRegisterBtn">
-                        <span class="btn-icon-wrap">
-                            <i class="fa-solid fa-user-plus" id="adminRegisterBtnIcon"></i>
-                        </span>
-                        <span id="adminRegisterBtnText">Create Admin Account & Unlock</span>
-                    </button>
-
-                    <div class="admin-gate-footer-hint">
-                        <span>Already have an admin account? </span>
-                        <button type="button" class="admin-gate-link-btn" id="switchToLoginBtn">
-                            Sign In with Admin USER ID
-                        </button>
-                    </div>
-                </form>
             </div>
 
+            <!-- ==========================================
+                 SECTION 2: ORGANIZATION WORKSPACE (DASHBOARD INSIDE ORG)
+            =========================================== -->
+            <div id="orgWorkspaceSection" class="org-workspace-section" style="display: none;">
+                <!-- Workspace Topbar -->
+                <div class="org-workspace-topbar">
+                    <button type="button" class="btn-org-action secondary" id="btnBackToPortal">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>All Organizations</span>
+                    </button>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="badge-role" id="workspaceNetworkBadge">
+                            <i class="fa-solid fa-cube"></i> <span id="workspaceNetworkText">Sepolia Testnet</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Organization Hero Header -->
+                <div class="org-workspace-header">
+                    <div class="org-workspace-header-main">
+                        <div class="org-workspace-icon">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                        <div>
+                            <div class="org-workspace-badge-row">
+                                <span class="badge-role" id="workspaceUserRoleBadge">Organization Owner</span>
+                                <span class="badge-status-active" id="workspaceOrgStatusBadge">Approved & Active</span>
+                            </div>
+                            <h1 class="org-workspace-name" id="workspaceOrgName">Organization Name</h1>
+                            <div class="org-workspace-meta-text">
+                                <span id="workspaceOrgEntity">Institutional Entity</span> &bull; <span style="color: #004741; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> On-Chain Verified Registry</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #555; margin-top: 4px;" id="workspaceOrgPurpose">Credential issuance and verification</div>
+                        </div>
+                    </div>
+                    <div class="org-workspace-stats">
+                        <div class="org-stat-box">
+                            <span class="org-stat-num" id="workspaceMembersCount">1</span>
+                            <span class="org-stat-label">Members</span>
+                        </div>
+                        <div class="org-stat-box">
+                            <span class="org-stat-num" id="workspaceCapacity">50</span>
+                            <span class="org-stat-label">Capacity</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================
+                     THE TWO ADMIN CHOICES (INSIDE SELECTED ORGANIZATION ONLY)
+                     Option A: Become an Admin | Option B: Existing Admin
+                ======================================================== -->
+                <!-- Active Admin Session Indicator Banner -->
+                <div id="portalActiveAdminBanner" style="display: none; background: #FAF8F5; border: 1.5px solid #004741; border-radius: 12px; padding: 18px 26px; margin-bottom: 24px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 16px rgba(0, 71, 65, 0.05);">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <i class="fa-solid fa-circle-check" style="color: #004741; font-size: 1.6rem;"></i>
+                        <div>
+                            <span style="font-size: 0.8rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Active Administrator Session</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <strong id="portalActiveAdminUserIdDisplay" style="font-family: 'JetBrains Mono', monospace; color: #004741; font-size: 1.15rem;">Admin</strong>
+                                <span style="font-size: 0.9rem; color: #4A635E;">• <span id="portalActiveRoleText">Verified Organization Administrator</span> for <span class="ws-target-org-name" style="font-weight: 700; color: #004741;">this institution</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-org-action secondary" id="btnPortalLockAdmin" style="padding: 10px 22px; font-size: 0.88rem; color: #B91C1C; border-color: #FCA5A5; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-lock"></i> Lock Admin Session
+                    </button>
+                </div>
+
+                <!-- The Two Admin Choices Card -->
+                <div class="portal-admin-choices-card" id="portalAdminChoicesCard" style="background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.2); border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0, 71, 65, 0.05);">
+                    <div class="portal-admin-choices-header" style="margin-bottom: 18px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: rgba(0, 71, 65, 0.08); color: #004741; border-radius: 6px; font-size: 16px;">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </span>
+                            <h2 class="portal-admin-choices-title" style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: #004741; margin: 0;">
+                                Organization Administrator Choices
+                            </h2>
+                        </div>
+                        <p class="portal-admin-choices-desc" style="font-size: 0.9rem; color: #4A635E; margin: 0; line-height: 1.5;">
+                            Manage or request administrative access for <strong class="ws-target-org-name" style="color: #004741;">this organization</strong>. Sign in with existing administrator credentials or submit an administrator request for approval.
+                        </p>
+                    </div>
+
+                    <!-- The Two Rectangular Admin Choice Tabs -->
+                    <div class="portal-admin-choice-tabs" role="tablist" style="display: flex; gap: 8px; margin-bottom: 18px; border-bottom: 1.5px solid rgba(0, 71, 65, 0.12); padding-bottom: 10px; flex-wrap: wrap;">
+                        <button type="button" class="portal-admin-choice-btn active" id="btnChoiceExistingAdmin" role="tab" aria-selected="true" style="padding: 9px 18px; border-radius: 6px; border: 1.5px solid #004741; background: #004741; color: #FAF8F5; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Option B — Existing Admin (Sign In)</span>
+                        </button>
+                        <button type="button" class="portal-admin-choice-btn" id="btnChoiceBecomeAdmin" role="tab" aria-selected="false" style="padding: 9px 18px; border-radius: 6px; border: 1.5px solid rgba(0, 71, 65, 0.25); background: #FAF8F5; color: #004741; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease;">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Option A — Become an Admin</span>
+                        </button>
+                    </div>
+
+                    <!-- Alert message box for portal admin choices -->
+                    <div id="portalAdminAlert" class="admin-gate-alert" style="display: none; margin-bottom: 16px; border-radius: 6px;" role="alert"></div>
+
+                    <!-- OPTION B: EXISTING ADMIN SIGN IN FORM -->
+                    <form id="portalAdminLoginForm" style="display: block;">
+                        <div style="font-size: 0.88rem; color: #4A635E; margin-bottom: 14px;">
+                            Sign in with your registered <strong>Admin USER ID</strong> and <strong>Password</strong> to verify your administrative role for <span class="ws-target-org-name" style="font-weight: 600;">this organization</span>.
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 16px;">
+                            <div class="admin-form-group">
+                                <label for="portalAdminUserId" class="admin-label" style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Admin USER ID<span class="required-star" style="color: #c00;">*</span></span>
+                                    <span style="color: #7A918C; font-size: 0.75rem;">Registered username</span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-id-badge"></i></span>
+                                    <input type="text" id="portalAdminUserId" class="admin-input mono" placeholder="Admin USER ID" autocomplete="username" spellcheck="false" required>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label for="portalAdminPassword" class="admin-label" style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Admin Password (PWD)<span class="required-star" style="color: #c00;">*</span></span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" id="portalAdminPassword" class="admin-input" placeholder="Admin Password" autocomplete="current-password" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                            <button type="submit" class="admin-submit-btn" id="btnSubmitPortalAdminLogin" style="padding: 10px 22px; font-size: 0.9rem; border-radius: 6px; background: #004741; color: #fff; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-unlock-keyhole" id="iconPortalAdminLogin"></i>
+                                <span id="textPortalAdminLogin">Sign In as Admin</span>
+                            </button>
+                            <span style="font-size: 0.85rem; color: #5F736F;">New administrator? <button type="button" id="linkToOptionBecome" style="background: none; border: none; color: #004741; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0;">Switch to Option A — Become an Admin</button></span>
+                        </div>
+                    </form>
+
+                    <!-- OPTION A: BECOME AN ADMIN FORM -->
+                    <form id="portalBecomeAdminForm" style="display: none;">
+                        <div style="font-size: 0.88rem; color: #4A635E; margin-bottom: 14px; line-height: 1.5;">
+                            Submit an administrator access request for <span class="ws-target-org-name" style="font-weight: 600;">this organization</span>. Your request will be sent to the organization owner or authorized administrator for approval.
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
+                            <div class="admin-form-group">
+                                <label for="portalNewAdminUserId" class="admin-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Choose Admin USER ID<span class="required-star" style="color: #c00;">*</span></span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-id-badge"></i></span>
+                                    <input type="text" id="portalNewAdminUserId" class="admin-input mono" placeholder="Admin USER ID" autocomplete="username" spellcheck="false" required>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label for="portalNewAdminEmail" class="admin-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Official Institutional Email<span class="required-star" style="color: #c00;">*</span></span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-envelope"></i></span>
+                                    <input type="email" id="portalNewAdminEmail" class="admin-input" placeholder="admin@institution.edu" autocomplete="email" required>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label for="portalNewAdminPassword" class="admin-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Admin Password<span class="required-star" style="color: #c00;">*</span></span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" id="portalNewAdminPassword" class="admin-input" placeholder="Min 6 characters" autocomplete="new-password" required>
+                                </div>
+                            </div>
+                            <div class="admin-form-group">
+                                <label for="portalNewAdminConfirmPassword" class="admin-label" style="display: block; font-size: 0.82rem; font-weight: 700; color: #004741; margin-bottom: 6px;">
+                                    <span>Confirm Password<span class="required-star" style="color: #c00;">*</span></span>
+                                </label>
+                                <div class="admin-input-group">
+                                    <span class="admin-input-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                                    <input type="password" id="portalNewAdminConfirmPassword" class="admin-input" placeholder="Re-enter password" autocomplete="new-password" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                            <button type="submit" class="admin-submit-btn" id="btnSubmitPortalBecomeAdmin" style="padding: 10px 22px; font-size: 0.9rem; border-radius: 6px; background: #004741; color: #fff; border: none; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-paper-plane" id="iconPortalBecomeAdmin"></i>
+                                <span id="textPortalBecomeAdmin">Submit Administrator Request</span>
+                            </button>
+                            <span style="font-size: 0.85rem; color: #5F736F;">Already have credentials? <button type="button" id="linkToOptionExisting" style="background: none; border: none; color: #004741; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0;">Switch to Option B — Existing Admin</button></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Navigation Tabs Inside Organization -->
+                <div class="org-workspace-tabs" role="tablist">
+                    <button type="button" class="org-ws-tab active" id="wsTabOverview" role="tab" aria-selected="true">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button type="button" class="org-ws-tab" id="wsTabMembers" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Members & Roster</span>
+                    </button>
+                    <button type="button" class="org-ws-tab" id="wsTabIssue" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-stamp"></i>
+                        <span>Issue Certificate</span>
+                    </button>
+                    <button type="button" class="org-ws-tab" id="wsTabCerts" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>Issued Records</span>
+                    </button>
+                    <button type="button" class="org-ws-tab" id="wsTabAccessKey" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Invite & Access</span>
+                    </button>
+                </div>
+
+                <!-- TAB 0: OVERVIEW -->
+                <div id="wsPanelOverview" class="org-ws-panel" style="display: block;">
+                    <!-- Overview Institutional Summary Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 18px 20px;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Institutional Entity</div>
+                            <div style="font-size: 1.15rem; font-weight: 700; color: #004741;" id="wsOverviewEntity">Institutional Authority</div>
+                            <div style="font-size: 0.85rem; color: #4A635E; margin-top: 4px;" id="wsOverviewPurpose">Academic Credential Registry</div>
+                        </div>
+                        <div style="background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 18px 20px;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Blockchain Ledger</div>
+                            <div style="font-size: 1.15rem; font-weight: 700; color: #004741;" id="wsOverviewNetwork">Ethereum Sepolia</div>
+                            <div style="font-size: 0.82rem; color: #4A635E; margin-top: 4px;" class="mono" id="wsOverviewContract">0x300A...Bb5D</div>
+                        </div>
+                        <div style="background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 18px 20px;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">Roster & Capacity</div>
+                            <div style="font-size: 1.15rem; font-weight: 700; color: #004741;"><span id="wsOverviewMembers">1</span> / <span id="wsOverviewCapacity">50</span> Members</div>
+                            <div style="font-size: 0.85rem; color: #4A635E; margin-top: 4px;">Registered on Smart Contract</div>
+                        </div>
+                    </div>
+
+                    <!-- Administrator Access Requests (Owner / Authorized Admin View) -->
+                    <div class="members-table-card" id="wsAdminRequestsCard" style="display: none; border: 1.5px solid rgba(0, 71, 65, 0.25); border-radius: 8px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0, 71, 65, 0.04);">
+                        <div class="members-table-header" style="background: #FAF8F5; padding: 16px 20px;">
+                            <div>
+                                <h3 class="members-table-title" style="font-size: 1.25rem; margin: 0 0 2px 0;">
+                                    <i class="fa-solid fa-user-shield" style="color: #004741;"></i>
+                                    <span>Pending Administrator Requests (<span id="wsTableRequestsCount">0</span>)</span>
+                                </h3>
+                                <div style="font-size: 0.82rem; color: #5F736F;">Review applicants requesting administrator and certificate issuance rights for this organization.</div>
+                            </div>
+                            <button type="button" class="btn-org-action secondary" id="btnRefreshWsRequests" style="padding: 7px 14px; font-size: 0.82rem; border-radius: 6px;">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh Requests
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto; width: 100%;">
+                            <table class="members-list-table fixed-compact-table" style="table-layout: fixed; width: 100%;">
+                                <colgroup>
+                                    <col style="width: 18%;">
+                                    <col style="width: 22%;">
+                                    <col style="width: 16%;">
+                                    <col style="width: 16%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 16%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Admin USER ID</th>
+                                        <th>Institutional Email</th>
+                                        <th>Organization</th>
+                                        <th>Requested Date</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right; padding: 14px 18px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wsAdminRequestsTableBody">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: #666; padding: 24px;">
+                                            No pending administrator requests for this organization.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Quick Workspace Navigation Actions -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+                        <button type="button" class="btn-org-action primary" id="btnOverviewGoIssue" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 6px;">
+                            <i class="fa-solid fa-stamp"></i> Issue Certificate
+                        </button>
+                        <button type="button" class="btn-org-action secondary" id="btnOverviewGoMembers" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 6px;">
+                            <i class="fa-solid fa-users"></i> View Members & Roster
+                        </button>
+                        <button type="button" class="btn-org-action secondary" id="btnOverviewGoCerts" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 6px;">
+                            <i class="fa-solid fa-folder-open"></i> Issued Records
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TAB 1: MEMBERS ROSTER -->
+                <div id="wsPanelMembers" class="org-ws-panel" style="display: none;">
+
+                    <!-- Members Roster Table -->
+                    <div class="members-table-card">
+                        <div class="members-table-header">
+                            <h3 class="members-table-title">
+                                <i class="fa-solid fa-users"></i>
+                                <span>Members Joined Organization (<span id="wsTableMembersCount">0</span>)</span>
+                            </h3>
+                            <button type="button" class="btn-org-action secondary" id="btnRefreshWsMembers" style="padding: 6px 12px; font-size: 0.8rem;">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh Members
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto; width: 100%;">
+                            <table class="members-list-table fixed-compact-table" style="table-layout: fixed; width: 100%;">
+                                <colgroup>
+                                    <col style="width: 30%;">
+                                    <col style="width: 16%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 16%;">
+                                    <col style="width: 18%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Authorized Institutional Member</th>
+                                        <th>Role</th>
+                                        <th>Issuing Rights</th>
+                                        <th>Status</th>
+                                        <th id="wsTableActionColHeader" style="text-align: right; padding-right: 18px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wsMembersTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: #666; padding: 24px;">
+                                            <i class="fa-solid fa-spinner fa-spin"></i> Loading members on blockchain...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Organization Access & Share Card -->
+                    <div class="org-invite-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h3 class="org-invite-title"><i class="fa-solid fa-share-nodes"></i> Invite Members to Join This Organization</h3>
+                                <p style="font-size: 0.88rem; color: #4A635E; margin: 0;">
+                                    Share these details with university faculty or institutional staff. Members can use these on the "Join Organization" page to enter this institution on blockchain.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-org-action primary" id="btnCopyOrgInvite">
+                                <i class="fa-solid fa-copy"></i> Copy Invite Details
+                            </button>
+                        </div>
+                        <div class="org-invite-grid">
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Organization Name</span>
+                                <div class="org-invite-value" id="inviteOrgName">—</div>
+                            </div>
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Unique Organization ID</span>
+                                <div class="org-invite-value" id="inviteOrgId">—</div>
+                            </div>
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Blockchain Network</span>
+                                <div class="org-invite-value" id="inviteOrgNetwork">Ethereum Sepolia</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: ISSUE CERTIFICATE (Scoped to this Organization) -->
+                <div id="wsPanelIssue" class="org-ws-panel" style="display: none;">
+                    
+                    <!-- UNAUTHORIZED NOTICE (Shown when a normal member or unauthenticated user tries to open Issue Certificate) -->
+                    <div id="wsUnauthorizedNotice" style="display: none; max-width: 580px; margin: 30px auto; background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.2); border-radius: 8px; padding: 28px; text-align: center; box-shadow: 0 4px 16px rgba(0, 71, 65, 0.05);">
+                        <div style="width: 48px; height: 48px; border-radius: 8px; background: rgba(0, 71, 65, 0.08); color: #004741; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 16px auto;">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h3 style="font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: #004741; margin: 0 0 8px 0;">Administrative Authorization Required</h3>
+                        <p style="font-size: 0.9rem; color: #4A635E; line-height: 1.6; margin: 0 auto 20px auto; max-width: 460px;">
+                            Academic credential issuance is strictly restricted to approved organization administrators and owners. If you are an administrator of this institution, please authenticate using <strong>Option B — Existing Admin</strong> on the Organization Dashboard.
+                        </p>
+                        <button type="button" class="btn-org-action primary" id="btnReturnToPortalFromUnauthorized" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 6px;">
+                            <i class="fa-solid fa-arrow-left"></i> Return to Organization Dashboard
+                        </button>
+                    </div>
+
+                    <!-- TERMINAL HEADER (Image 2) -->
+                    <div id="wsTerminalHeader" style="display: none; text-align: center; margin-bottom: 24px;">
+                        <div class="admin-badge" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 71, 65, 0.08); color: #004741; border: 1px solid rgba(0, 71, 65, 0.18); border-radius: 8px; padding: 6px 14px; font-size: 0.82rem; font-weight: 700; margin-bottom: 12px;">
+                            <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                            <span>Office of the Registrar • Certificate Issuance Terminal</span>
+                        </div>
+                        <h1 class="page-title" style="font-family: 'DM Serif Display', serif; font-size: 2.3rem; color: #004741; margin: 0 0 8px 0; line-height: 1.2;">
+                            Issue <span>Academic Certificate</span>
+                        </h1>
+                        <p class="admin-subtitle" style="font-size: 0.95rem; color: #4A635E; max-width: 600px; margin: 0 auto 16px auto; line-height: 1.5;">
+                            Record and register an official academic degree or diploma in the university's permanent repository.
+                        </p>
+                        <div class="issue-badges-row" style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                            <div class="admin-user-badge" id="wsRegistrarBadge" style="display: inline-flex; align-items: center; gap: 6px; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; color: #004741;">
+                                <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                                <span>Authorized Registrar:</span>
+                                <strong id="wsRegistrarEmail" style="color: #004741;">siddasat@gmail.com</strong>
+                            </div>
+                            <div class="admin-wallet-toggle-wrap" id="wsWalletToggleWrap" style="display: inline-flex;">
+                                <button type="button" class="admin-wallet-toggle-btn" id="wsToggleWalletBtn" style="display: inline-flex; align-items: center; gap: 6px; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; color: #004741; cursor: pointer; font-weight: 600;">
+                                    <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+                                    <span id="wsToggleWalletText">View MetaMask Details</span>
+                                    <i class="fa-solid fa-chevron-down" id="wsToggleWalletChevron" style="font-size: 0.72rem; margin-left: 2px;"></i>
+                                </button>
+                            </div>
+                            <div class="admin-user-badge admin-id-badge" id="wsAdminIdBadge" style="display: inline-flex; align-items: center; gap: 6px; background: #E8F0FE; border: 1px solid #C2D7FA; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; color: #1A73E8;">
+                                <i class="fa-solid fa-id-badge" aria-hidden="true"></i>
+                                <span>Admin USER ID:</span>
+                                <strong id="wsActiveAdminUserId">Sidd2227</strong>
+                                <button type="button" class="admin-badge-lock-btn" id="wsLockAdminBtn" title="Lock admin terminal" style="background: none; border: none; color: #c00; font-weight: 700; cursor: pointer; margin-left: 6px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.78rem;">
+                                    <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                                    <span>Lock</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="wsMetaMaskDetailsBox" style="display: none; margin-top: 10px;">
+                            <span style="font-size: 0.82rem; color: #4A635E;">Connected Wallet: </span>
+                            <span id="wsConnectedWalletText" class="mono" style="font-weight: 700; color: #004741; font-size: 0.82rem;">Not Connected</span>
+                        </div>
+                    </div>
+
+                    <!-- Container for the form card -->
+                    <div id="wsFormMountPoint"></div>
+                </div>
+
+                <!-- TAB 3: ISSUED CERTIFICATES -->
+                <div id="wsPanelCerts" class="org-ws-panel" style="display: none;">
+                    <div class="members-table-card">
+                        <div class="members-table-header">
+                            <h3 class="members-table-title">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span>Certificates Issued by <span id="wsCertsOrgNameHeader">—</span></span>
+                            </h3>
+                            <button type="button" class="btn-org-action secondary" id="btnRefreshWsCerts" style="padding: 6px 12px; font-size: 0.8rem;">
+                                <i class="fa-solid fa-arrows-rotate"></i> Refresh Records
+                            </button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="members-list-table">
+                                <thead>
+                                    <tr>
+                                        <th>Certificate ID</th>
+                                        <th>Candidate Name</th>
+                                        <th>Degree / Course</th>
+                                        <th>Issue Date</th>
+                                        <th>Status</th>
+                                        <th style="text-align: right;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wsCertsTableBody">
+                                    <tr>
+                                        <td colspan="6" style="text-align: center; color: #666; padding: 28px;">
+                                            <i class="fa-solid fa-circle-info"></i> No certificates recorded on-chain for this organization yet.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: INVITE & ACCESS KEY -->
+                <div id="wsPanelAccessKey" class="org-ws-panel" style="display: none;">
+                    <div class="org-invite-card" style="border-style: solid;">
+                        <h3 class="org-invite-title"><i class="fa-solid fa-key"></i> Institutional Access Key & Member Invite Information</h3>
+                        <p style="font-size: 0.9rem; color: #4A635E; line-height: 1.6; margin-bottom: 20px;">
+                            Members can join this institution on the blockchain by entering this Organization ID and the registered Access Key on the "Join Organization" modal.
+                        </p>
+                        <div class="org-invite-grid">
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Organization Name</span>
+                                <div class="org-invite-value" id="accessPanelOrgName">—</div>
+                            </div>
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Organization ID</span>
+                                <div class="org-invite-value" id="accessPanelOrgId">—</div>
+                            </div>
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Capacity</span>
+                                <div class="org-invite-value" id="accessPanelCapacity">50 members</div>
+                            </div>
+                            <div class="org-invite-field">
+                                <span class="org-invite-label">Contract Address</span>
+                                <div class="org-invite-value mono" id="accessPanelContract" style="font-size: 0.8rem;">—</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 14px;">
+                            <button type="button" class="btn-org-action primary" id="btnCopyInviteInfoBtn">
+                                <i class="fa-solid fa-copy"></i> Copy Full Invitation Message
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ==========================================
                  ADMINISTRATIVE CERTIFICATE FORM (GLASSMORPHIC)
@@ -411,6 +824,23 @@
             <div class="admin-form-card" id="adminFormCard" style="display:none;">
 
                 <form id="certificateForm" novalidate>
+
+                    <!-- ACTIVE ISSUING ORGANIZATION BANNER -->
+                    <div class="active-org-banner" id="activeOrgBanner" style="background: #F7F5F0; border: 1.5px solid #004741; border-radius: 12px; padding: 14px 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">
+                                <i class="fa-solid fa-building-columns" style="color: #004741;"></i> Active Issuing Organization
+                            </span>
+                            <div style="font-family: 'DM Serif Display', serif; font-size: 1.35rem; color: #004741;" id="activeOrgNameDisplay">No Organization Selected</div>
+                            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #4A635E;" id="activeOrgIdDisplay">Please select an approved organization in which you have issuing rights</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span class="badge-role" id="activeOrgRoleBadge">Role: Issuer</span>
+                            <button type="button" class="btn-org-action secondary" id="btnChangeOrg" style="padding: 6px 12px; font-size: 0.8rem;">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i> Change Org
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- SECTION 1: CANDIDATE INFORMATION -->
                     <div class="admin-form-section">
@@ -631,20 +1061,20 @@
                     </div>
 
 
-                    <!-- SECTION 3: BLOCKCHAIN NETWORK SELECTION -->
-                    <div class="network-selector-card" id="networkSelectorCard">
-                        <div class="network-selector-header">
-                            <div class="network-selector-title-wrap">
-                                <span class="network-selector-icon-orb" aria-hidden="true">
+                    <!-- SECTION 3: BLOCKCHAIN NETWORK & PLATFORM OWNER WALLET STATUS -->
+                    <div class="network-selector-card" id="networkSelectorCard" style="background: #FFFFFF; border: 1.5px solid rgba(0, 71, 65, 0.2); border-radius: 8px; padding: 22px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0, 71, 65, 0.04);">
+                        <div class="network-selector-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; border-bottom: 1px solid rgba(0, 71, 65, 0.12); padding-bottom: 14px;">
+                            <div class="network-selector-title-wrap" style="display: flex; align-items: center; gap: 10px;">
+                                <span style="width: 36px; height: 36px; border-radius: 6px; background: rgba(0, 71, 65, 0.08); color: #004741; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem;">
                                     <i class="fa-solid fa-network-wired"></i>
                                 </span>
                                 <div>
-                                    <span class="network-selector-label">Blockchain Network</span>
-                                    <span class="network-selector-subtitle">Explicitly choose which blockchain to use for this certificate transaction</span>
+                                    <span class="network-selector-label" style="font-weight: 700; color: #004741; font-size: 1.05rem; display: block;">Blockchain Network Selection</span>
+                                    <span class="network-selector-subtitle" style="font-size: 0.85rem; color: #4A635E;">Explicitly choose which blockchain network to record this academic credential</span>
                                 </div>
                             </div>
 
-                            <div class="network-selector-pills" role="radiogroup" aria-label="Blockchain Network Selection">
+                            <div class="network-selector-pills" role="radiogroup" aria-label="Blockchain Network Selection" style="display: flex; gap: 8px;">
                                 <button
                                     type="button"
                                     class="network-pill-btn active"
@@ -653,6 +1083,7 @@
                                     role="radio"
                                     aria-checked="true"
                                     tabindex="0"
+                                    style="padding: 8px 16px; border-radius: 6px; border: 1.5px solid #004741; background: #004741; color: #FAF8F5; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
                                 >
                                     <i class="fa-brands fa-ethereum" aria-hidden="true"></i>
                                     <span>Ethereum Sepolia</span>
@@ -665,6 +1096,7 @@
                                     role="radio"
                                     aria-checked="false"
                                     tabindex="0"
+                                    style="padding: 8px 16px; border-radius: 6px; border: 1.5px solid rgba(0, 71, 65, 0.25); background: #FAF8F5; color: #004741; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
                                 >
                                     <i class="fa-solid fa-server" aria-hidden="true"></i>
                                     <span>Ganache Local</span>
@@ -672,63 +1104,60 @@
                             </div>
                         </div>
 
-                        <!-- Active Network Info Panel -->
+                        <!-- Read-Only Platform Owner Wallet Status Panel -->
                         <div class="network-info-panel" id="networkInfoPanel">
-                            <div class="network-info-grid">
-                                <div class="network-info-item">
-                                    <span class="network-info-label">Active Network</span>
-                                    <span class="network-info-value" id="netActiveName">Ethereum Sepolia</span>
+                            <div class="network-info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <div class="network-info-item" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px;">
+                                    <span class="network-info-label" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Active Network</span>
+                                    <span class="network-info-value" id="netActiveName" style="font-weight: 700; color: #004741; font-size: 0.9rem;">Ethereum Sepolia</span>
                                 </div>
-                                <div class="network-info-item">
-                                    <span class="network-info-label">Chain ID</span>
-                                    <span class="network-info-value mono" id="netActiveChainId">11155111 (0xaa36a7)</span>
+                                <div class="network-info-item" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px;">
+                                    <span class="network-info-label" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Chain ID</span>
+                                    <span class="network-info-value mono" id="netActiveChainId" style="font-weight: 700; color: #004741; font-size: 0.85rem;">11155111 (0xaa36a7)</span>
                                 </div>
-                                <div class="network-info-item">
-                                    <span class="network-info-label">Contract Address</span>
-                                    <span class="network-info-value mono contract-inspect-wrap" id="netActiveContractWrap">
-                                        <span id="netActiveContract" class="contract-address-compact">0xDd4DF9A618683a407f3B195e651271DC0E97f5bE</span>
-                                        <button type="button" id="copyContractBtn" class="network-copy-btn" title="Copy contract address" aria-label="Copy contract address">
+                                <div class="network-info-item" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px;">
+                                    <span class="network-info-label" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Contract Address</span>
+                                    <span class="network-info-value mono contract-inspect-wrap" id="netActiveContractWrap" style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                                        <span id="netActiveContract" class="contract-address-compact" style="font-size: 0.82rem; font-weight: 700; color: #004741;">0x300A5CAdb32f52C9fA0C26bfC3735Bf83838Bb5D</span>
+                                        <button type="button" id="copyContractBtn" class="network-copy-btn" title="Copy contract address" aria-label="Copy contract address" style="background: none; border: none; cursor: pointer; color: #5F736F; padding: 2px 4px;">
                                             <i class="fa-regular fa-copy" id="copyContractIcon"></i>
                                         </button>
                                     </span>
                                 </div>
-                                <div class="network-info-item">
-                                    <span class="network-info-label">Readiness Status</span>
-                                    <span class="network-status-badge ready" id="netActiveStatus">
+                                <div class="network-info-item" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px;">
+                                    <span class="network-info-label" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Configured Owner Wallet</span>
+                                    <span class="network-info-value mono" id="netConfiguredOwnerAddr" style="font-size: 0.82rem; font-weight: 700; color: #004741;">0x1FC0...aCC7</span>
+                                </div>
+                                <div class="network-info-item" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px;">
+                                    <span class="network-info-label" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Readiness Status</span>
+                                    <span class="network-status-badge ready" id="netActiveStatus" style="display: inline-flex; align-items: center; gap: 6px; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; font-weight: 700;">
                                         <span class="network-status-dot"></span>
                                         <span id="netActiveStatusText">Ready for Transactions</span>
                                     </span>
                                 </div>
-                                <div class="network-info-item full-width-account" id="netAccountItem">
-                                    <span class="network-info-label" id="netAccountLabel">Connected MetaMask Account</span>
-                                    <span class="network-info-value account-inspect-wrap" id="netAccountWrap">
-                                        <span id="netAccountName" class="account-name-badge">Not Connected</span>
-                                        <span id="netAccountAddr" class="mono account-addr-compact">Not Connected</span>
-                                        <button type="button" id="switchMetaMaskAccountBtn" class="network-switch-acc-btn" title="Change account in MetaMask" aria-label="Change account in MetaMask">
-                                            <i class="fa-solid fa-arrow-right-arrow-left"></i> <span id="switchMetaMaskAccountBtnText">Change account in MetaMask</span>
-                                        </button>
-                                    </span>
+                                <div class="network-info-item full-width-account" id="netAccountItem" style="grid-column: 1 / -1; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.12); border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                    <div>
+                                        <span class="network-info-label" id="netAccountLabel" style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 2px;">Connected MetaMask Account</span>
+                                        <span class="network-info-value account-inspect-wrap" id="netAccountWrap" style="display: flex; align-items: center; gap: 8px;">
+                                            <span id="netAccountName" class="account-name-badge" style="font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: rgba(0, 71, 65, 0.1); color: #004741;">Contract Owner</span>
+                                            <span id="netAccountAddr" class="mono account-addr-compact" style="font-size: 0.85rem; font-weight: 700; color: #102926;">Not Connected</span>
+                                        </span>
+                                    </div>
+                                    <button type="button" id="switchMetaMaskAccountBtn" class="btn-org-action secondary" title="Change account in MetaMask" aria-label="Change account in MetaMask" style="padding: 6px 12px; font-size: 0.8rem; border-radius: 6px;">
+                                        <i class="fa-solid fa-arrow-right-arrow-left"></i> <span id="switchMetaMaskAccountBtnText">Change account in MetaMask</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Hosted Environment Notice (Shown if on Render or Ganache unavailable) -->
-                            <div class="network-notice-box" id="networkHostedNotice" style="display: none;">
-                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-                                <span id="networkHostedNoticeText">Ganache Local requires the local development server and cannot be reached from hosted environments.</span>
-                            </div>
-
-                            <!-- Insufficient Sepolia ETH Fallback Prompt (Requirement 6 & 8) -->
-                            <div class="network-insufficient-funds-banner" id="netInsufficientFundsBanner" style="display: none;">
-                                <div class="banner-msg-wrap">
-                                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                            <!-- Network / Owner Mismatch Notice Box -->
+                            <div id="netMismatchNotice" class="network-notice-box" style="display: none; margin-top: 12px; background: #FEF2F2; border: 1.5px solid #F87171; border-radius: 6px; padding: 12px 16px; color: #991B1B; font-size: 0.86rem; line-height: 1.5;">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <i class="fa-solid fa-triangle-exclamation" style="margin-top: 3px; font-size: 1.1rem; flex-shrink: 0;"></i>
                                     <div>
-                                        <strong>Not enough Sepolia test ETH.</strong>
-                                        <p>You can switch to Ganache Local to issue a separate local test transaction.</p>
+                                        <strong style="display: block; margin-bottom: 2px;">Platform Owner Wallet Mismatch</strong>
+                                        <span id="netMismatchNoticeText">The connected MetaMask account does not match the configured Platform Owner wallet for this network. Blockchain transactions must be signed by the Platform Owner.</span>
                                     </div>
                                 </div>
-                                <button type="button" class="network-switch-fallback-btn" id="btnSwitchToGanacheFallback">
-                                    <i class="fa-solid fa-server"></i> Switch to Ganache Local
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -840,6 +1269,284 @@
 
         </div>
 
+
+        <!-- ==========================================
+             MODAL: CREATE ORGANIZATION (REQUIREMENT 3)
+        =========================================== -->
+        <div id="createOrgModal" class="portal-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="createOrgModalTitle">
+            <div class="portal-modal-card">
+                <div class="portal-modal-header">
+                    <h2 class="portal-modal-title" id="createOrgModalTitle">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>Create Organization</span>
+                    </h2>
+                    <button type="button" class="portal-modal-close-btn" id="closeCreateOrgModalBtn" aria-label="Close modal" onclick="window.closeCreateOrgModal && window.closeCreateOrgModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="createOrgAlert" class="inline-alert" style="display: none; margin-bottom: 16px;"></div>
+
+                <form id="createOrgForm">
+                    <div class="admin-form-group">
+                        <label for="createOrgName" class="admin-label">
+                            <span>Organization Display Name<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-building"></i></span>
+                            <input type="text" id="createOrgName" class="admin-input" placeholder="e.g. Stanford University Registrar" required maxlength="120">
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="createOrgUniversity" class="admin-label">
+                            <span>University / Company Name<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-landmark"></i></span>
+                            <input type="text" id="createOrgUniversity" class="admin-input" placeholder="e.g. Stanford University" required maxlength="150">
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="createOrgCapacity" class="admin-label">
+                            <span>Maximum Membership Capacity<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Positive integer</span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-users"></i></span>
+                            <input type="number" id="createOrgCapacity" class="admin-input mono" placeholder="50" min="1" max="10000" value="50" required>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="createOrgPurpose" class="admin-label">
+                            <span>Purpose of Organization<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-bullseye"></i></span>
+                            <input type="text" id="createOrgPurpose" class="admin-input" placeholder="e.g. Issue verified academic degrees and diplomas" required maxlength="250">
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="createOrgAccessKey" class="admin-label">
+                            <span>Organization Access Key<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Used by members to request joining (Min 6 chars)</span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-key"></i></span>
+                            <input type="password" id="createOrgAccessKey" class="admin-input" placeholder="Enter secure access key" required minlength="6">
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="createOrgAccessKeyConfirm" class="admin-label">
+                            <span>Confirm Organization Access Key<span class="required-star">*</span></span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-key"></i></span>
+                            <input type="password" id="createOrgAccessKeyConfirm" class="admin-input" placeholder="Confirm access key" required minlength="6">
+                        </div>
+                    </div>
+
+                    <!-- Explicit Network Selection -->
+                    <div class="admin-form-group">
+                        <label class="admin-label">
+                            <span>Blockchain Network<span class="required-star">*</span></span>
+                        </label>
+                        <div style="display: flex; gap: 10px;">
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                                <input type="radio" name="createOrgNetworkRadio" value="sepolia" checked> Ethereum Sepolia
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                                <input type="radio" name="createOrgNetworkRadio" value="ganache"> Ganache Local
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Connected MetaMask Account Info -->
+                    <div style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.15); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #5F736F; text-transform: uppercase;">Connected Requester Wallet</span>
+                            <button type="button" id="btnConnectMetamaskInModal" style="background: none; border: none; font-size: 0.75rem; color: #004741; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">
+                                <i class="fa-solid fa-wallet"></i> Connect / Change Account
+                            </button>
+                        </div>
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #004741; word-break: break-all;" id="createOrgRequesterWallet">—</div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="btn-org-action cancel" id="btnCancelCreateOrg" onclick="window.closeCreateOrgModal && window.closeCreateOrgModal()" style="flex: 1; height: 46px;">
+                            Cancel
+                        </button>
+                        <button type="submit" class="admin-submit-btn" id="btnSubmitCreateOrg" style="flex: 2; margin-top: 0;">
+                            <i class="fa-solid fa-plus-circle" id="btnSubmitCreateOrgIcon"></i>
+                            <span id="btnSubmitCreateOrgText">Create Organization</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- ==========================================
+             MODAL: JOIN ORGANIZATION (REQUIREMENT 6)
+        =========================================== -->
+        <div id="joinOrgModal" class="portal-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="joinOrgModalTitle">
+            <div class="portal-modal-card">
+                <div class="portal-modal-header">
+                    <h2 class="portal-modal-title" id="joinOrgModalTitle">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Join Organization</span>
+                    </h2>
+                    <button type="button" class="portal-modal-close-btn" id="closeJoinOrgModalBtn" aria-label="Close modal" onclick="window.closeJoinOrgModal && window.closeJoinOrgModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="joinOrgAlert" class="inline-alert" style="display: none; margin-bottom: 16px;"></div>
+
+                <form id="joinOrgForm">
+                    <div class="admin-form-group">
+                        <label for="joinOrgIdentifier" class="admin-label">
+                            <span>Organization Name or Unique ID<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Enter the full display name or orgId</span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" id="joinOrgIdentifier" class="admin-input" placeholder="e.g. Stanford University or org_1234..." required>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label for="joinOrgAccessKey" class="admin-label">
+                            <span>Organization Access Key<span class="required-star">*</span></span>
+                            <span class="admin-label-hint">Provided by the organization administrator</span>
+                        </label>
+                        <div class="admin-input-group">
+                            <span class="admin-input-icon"><i class="fa-solid fa-lock"></i></span>
+                            <input type="password" id="joinOrgAccessKey" class="admin-input" placeholder="Enter organization access key" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" class="btn-org-action cancel" id="btnCancelJoinOrg" onclick="window.closeJoinOrgModal && window.closeJoinOrgModal()" style="flex: 1; height: 46px;">
+                            Cancel
+                        </button>
+                        <button type="submit" class="admin-submit-btn" id="btnSubmitJoinOrg" style="flex: 2; margin-top: 0;">
+                            <i class="fa-solid fa-user-plus" id="btnSubmitJoinOrgIcon"></i>
+                            <span id="btnSubmitJoinOrgText">Submit Join Request</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <!-- ==========================================
+             MODAL: MANAGE ORGANIZATION (REQUIREMENT 5)
+        =========================================== -->
+        <div id="manageOrgModal" class="portal-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="manageOrgModalTitle">
+            <div class="portal-modal-card" style="max-width: 700px;">
+                <div class="portal-modal-header">
+                    <div>
+                        <h2 class="portal-modal-title" id="manageOrgModalTitle">
+                            <i class="fa-solid fa-gear"></i>
+                            <span id="manageOrgNameHeader">Manage Organization</span>
+                        </h2>
+                        <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #4A635E;" id="manageOrgIdHeader">ID: —</span>
+                    </div>
+                    <button type="button" class="portal-modal-close-btn" id="closeManageOrgModalBtn" aria-label="Close modal" onclick="window.closeManageOrgModal && window.closeManageOrgModal()">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="manageOrgAlert" class="inline-alert" style="display: none; margin-bottom: 16px;"></div>
+
+                <!-- Sub-tabs: Administrators vs Member Requests -->
+                <div class="portal-nav-tabs" style="margin-bottom: 18px;">
+                    <button type="button" class="portal-tab-btn active" id="tabManageAdmins">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Administrators & Issuers</span>
+                    </button>
+                    <button type="button" class="portal-tab-btn" id="tabManageRequests">
+                        <i class="fa-solid fa-inbox"></i>
+                        <span id="tabManageRequestsCount">Join Requests</span>
+                    </button>
+                </div>
+
+                <!-- PANEL 1: ADMINS & ISSUERS -->
+                <div id="panelManageAdmins">
+                    <!-- First Admin Setup Box (Shown if organization has no active issuer admins) -->
+                    <div id="firstAdminSetupBox" style="display: none; background: #FEF7E0; border: 1.5px solid #FEEFC3; border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+                        <span style="font-weight: 700; color: #B06000; font-size: 0.95rem; display: block; margin-bottom: 6px;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> First Administrator Setup Required
+                        </span>
+                        <p style="font-size: 0.85rem; color: #4A635E; margin: 0 0 12px 0;">
+                            As the organization owner, please choose how to activate issuing rights:
+                        </p>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" class="btn-org-action primary" id="btnBecomeFirstAdmin">
+                                <i class="fa-solid fa-user-check"></i> Become First Issuing Administrator
+                            </button>
+                            <button type="button" class="btn-org-action secondary" id="btnToggleNominateAdmin">
+                                <i class="fa-solid fa-user-tag"></i> Nominate Registered User
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Nominate Form (Toggled) -->
+                    <form id="nominateAdminForm" style="display: none; background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.15); border-radius: 10px; padding: 14px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: #004741; font-size: 0.95rem;">Nominate Administrator</h4>
+                        <div class="admin-form-group">
+                            <label for="nominateAdminEmail" class="admin-label"><span>Registered User Email<span class="required-star">*</span></span></label>
+                            <input type="email" id="nominateAdminEmail" class="admin-input" placeholder="user@university.edu" required>
+                        </div>
+                        <div class="admin-form-group">
+                            <label for="nominateAdminWallet" class="admin-label"><span>Wallet Address (Hex)<span class="required-star">*</span></span></label>
+                            <input type="text" id="nominateAdminWallet" class="admin-input mono" placeholder="0x..." required>
+                        </div>
+                        <button type="submit" class="btn-org-action primary" id="btnSubmitNominateAdmin">
+                            <i class="fa-solid fa-paper-plane"></i> Send Nomination
+                        </button>
+                    </form>
+
+                    <!-- Add Authorized Issuer Form -->
+                    <form id="addAdminForm" style="background: #FAF8F5; border: 1px solid rgba(0, 71, 65, 0.15); border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; color: #004741; font-size: 0.95rem;">Authorize New Issuer Administrator (On-Chain)</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div>
+                                <label for="newAdminEmail" class="admin-label"><span>User Email<span class="required-star">*</span></span></label>
+                                <input type="email" id="newAdminEmail" class="admin-input" placeholder="officer@domain.edu" required>
+                            </div>
+                            <div>
+                                <label for="newAdminWallet" class="admin-label"><span>Authorized Wallet Address<span class="required-star">*</span></span></label>
+                                <input type="text" id="newAdminWallet" class="admin-input mono" placeholder="0x..." required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-org-action primary" id="btnAddAdminSubmit">
+                            <i class="fa-solid fa-plus"></i> Authorize on Blockchain
+                        </button>
+                    </form>
+
+                    <!-- Current Admins List -->
+                    <h4 style="margin: 0 0 10px 0; color: #004741; font-size: 0.95rem;">Current Authorized Administrators</h4>
+                    <div id="manageAdminsListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="text-align: center; color: #5F736F; padding: 16px;">Loading administrators...</div>
+                    </div>
+                </div>
+
+                <!-- PANEL 2: MEMBERSHIP JOIN REQUESTS -->
+                <div id="panelManageRequests" style="display: none;">
+                    <h4 style="margin: 0 0 10px 0; color: #004741; font-size: 0.95rem;">Pending Member Join Requests</h4>
+                    <div id="manageRequestsListContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="text-align: center; color: #5F736F; padding: 16px;">Checking member requests...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
 
@@ -885,9 +1592,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
     <!-- Auth & Admin Scripts -->
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/admin.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/auth.js?v=2.5"></script>
+    <script src="assets/js/admin.js?v=2.5"></script>
+    <script src="assets/js/app.js?v=2.5"></script>
 
 </body>
 

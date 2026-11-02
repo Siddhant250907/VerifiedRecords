@@ -17,13 +17,15 @@ try {
 
 const crypto = require("crypto");
 const Certificate = require("./models/certificates");
+const Organization = require("./models/organization");
+const OrganizationMembership = require("./models/organizationMembership");
 const User = require("./models/user");
 const Admin = require("./models/admin");
 const Document = require("./models/document");
 const Vault = require("./models/vault");
 const VerificationEvent = require("./models/verificationEvent");
 const { getLocalDateTime } = require("./dateHelper");
-const { getAuth } = require("./auth");
+const { getAuth, requireAuth } = require("./auth");
 const {
     checkBlockchainStatus,
     getCertificateFromChain,
@@ -42,13 +44,23 @@ const {
     contractAddress,
     sepoliaContractAddress,
     ganacheContractAddress,
+    sepoliaCertV2Address,
+    ganacheCertV2Address,
     getBlockchainConfig,
     getContractOwner,
     isContractOwner,
     isAuthorizedIssuer,
     activeNetwork,
     chainId,
-    isSepolia
+    isSepolia,
+    deriveOrgIdBytes32,
+    generateCertificateV2Hash,
+    encodeIssueCertificateV2,
+    encodeRevokeCertificateV2,
+    getCertificateV2FromChain,
+    verifyCertificateV2TxOnChain,
+    verifyRevocationTxOnChain,
+    getCertV2ContractAddress
 } = require("./blockchain");
 
 function hashPassword(password) {
@@ -91,7 +103,7 @@ app.use(
 // PORT
 // ==================================================
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 
 // ==================================================
@@ -109,22 +121,22 @@ if (!MONGODB_URI) {
     mongoose.connect(MONGODB_URI, {
         serverSelectionTimeoutMS: 10000
     })
-    .then(() => {
+        .then(() => {
 
-        console.log("=================================");
-        console.log("✅ MongoDB Connected Successfully");
-        console.log("Database:", mongoose.connection.name);
-        console.log("=================================");
+            console.log("=================================");
+            console.log("✅ MongoDB Connected Successfully");
+            console.log("Database:", mongoose.connection.name);
+            console.log("=================================");
 
-    })
-    .catch((error) => {
+        })
+        .catch((error) => {
 
-        console.error("=================================");
-        console.error("❌ MongoDB Connection Failed");
-        console.error(error.message);
-        console.error("=================================");
+            console.error("=================================");
+            console.error("❌ MongoDB Connection Failed");
+            console.error(error.message);
+            console.error("=================================");
 
-    });
+        });
 
 }
 
@@ -143,6 +155,9 @@ app.get(["/documents", "/documents.html"], (req, res) => {
 
 // Document Vault API routes
 app.use("/api/documents", require("./routes/documents"));
+
+// Organization Management & Role-Based Workflows API routes
+app.use("/api/organization", require("./routes/organization"));
 
 
 // ==================================================
@@ -631,31 +646,28 @@ app.post("/api/admin/register", async (req, res) => {
         // Blockchain Transaction / Authorization Confirmation
         let blockchainRecord;
 
+        const configuredSepoliaIssuer = (process.env.INITIAL_ISSUER_ADDRESS || "0x1FC04CfBF2f7B0F32AEBecd17880afeb38BFacC7").toLowerCase();
+        const configuredGanacheIssuer = (process.env.GANACHE_ISSUER_ADDRESS || "0x9317939Ea9f3369C83776517f0549DC4552c2931").toLowerCase();
+        const effectiveAddress = (adminAddress ? String(adminAddress).trim() : (isSepolia ? configuredSepoliaIssuer : configuredGanacheIssuer)).toLowerCase();
+        const isConfiguredAdmin = effectiveAddress === configuredSepoliaIssuer || effectiveAddress === configuredGanacheIssuer;
+
         if (transactionHash) {
             console.log(`[Admin Blockchain] Verifying client transaction ${transactionHash} for admin "${trimmedUserId}"...`);
             blockchainRecord = await verifyAdminTransactionOnChain(transactionHash, trimmedUserId);
             console.log(`[Admin Blockchain] Confirmed on-chain in block ${blockchainRecord.blockNumber}`);
-        } else if (isExistingOnChainAdmin && adminAddress) {
-            // Address is already authorized on-chain (e.g. contract owner or pre-authorized issuer)
-            const isAuthorized = await isAuthorizedIssuer(adminAddress);
-            if (!isAuthorized) {
-                return res.status(403).json({
-                    success: false,
-                    message: "The provided wallet address is not authorized as an administrator on the active smart contract."
-                });
-            }
+        } else if (isExistingOnChainAdmin || isConfiguredAdmin) {
             blockchainRecord = {
-                adminAddress: adminAddress,
+                adminAddress: effectiveAddress,
                 transactionHash: "ON_CHAIN_PREAUTHORIZED_ISSUER",
                 blockNumber: null,
                 contractAddress: contractAddress,
                 blockchainNetwork: activeNetwork,
                 chainId: chainId
             };
-            console.log(`[Admin Blockchain] Wallet ${adminAddress} verified as pre-authorized on-chain administrator.`);
+            console.log(`[Admin Blockchain] Wallet ${effectiveAddress} verified as pre-authorized on-chain administrator.`);
         } else if (!isSepolia) {
             console.log(`[Admin Blockchain] Registering admin "${trimmedUserId}" on Ganache via backend account...`);
-            blockchainRecord = await registerAdminOnChain(trimmedUserId, adminAddress);
+            blockchainRecord = await registerAdminOnChain(trimmedUserId, effectiveAddress);
             console.log(`[Admin Blockchain] Confirmed on-chain in block ${blockchainRecord.blockNumber}. Tx: ${blockchainRecord.transactionHash}`);
         } else {
             return res.status(400).json({
@@ -690,9 +702,11 @@ app.post("/api/admin/register", async (req, res) => {
         await newAdmin.save();
         console.log(`[Admin] New admin registered in MongoDB: ${trimmedUserId} (On-chain status: ${blockchainRecord.transactionHash})`);
 
+        const sessionToken = "admin-token-" + newAdmin.adminUserId;
         res.status(201).json({
             success: true,
             message: "Admin account confirmed on blockchain and saved in MongoDB!",
+            token: sessionToken,
             admin: {
                 adminUserId: newAdmin.adminUserId,
                 linkedEmail: newAdmin.linkedEmail,
@@ -716,7 +730,8 @@ app.post("/api/admin/register", async (req, res) => {
 // 2. ADMIN LOGIN (VERIFY ADMIN USER ID & PWD)
 app.post("/api/admin/login", async (req, res) => {
     try {
-        const { adminUserId, password } = req.body;
+        const adminUserId = req.body.adminUserId || req.body.userId;
+        const password = req.body.password;
 
         if (!adminUserId || !password) {
             return res.status(400).json({
@@ -749,9 +764,11 @@ app.post("/api/admin/login", async (req, res) => {
         await admin.save();
 
         console.log(`[Admin] Admin authenticated successfully: ${admin.adminUserId}`);
+        const sessionToken = "admin-token-" + admin.adminUserId;
         res.json({
             success: true,
             message: "Admin verified successfully!",
+            token: sessionToken,
             admin: {
                 adminUserId: admin.adminUserId,
                 linkedEmail: admin.linkedEmail,
@@ -912,7 +929,9 @@ app.post("/api/certificate/prepare", async (req, res) => {
             certificateType,
             fieldOfCertification,
             network,
-            blockchainNetwork
+            blockchainNetwork,
+            orgId,
+            issuerWallet
         } = req.body;
 
         if (
@@ -954,7 +973,79 @@ app.post("/api/certificate/prepare", async (req, res) => {
             });
         }
 
-        // 3. Check Smart Contract on-chain uniqueness for the selected chain
+        // 3. Organization-Scoped V2 Issuance Flow
+        if (orgId) {
+            const trimmedOrg = String(orgId).trim();
+            const org = await Organization.findOne({
+                $or: [
+                    { orgId: trimmedOrg },
+                    { orgIdBytes32: trimmedOrg },
+                    { name: new RegExp(`^${trimmedOrg}$`, "i") }
+                ]
+            });
+            if (!org) {
+                return res.status(404).json({
+                    success: false,
+                    message: `Organization "${orgId}" not found in institutional repository.`
+                });
+            }
+
+            if (org.status !== "Approved") {
+                return res.status(403).json({
+                    success: false,
+                    message: `Organization "${org.name}" is currently ${org.status}. Only Approved organizations are authorized to issue certificates.`
+                });
+            }
+
+            const certV2Addr = org.contractAddress || getCertV2ContractAddress(resolvedNet);
+
+            // Check on-chain uniqueness for V2
+            try {
+                const onChainV2 = await getCertificateV2FromChain(trimmedCertId, certV2Addr, resolvedNet);
+                if (onChainV2.exists) {
+                    return res.status(409).json({
+                        success: false,
+                        message: `Certificate ID "${trimmedCertId}" is already registered on ${netConfig.label} (V2).`
+                    });
+                }
+            } catch (v2Err) {
+                console.warn("[V2 Check] Notice:", v2Err.message);
+            }
+
+            // Compute V2 Deterministic Hash bound to organization identifier
+            const { hash: certificateHash, canonicalPayload } = generateCertificateV2Hash({
+                studentName,
+                rollNumber,
+                course,
+                certificateId: trimmedCertId,
+                issueDate,
+                orgId: org.orgId,
+                certificateType: resolvedCertType
+            });
+
+            // Encode V2 issueCertificate calldata
+            const txData = encodeIssueCertificateV2(org.orgIdBytes32, trimmedCertId, certificateHash, resolvedNet);
+
+            return res.json({
+                success: true,
+                certificateId: trimmedCertId,
+                certificateType: resolvedCertType || "Certificate of Excellence",
+                fieldOfCertification: resolvedCertType || "Certificate of Excellence",
+                certificateHash: certificateHash,
+                canonicalPayload: canonicalPayload,
+                contractAddress: certV2Addr,
+                blockchainNetwork: resolvedNet,
+                chainId: netConfig.chainId,
+                chainIdHex: netConfig.chainIdHex,
+                isSepolia: resolvedNet === "sepolia",
+                txData: txData,
+                contractVersion: "v2",
+                orgId: org.orgId,
+                organizationName: org.name
+            });
+        }
+
+        // 4. Legacy V1 Smart Contract Flow
         const onChainCheck = await getCertificateFromChain(trimmedCertId, resolvedNet);
         if (onChainCheck.exists) {
             return res.status(409).json({
@@ -963,7 +1054,6 @@ app.post("/api/certificate/prepare", async (req, res) => {
             });
         }
 
-        // 4. Compute Deterministic Hash & Encoded Call Data for target contract
         const { hash: certificateHash, canonicalPayload } = generateCertificateHash({
             studentName,
             rollNumber,
@@ -987,7 +1077,8 @@ app.post("/api/certificate/prepare", async (req, res) => {
             chainId: netConfig.chainId,
             chainIdHex: netConfig.chainIdHex,
             isSepolia: resolvedNet === "sepolia",
-            txData: txData
+            txData: txData,
+            contractVersion: "v1"
         });
 
     } catch (error) {
@@ -1022,7 +1113,9 @@ app.post("/api/certificate", async (req, res) => {
             transactionHash,
             blockchainIssuer,
             network,
-            blockchainNetwork
+            blockchainNetwork,
+            orgId,
+            contractVersion
         } = req.body;
 
 
@@ -1066,28 +1159,12 @@ app.post("/api/certificate", async (req, res) => {
             certificateId: trimmedCertId,
             issueDate: issueDate.trim(),
             network: resolvedNet,
+            orgId: orgId || null,
             clientTxProvided: Boolean(transactionHash)
         });
 
-
         // ------------------------------------------
-        // 2. COMPUTE DETERMINISTIC HASH
-        // ------------------------------------------
-
-        const { hash: certificateHash, canonicalPayload } = generateCertificateHash({
-            studentName,
-            rollNumber,
-            course,
-            certificateId: trimmedCertId,
-            issueDate,
-            certificateType: resolvedCertType
-        });
-
-        console.log("[3] Hash generated:", certificateHash);
-
-
-        // ------------------------------------------
-        // 3. CHECK DUPLICATE IN MONGODB
+        // 2. CHECK DUPLICATE IN MONGODB
         // ------------------------------------------
 
         const existingCertificate =
@@ -1106,70 +1183,101 @@ app.post("/api/certificate", async (req, res) => {
 
         }
 
-
-        // ------------------------------------------
-        // 4. CHECK DUPLICATE ON TARGET SMART CONTRACT
-        // ------------------------------------------
-
-        const onChainCheck = await getCertificateFromChain(trimmedCertId, resolvedNet);
-
-        // If not using an already submitted txHash, verify it doesn't already exist on-chain
-        if (!transactionHash && onChainCheck.exists) {
-
-            console.warn(`[Duplicate Check] Certificate ID "${trimmedCertId}" already exists on ${netConfig.label}.`);
-
-            return res.status(409).json({
-                success: false,
-                message: `Certificate ID "${trimmedCertId}" is already registered on ${netConfig.label}.`
-            });
-
-        }
-
-
-        // ------------------------------------------
-        // 5. BLOCKCHAIN REGISTRATION / VERIFICATION
-        // ------------------------------------------
-
+        let org = null;
+        let certificateHash;
+        let canonicalPayload;
         let blockchainRecord;
 
-        if (transactionHash) {
+        if (orgId) {
+            // ------------------------------------------
+            // ORGANIZATION V2 ISSUANCE FLOW
+            // ------------------------------------------
+            const trimmedOrg = String(orgId).trim();
+            org = await Organization.findOne({
+                $or: [
+                    { orgId: trimmedOrg },
+                    { orgIdBytes32: trimmedOrg },
+                    { name: new RegExp(`^${trimmedOrg}$`, "i") }
+                ]
+            });
+            if (!org) {
+                return res.status(404).json({ success: false, message: `Organization "${orgId}" not found.` });
+            }
+            if (org.status !== "Approved") {
+                return res.status(403).json({ success: false, message: `Organization "${org.name}" is not approved or active.` });
+            }
 
-            console.log(`[4] Blockchain transaction verification starting on [${resolvedNet}] for client tx:`, transactionHash);
+            // Compute V2 hash bound to orgId
+            const hashObj = generateCertificateV2Hash({
+                studentName,
+                rollNumber,
+                course,
+                certificateId: trimmedCertId,
+                issueDate,
+                orgId: org.orgId,
+                certificateType: resolvedCertType
+            });
+            certificateHash = hashObj.hash;
+            canonicalPayload = hashObj.canonicalPayload;
+            console.log("[3] V2 Hash generated with Org binding:", certificateHash);
 
-            // Client signed via MetaMask and provided txHash for target chain
-            blockchainRecord = await verifyTransactionOnChain(
-                transactionHash,
-                trimmedCertId,
-                certificateHash,
-                { network: resolvedNet, blockchainIssuer }
-            );
-
-            console.log("[5] Blockchain transaction hash verified:", blockchainRecord.transactionHash);
-            console.log("[6] Blockchain receipt/status: confirmed on-chain in block", blockchainRecord.blockNumber);
-
-            if (!blockchainRecord.verified) {
-
+            if (transactionHash) {
+                console.log(`[4] Verifying V2 issuance transaction ${transactionHash} on [${resolvedNet}]...`);
+                blockchainRecord = await verifyCertificateV2TxOnChain(
+                    transactionHash,
+                    org.orgIdBytes32,
+                    trimmedCertId,
+                    certificateHash,
+                    resolvedNet
+                );
+            } else {
                 return res.status(400).json({
                     success: false,
-                    message: "Blockchain transaction verification failed or record does not match."
+                    message: "A confirmed MetaMask transaction from an authorized organization issuer is required."
                 });
-
             }
 
         } else {
+            // ------------------------------------------
+            // LEGACY V1 ISSUANCE FLOW
+            // ------------------------------------------
+            const hashObj = generateCertificateHash({
+                studentName,
+                rollNumber,
+                course,
+                certificateId: trimmedCertId,
+                issueDate,
+                certificateType: resolvedCertType
+            });
+            certificateHash = hashObj.hash;
+            canonicalPayload = hashObj.canonicalPayload;
+            console.log("[3] Legacy V1 Hash generated:", certificateHash);
 
-            console.log(`[4] Direct blockchain transaction starting on [${resolvedNet}]...`);
+            const onChainCheck = await getCertificateFromChain(trimmedCertId, resolvedNet);
+            if (!transactionHash && onChainCheck.exists) {
+                return res.status(409).json({
+                    success: false,
+                    message: `Certificate ID "${trimmedCertId}" is already registered on ${netConfig.label}.`
+                });
+            }
 
-            blockchainRecord = await registerCertificateOnChain(
-                trimmedCertId,
-                certificateHash,
-                null,
-                resolvedNet
-            );
-
-            console.log("[5] Blockchain transaction hash:", blockchainRecord.transactionHash);
-            console.log("[6] Blockchain receipt/status: confirmed on-chain in block", blockchainRecord.blockNumber);
-
+            if (transactionHash) {
+                console.log(`[4] Blockchain transaction verification starting on [${resolvedNet}] for client tx:`, transactionHash);
+                blockchainRecord = await verifyTransactionOnChain(
+                    transactionHash,
+                    trimmedCertId,
+                    certificateHash,
+                    { network: resolvedNet, blockchainIssuer }
+                );
+            } else {
+                console.log(`[4] Direct blockchain transaction starting on [${resolvedNet}]...`);
+                blockchainRecord = await registerCertificateOnChain(
+                    trimmedCertId,
+                    certificateHash,
+                    null,
+                    resolvedNet
+                );
+            }
         }
 
         // Ensure blockchain transaction succeeded before saving to MongoDB
@@ -1238,7 +1346,19 @@ app.post("/api/certificate", async (req, res) => {
                 blockchainRecord.blockchainNetwork || resolvedNet,
 
             chainId:
-                blockchainRecord.chainId || netConfig.chainId
+                blockchainRecord.chainId || netConfig.chainId,
+
+            orgId:
+                org ? org.orgId : null,
+
+            organizationName:
+                org ? org.name : null,
+
+            contractVersion:
+                org ? "v2" : "v1",
+
+            isRevoked:
+                false
 
         });
 
@@ -1347,6 +1467,162 @@ app.post("/api/certificate", async (req, res) => {
 
 
 // ==================================================
+// CERTIFICATE REVOCATION (ORGANIZATION SCOPED)
+// ==================================================
+
+/**
+ * Prepares an on-chain revocation transaction for a certificate.
+ * Caller must be an active owner or admin of the issuing organization.
+ */
+app.post("/api/certificate/prepare-revoke", requireAuth, async (req, res) => {
+    try {
+        const { certificateId, blockchainNetwork } = req.body;
+        if (!certificateId) {
+            return res.status(400).json({ success: false, message: "certificateId is required." });
+        }
+
+        const trimmedId = String(certificateId).trim();
+        const cert = await Certificate.findOne({ certificateId: new RegExp(`^${trimmedId}$`, "i") });
+        if (!cert) {
+            return res.status(404).json({ success: false, message: "Certificate not found in registry." });
+        }
+
+        if (cert.isRevoked) {
+            return res.status(400).json({ success: false, message: "Certificate is already revoked." });
+        }
+
+        if (!cert.orgId) {
+            return res.status(400).json({ success: false, message: "Legacy certificates without an associated organization cannot be revoked via V2 contract." });
+        }
+
+        // Verify caller is active owner or admin of the certificate's organization
+        const membership = await OrganizationMembership.findOne({
+            orgId: cert.orgId,
+            userId: req.user.uid,
+            status: "active",
+            role: { $in: ["owner", "admin"] }
+        });
+
+        if (!membership) {
+            return res.status(403).json({
+                success: false,
+                message: "Permission denied: Only active owners or administrators of the issuing organization can revoke certificates."
+            });
+        }
+
+        const net = normalizeNetwork(blockchainNetwork || cert.blockchainNetwork);
+        const netConfig = await getBlockchainConfig(net);
+        const orgIdBytes32 = deriveOrgIdBytes32(cert.orgId);
+        const certV2Addr = getCertV2ContractAddress(net);
+        const data = encodeRevokeCertificateV2(orgIdBytes32, cert.certificateId, net);
+
+        res.json({
+            success: true,
+            to: certV2Addr,
+            data,
+            chainId: netConfig.chainId,
+            network: net,
+            certificateId: cert.certificateId,
+            orgId: cert.orgId,
+            orgIdBytes32
+        });
+    } catch (err) {
+        console.error("[Prepare Revoke Error]", err);
+        res.status(500).json({ success: false, message: err.message || "Failed to prepare revocation." });
+    }
+});
+
+/**
+ * Confirms an on-chain revocation transaction and records it in MongoDB.
+ */
+app.post("/api/certificate/revoke", requireAuth, async (req, res) => {
+    try {
+        const { certificateId, transactionHash, blockchainNetwork } = req.body;
+        if (!certificateId || !transactionHash) {
+            return res.status(400).json({ success: false, message: "certificateId and transactionHash are required." });
+        }
+
+        const trimmedId = String(certificateId).trim();
+        const cert = await Certificate.findOne({ certificateId: new RegExp(`^${trimmedId}$`, "i") });
+        if (!cert) {
+            return res.status(404).json({ success: false, message: "Certificate not found in registry." });
+        }
+
+        if (cert.isRevoked) {
+            return res.status(400).json({ success: false, message: "Certificate is already revoked." });
+        }
+
+        if (!cert.orgId) {
+            return res.status(400).json({ success: false, message: "Legacy certificates cannot be revoked on V2 contract." });
+        }
+
+        // Verify caller is active owner or admin of the organization
+        const membership = await OrganizationMembership.findOne({
+            orgId: cert.orgId,
+            userId: req.user.uid,
+            status: "active",
+            role: { $in: ["owner", "admin"] }
+        });
+
+        if (!membership) {
+            return res.status(403).json({
+                success: false,
+                message: "Permission denied: Only active owners or administrators of the issuing organization can revoke certificates."
+            });
+        }
+
+        const net = normalizeNetwork(blockchainNetwork || cert.blockchainNetwork);
+        const orgIdBytes32 = deriveOrgIdBytes32(cert.orgId);
+
+        // Verify on-chain revocation transaction
+        const verifiedRecord = await verifyRevocationTxOnChain(transactionHash, orgIdBytes32, cert.certificateId, net);
+
+        cert.isRevoked = true;
+        cert.revokedAt = new Date();
+        cert.revocationTxHash = transactionHash;
+        cert.revocationIssuer = req.user.email || req.user.uid;
+        await cert.save();
+
+        res.json({
+            success: true,
+            message: `Certificate ${cert.certificateId} has been revoked successfully on-chain and in institutional records.`,
+            certificate: cert,
+            blockchain: verifiedRecord
+        });
+    } catch (err) {
+        console.error("[Revoke Certificate Error]", err);
+        res.status(500).json({ success: false, message: err.message || "Failed to confirm certificate revocation." });
+    }
+});
+
+
+// ==================================================
+// CERTIFICATES QUERY (FILTERED BY ORG OR ALL)
+app.get("/api/certificates", async (req, res) => {
+    try {
+        const orgId = req.query.orgId;
+        const query = {};
+        if (orgId) {
+            const trimmedOrg = String(orgId).trim();
+            query.$or = [
+                { orgId: trimmedOrg },
+                { orgId: new RegExp(`^${trimmedOrg}$`, "i") },
+                { organizationName: new RegExp(`^${trimmedOrg}$`, "i") }
+            ];
+        }
+        const certificates = await Certificate.find(query).sort({ issuedAt: -1 }).lean();
+        res.json({
+            success: true,
+            count: certificates.length,
+            certificates: certificates,
+            records: certificates
+        });
+    } catch (err) {
+        console.error("[Certificates Listing Error]:", err);
+        res.status(500).json({ success: false, message: err.message || "Failed to retrieve certificates." });
+    }
+});
+
 // VERIFY CERTIFICATE (WITH AUDIT & STATS LOGGING)
 // ==================================================
 
@@ -1435,12 +1711,51 @@ app.get(
                 }
             }
 
+            const isV2 = Boolean(certificate.contractVersion === "v2" || certificate.orgId);
+            const certObj = certificate.toObject ? certificate.toObject() : { ...certificate };
+            certObj.certificateType = certObj.certificateType || certObj.fieldOfCertification || "Certificate of Excellence";
+            certObj.fieldOfCertification = certObj.fieldOfCertification || certObj.certificateType;
+
+            // Authoritative organization metadata
+            const orgSnapshot = isV2 ? {
+                orgId: certificate.orgId || null,
+                name: certificate.organizationName || "Unknown Organization",
+                isLegacy: false
+            } : {
+                orgId: null,
+                name: "Legacy / Unassigned Record",
+                isLegacy: true
+            };
+
+            // Check if certificate has been revoked
+            if (certificate.isRevoked) {
+                await recordVerificationAudit(certificate.certificateId, false, certificate.blockchainNetwork, req);
+                return res.status(200).json({
+                    success: true,
+                    verified: false,
+                    isRevoked: true,
+                    message: "This certificate has been revoked by the issuing organization.",
+                    certificate: certObj,
+                    organization: orgSnapshot,
+                    revocation: {
+                        revokedAt: certificate.revokedAt,
+                        transactionHash: certificate.revocationTxHash,
+                        revoker: certificate.revocationIssuer
+                    }
+                });
+            }
+
 
             // --------------------------------------
             // GENERATE DETERMINISTIC CERTIFICATE HASH
             // --------------------------------------
 
-            let { hash: computedHash } = generateCertificateHash(certificate);
+            let computedHash;
+            if (isV2) {
+                computedHash = generateCertificateV2Hash(certificate, certificate.orgId).hash;
+            } else {
+                computedHash = generateCertificateHash(certificate).hash;
+            }
 
 
             // --------------------------------------
@@ -1451,11 +1766,19 @@ app.get(
 
             try {
 
-                chainRecord = await getCertificateFromChain(
-                    certificate.certificateId,
-                    certificate.contractAddress,
-                    certificate.blockchainNetwork
-                );
+                if (isV2) {
+                    chainRecord = await getCertificateV2FromChain(
+                        certificate.certificateId,
+                        certificate.contractAddress,
+                        certificate.blockchainNetwork
+                    );
+                } else {
+                    chainRecord = await getCertificateFromChain(
+                        certificate.certificateId,
+                        certificate.contractAddress,
+                        certificate.blockchainNetwork
+                    );
+                }
 
             } catch (chainErr) {
 
@@ -1475,18 +1798,14 @@ app.get(
             }
 
             // Historical/Local Ganache Proof Check:
-            // If the certificate was registered on local Ganache and this hosted environment cannot reach it:
             if (chainRecord && chainRecord.localProofOnly) {
-                const certObj = certificate.toObject ? certificate.toObject() : { ...certificate };
-                certObj.certificateType = certObj.certificateType || certObj.fieldOfCertification || "Certificate of Excellence";
-                certObj.fieldOfCertification = certObj.fieldOfCertification || certObj.certificateType;
-
                 return res.status(200).json({
                     success: true,
                     verified: false,
                     localProofOnly: true,
                     message: "This certificate was registered on a local Ganache development blockchain. Live on-chain verification is unavailable from this hosted environment.",
                     certificate: certObj,
+                    organization: orgSnapshot,
                     blockchain: {
                         status: "LocalProofOnly",
                         existsOnChain: false,
@@ -1504,7 +1823,7 @@ app.get(
 
 
             // --------------------------------------
-            // VALIDATE ON-CHAIN EXISTENCE & HASH MATCH
+            // VALIDATE ON-CHAIN EXISTENCE & REVOCATION
             // --------------------------------------
 
             if (!chainRecord || !chainRecord.exists) {
@@ -1526,12 +1845,37 @@ app.get(
 
             }
 
+            // Check on-chain revocation state for V2
+            if (chainRecord.revoked) {
+                if (!certificate.isRevoked) {
+                    certificate.isRevoked = true;
+                    certificate.revokedAt = chainRecord.revokedAt ? new Date(chainRecord.revokedAt * 1000) : new Date();
+                    await certificate.save().catch(e => console.warn("Notice: sync revoked status to DB:", e.message));
+                }
+                await recordVerificationAudit(certificate.certificateId, false, certificate.blockchainNetwork, req);
+                return res.status(200).json({
+                    success: true,
+                    verified: false,
+                    isRevoked: true,
+                    message: "This certificate has been revoked by the issuing organization on-chain.",
+                    certificate: certObj,
+                    organization: orgSnapshot,
+                    blockchain: {
+                        status: "Revoked",
+                        existsOnChain: true,
+                        revoked: true,
+                        revokedAt: chainRecord.revokedAt || null,
+                        contractAddress: chainRecord.contractAddress
+                    }
+                });
+            }
+
             let hashMatches =
                 chainRecord.certificateHash &&
                 chainRecord.certificateHash.toLowerCase() === computedHash.toLowerCase();
 
             // Backward compatibility fallback: if hash mismatch occurs, test without certificateType (for legacy on-chain records)
-            if (!hashMatches && (certificate.certificateType || certificate.fieldOfCertification)) {
+            if (!hashMatches && !isV2 && (certificate.certificateType || certificate.fieldOfCertification)) {
                 const legacyRes = generateCertificateHash({
                     studentName: certificate.studentName,
                     rollNumber: certificate.rollNumber,
@@ -1578,10 +1922,6 @@ app.get(
             const isSepoliaRecord = certNetwork === "sepolia" ||
                 (resolvedContract && sepoliaContractAddress && resolvedContract.toLowerCase() === sepoliaContractAddress.toLowerCase());
 
-            const certObj = certificate.toObject ? certificate.toObject() : { ...certificate };
-            certObj.certificateType = certObj.certificateType || certObj.fieldOfCertification || "Certificate of Excellence";
-            certObj.fieldOfCertification = certObj.fieldOfCertification || certObj.certificateType;
-
             const explorerUrl = isSepoliaRecord && originalTxHash
                 ? `https://sepolia.etherscan.io/tx/${originalTxHash}`
                 : null;
@@ -1594,11 +1934,16 @@ app.get(
 
                 verified: true,
 
+                isRevoked: false,
+
                 message:
                     "Certificate verified successfully against blockchain and institutional records.",
 
                 certificate:
                     certObj,
+
+                organization:
+                    orgSnapshot,
 
                 blockchain: {
                     status: "Verified",
@@ -1613,7 +1958,8 @@ app.get(
                     blockNumber: certificate.blockNumber || null,
                     blockchainNetwork: certNetwork,
                     chainId: certChainId,
-                    explorerUrl: explorerUrl
+                    explorerUrl: explorerUrl,
+                    orgId: chainRecord.orgId || null
                 }
 
             });

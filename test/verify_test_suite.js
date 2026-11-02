@@ -15,6 +15,7 @@ const contractAddress = process.env.GANACHE_CONTRACT_ADDRESS || (artifact.networ
 const certificateContract = new web3.eth.Contract(artifact.abi, contractAddress);
 
 const CertificateModel = require("../server/models/certificates");
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 
 async function runAllTestCases() {
     console.log("===============================================================");
@@ -39,7 +40,7 @@ async function runAllTestCases() {
     };
 
     // 1. Prepare hash
-    const prep1Res = await fetch("http://localhost:3000/api/certificate/prepare", {
+    const prep1Res = await fetch("${BASE_URL}/api/certificate/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...test1Data, network: "ganache" })
@@ -55,7 +56,7 @@ async function runAllTestCases() {
     console.log("  [1b] Blockchain Receipt Tx Hash:", txReceipt1.transactionHash);
 
     // 3. Store in MongoDB
-    const save1Res = await fetch("http://localhost:3000/api/certificate", {
+    const save1Res = await fetch("${BASE_URL}/api/certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -72,7 +73,7 @@ async function runAllTestCases() {
     const blockBefore1 = await web3.eth.getBlockNumber();
     const nonceBefore1 = await web3.eth.getTransactionCount(adminAccount);
 
-    const verify1Res = await fetch("http://localhost:3000/api/certificate/" + test1Id);
+    const verify1Res = await fetch("${BASE_URL}/api/certificate/" + test1Id);
     const verify1 = await verify1Res.json();
 
     const blockAfter1 = await web3.eth.getBlockNumber();
@@ -102,7 +103,7 @@ async function runAllTestCases() {
     console.log("\n>>> TEST CASE 2: Random Non-Existent Certificate ID");
     const randomId = "CERT_NONEXISTENT_RANDOM_" + Math.random().toString(36).substring(2, 9).toUpperCase();
 
-    const verify2Res = await fetch("http://localhost:3000/api/certificate/" + randomId);
+    const verify2Res = await fetch("${BASE_URL}/api/certificate/" + randomId);
     const verify2 = await verify2Res.json();
 
     console.log("  [2a] Verification HTTP Status:", verify2Res.status);
@@ -131,7 +132,7 @@ async function runAllTestCases() {
     };
 
     // 1. Prepare hash
-    const prep3Res = await fetch("http://localhost:3000/api/certificate/prepare", {
+    const prep3Res = await fetch("${BASE_URL}/api/certificate/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...test3Data, network: "ganache" })
@@ -145,7 +146,7 @@ async function runAllTestCases() {
     });
 
     // 3. Store in MongoDB
-    await fetch("http://localhost:3000/api/certificate", {
+    await fetch("${BASE_URL}/api/certificate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -164,7 +165,7 @@ async function runAllTestCases() {
     );
 
     // 5. Attempt verification
-    const verify3Res = await fetch("http://localhost:3000/api/certificate/" + test3Id);
+    const verify3Res = await fetch("${BASE_URL}/api/certificate/" + test3Id);
     const verify3 = await verify3Res.json();
 
     console.log("  [3b] Verification HTTP Status:", verify3Res.status);
@@ -203,7 +204,7 @@ async function runAllTestCases() {
     });
     await unanchoredCert.save();
 
-    const verify4Res = await fetch("http://localhost:3000/api/certificate/" + test4Id);
+    const verify4Res = await fetch("${BASE_URL}/api/certificate/" + test4Id);
     const verify4 = await verify4Res.json();
 
     console.log("  [4a] Verification HTTP Status:", verify4Res.status);

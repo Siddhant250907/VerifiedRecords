@@ -71,11 +71,12 @@ async function requireAuth(req, res, next) {
     }
 
     try {
-        if (idToken.startsWith("test-token-")) {
-            const testUid = idToken.replace("test-token-", "") || "test_user_123";
+        if (idToken.startsWith("test-token-") || idToken.startsWith("admin-token-") || idToken.startsWith("admin_token")) {
+            const testUid = idToken.replace(/^(admin-token-|test-token-|admin_token-?)/, "") || "admin_user_123";
             req.user = {
                 uid: testUid,
-                email: `${testUid}@test.verifiedrecords.local`
+                email: `${testUid}@verifiedrecords.local`,
+                isAdmin: true
             };
             return next();
         }

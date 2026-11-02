@@ -12,7 +12,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 
 // Test users
 const USER_A_TOKEN = "test-token-user_alpha_777";

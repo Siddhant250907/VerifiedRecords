@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const GANACHE_RPC_URL = process.env.GANACHE_RPC_URL || "http://127.0.0.1:7545";
 const web3 = new Web3(GANACHE_RPC_URL);
 const CertificateModel = require("../server/models/certificates");
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 
 async function runSecurityIntegrityTest() {
     console.log("==================================================================");
@@ -34,7 +35,7 @@ async function runSecurityIntegrityTest() {
     console.log(`TEST 1 — VALID CERTIFICATE (${targetCertId})`);
     console.log(`------------------------------------------------------------------`);
 
-    const res1 = await fetch(`http://localhost:3000/api/certificate/${targetCertId}`);
+    const res1 = await fetch(`${BASE_URL}/api/certificate/${targetCertId}`);
     const data1 = await res1.json();
 
     console.log(`HTTP Status: ${res1.status}`);
@@ -67,7 +68,7 @@ async function runSecurityIntegrityTest() {
         { $set: { course: "Master of Business Administration (Tampered)" } }
     );
 
-    const res2 = await fetch(`http://localhost:3000/api/certificate/${targetCertId}`);
+    const res2 = await fetch(`${BASE_URL}/api/certificate/${targetCertId}`);
     const data2 = await res2.json();
 
     console.log(`HTTP Status: ${res2.status}`);
@@ -91,7 +92,7 @@ async function runSecurityIntegrityTest() {
         { $set: { course: originalCourse } }
     );
 
-    const res3 = await fetch(`http://localhost:3000/api/certificate/${targetCertId}`);
+    const res3 = await fetch(`${BASE_URL}/api/certificate/${targetCertId}`);
     const data3 = await res3.json();
 
     console.log(`HTTP Status: ${res3.status}`);
@@ -111,7 +112,7 @@ async function runSecurityIntegrityTest() {
     console.log(`------------------------------------------------------------------`);
 
     const fakeId = "CERT_COMPLETELY_FAKE_99999";
-    const res4 = await fetch(`http://localhost:3000/api/certificate/${fakeId}`);
+    const res4 = await fetch(`${BASE_URL}/api/certificate/${fakeId}`);
     const data4 = await res4.json();
 
     console.log(`Querying: ${fakeId}`);

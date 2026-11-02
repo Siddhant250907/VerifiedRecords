@@ -15,9 +15,11 @@ const routes = [
 let passCount = 0;
 let failCount = 0;
 
+const PORT = process.env.PORT || 5000;
+
 function checkRoute(path) {
     return new Promise((resolve) => {
-        http.get(`http://localhost:3000${path}`, (res) => {
+        http.get(`http://localhost:${PORT}${path}`, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
@@ -50,7 +52,7 @@ function checkRoute(path) {
 }
 
 async function run() {
-    console.log('Testing all platform routes on http://localhost:3000 ...\n');
+    console.log(`Testing all platform routes on http://localhost:${PORT} ...\n`);
     for (const route of routes) {
         await checkRoute(route);
     }

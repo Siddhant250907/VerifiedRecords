@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = `http://localhost:${process.env.PORT || 5000}`;
 const EXPECTED_SEPOLIA_CONTRACT = "0xDd4DF9A618683a407f3B195e651271DC0E97f5bE";
 const EXPECTED_INITIAL_ISSUER = "0x1FC04CfBF2f7B0F32AEBecd17880afeb38BFacC7";
 

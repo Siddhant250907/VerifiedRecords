@@ -48,7 +48,7 @@ async function runBenchmark() {
 
     const testPassword = "VaultBenchmarkPassword2026!#";
     const dummyPdf = generateDummyPdf(45000); // ~45 KB dummy PDF
-    const serverBaseUrl = "http://localhost:3000";
+    const serverBaseUrl = `http://localhost:${process.env.PORT || 5000}`;
     const testAuthToken = "test-token-benchmark_diagnostics_user";
 
     console.log(`📄 Test Dummy PDF Generated: ${dummyPdf.length} bytes (${(dummyPdf.length / 1024).toFixed(2)} KB)`);

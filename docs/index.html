@@ -189,10 +189,10 @@
                     </div>
                     <div class="services-buttons-group">
                         <div class="services-buttons-row services-row-primary">
-                            <!-- 1. ISSUE A CERTIFICATE -->
-                            <a href="admin.html" class="service-action-pill" id="btnServiceIssue" title="Issue a Certificate via Registrar Portal">
-                                <span class="service-pill-icon"><i class="fa-solid fa-award" aria-hidden="true"></i></span>
-                                <span class="service-pill-text">Issue a Certificate</span>
+                            <!-- 1. JOIN THE ORGANIZATION -->
+                            <a href="admin.html?action=join-org" class="service-action-pill" id="btnServiceJoinOrg" data-service-id="btnServiceIssue" title="Join an Existing Organization on Blockchain">
+                                <span class="service-pill-icon"><i class="fa-solid fa-users" aria-hidden="true"></i></span>
+                                <span class="service-pill-text">Join the Organization</span>
                             </a>
 
                             <!-- 2. VERIFY A CERTIFICATE -->
@@ -209,12 +209,11 @@
                         </div>
 
                         <div class="services-buttons-row services-row-secondary">
-                            <!-- 4. CREATE ORGANIZATION (UPCOMING FEATURE) -->
-                            <button type="button" class="service-action-pill service-pill-upcoming" id="btnServiceCreateOrg" title="Create Organization (Coming Soon)" onclick="openUpcomingOrgNotice(event)">
+                            <!-- 4. CREATE ORGANIZATION -->
+                            <a href="admin.html?action=create-org" class="service-action-pill" id="btnServiceCreateOrg" title="Register a New Organization on Blockchain">
                                 <span class="service-pill-icon"><i class="fa-solid fa-building-columns" aria-hidden="true"></i></span>
                                 <span class="service-pill-text">Create Organization</span>
-                                <span class="upcoming-tag">Soon</span>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -867,9 +866,14 @@
                 Institutional registration and decentralized Registrar DAO onboarding is currently under active development. This feature will empower universities, academic boards, and accredited institutions to register their verifiable on-chain identity.
             </p>
 
-            <button type="button" class="btn-upcoming-confirm" onclick="closeUpcomingOrgModal()">
-                <span>Got it, thank you</span>
-            </button>
+            <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap; margin-top: 14px;">
+                <a href="admin.html?action=create-org" class="btn-upcoming-confirm" style="flex: 1; min-width: 140px; text-decoration: none; text-align: center; background: #004741; color: #fff;">
+                    <span>Open Organization Portal</span>
+                </a>
+                <button type="button" class="btn-upcoming-confirm" onclick="closeUpcomingOrgModal()" style="flex: 1; min-width: 120px; background: transparent; border: 1px solid #dcd7ce; color: #444;">
+                    <span>Dismiss</span>
+                </button>
+            </div>
         </div>
 
     </div>
