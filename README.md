@@ -1,4 +1,4 @@
-# University-Certificate-System
+# Verified Records
  which verifies the student's certificate whether they are geniune or not(it mainly use blockchain technology for security purpose).
 
 In this website you can acccess Admin page, where you can provide info about any candidate as per your choice.
